@@ -62,7 +62,7 @@ public class TabFrame extends AbstractFrame {
         for (Tab<?> tab : this.tabs) {
             int x = this.tabSection.getOriginX();
             int y = this.tabSection.getOriginY() + offsetY;
-            int width = this.tabSection.getWidth();
+            int width = this.tabSection.getWidth() - 4;
             int height = 18;
             Dim2i tabDim = new Dim2i(x, y, width, height);
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "reeses_sodium_options",
+  "id": "reeses-sodium-options",
   "version": "${version}",
   "name": "Reese's Sodium Options",
   "description": "Replaces Sodium's Options Screen",
@@ -10,10 +10,11 @@
   "contact": {
     "repo": "https://github.com/FlashyReese/reeses-sodium-options"
   },
+  "icon": "assets/reeses-sodium-options/icon.png",
   "license": "MIT",
   "environment": "client",
   "mixins": [
-    "reeses_sodium_options.mixins.json"
+    "reeses-sodium-options.mixins.json"
   ],
   "custom": {
     "modmenu": {
