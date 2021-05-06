@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.flashyreese.mods.reeses_sodium_options.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "sodium.MixinControlElement",
+    "sodium.MixinOptionsScreen",
+    "sodium.MixinSliderControl"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
