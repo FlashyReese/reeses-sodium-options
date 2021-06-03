@@ -2,6 +2,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components;
 
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 
@@ -50,7 +51,7 @@ public class ScrollBarComponent extends AbstractWidget {
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.drawRectOutline(this.dim.getOriginX(), this.dim.getOriginY(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
-        this.drawRect(this.scrollThumb.getOriginX(), this.scrollThumb.getOriginY(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
+        this.drawRectangle(this.scrollThumb.getOriginX(), this.scrollThumb.getOriginY(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
     }
 
     @Override
@@ -106,19 +107,34 @@ public class ScrollBarComponent extends AbstractWidget {
         VERTICAL
     }
 
+    //Fixme: Duplicated, fix in 1.17 when Sodium release.
+    protected void drawRectangle(double x1, double y1, double x2, double y2, int color) {
+        float a = (float) (color >> 24 & 255) / 255.0F;
+        float r = (float) (color >> 16 & 255) / 255.0F;
+        float g = (float) (color >> 8 & 255) / 255.0F;
+        float b = (float) (color & 255) / 255.0F;
 
+        this.drawQuads(vertices -> this.addQuad(vertices, x1, y1, x2, y2, a, r, g, b));
+    }
 
-    protected void drawRectOutline(int x, int y, int w, int h, int color) {
+    protected void drawRectOutline(double x, double y, double w, double h, int color) {
         final float a = (float) (color >> 24 & 255) / 255.0F;
         final float r = (float) (color >> 16 & 255) / 255.0F;
         final float g = (float) (color >> 8 & 255) / 255.0F;
         final float b = (float) (color & 255) / 255.0F;
 
         this.drawQuads(vertices -> {
-            addQuad(vertices, x, y, w, y + 1, a, r, g, b);
-            addQuad(vertices, x, h - 1, w, h, a, r, g, b);
-            addQuad(vertices, x, y, x + 1, h, a, r, g, b);
-            addQuad(vertices, w - 1, y, w, h, a, r, g, b);
+            this.addQuad(vertices, x, y, w, y + 1, a, r, g, b);
+            this.addQuad(vertices, x, h - 1, w, h, a, r, g, b);
+            this.addQuad(vertices, x, y, x + 1, h, a, r, g, b);
+            this.addQuad(vertices, w - 1, y, w, h, a, r, g, b);
         });
+    }
+
+    protected void addQuad(VertexConsumer consumer, double x1, double y1, double x2, double y2, float a, float r, float g, float b) {
+        consumer.vertex(x2, y1, 0.0D).color(r, g, b, a).next();
+        consumer.vertex(x1, y1, 0.0D).color(r, g, b, a).next();
+        consumer.vertex(x1, y2, 0.0D).color(r, g, b, a).next();
+        consumer.vertex(x2, y2, 0.0D).color(r, g, b, a).next();
     }
 }

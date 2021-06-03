@@ -134,7 +134,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
             boxY = dim.getLimitY();
         }
 
-        this.drawRect(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
+        this.drawRectangle(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
         this.drawRectOutline(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3);
 
         for (int i = 0; i < tooltip.size(); i++) {
