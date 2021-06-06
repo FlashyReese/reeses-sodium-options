@@ -7,7 +7,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -80,16 +79,6 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 
-    //Fixme: Duplicated, fix in 1.17 when Sodium release.
-    protected void drawRectangle(double x1, double y1, double x2, double y2, int color) {
-        float a = (float) (color >> 24 & 255) / 255.0F;
-        float r = (float) (color >> 16 & 255) / 255.0F;
-        float g = (float) (color >> 8 & 255) / 255.0F;
-        float b = (float) (color & 255) / 255.0F;
-
-        this.drawQuads(vertices -> this.addQuad(vertices, x1, y1, x2, y2, a, r, g, b));
-    }
-
     protected void drawRectOutline(double x, double y, double w, double h, int color) {
         final float a = (float) (color >> 24 & 255) / 255.0F;
         final float r = (float) (color >> 16 & 255) / 255.0F;
@@ -97,18 +86,11 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
         final float b = (float) (color & 255) / 255.0F;
 
         this.drawQuads(vertices -> {
-            this.addQuad(vertices, x, y, w, y + 1, a, r, g, b);
-            this.addQuad(vertices, x, h - 1, w, h, a, r, g, b);
-            this.addQuad(vertices, x, y, x + 1, h, a, r, g, b);
-            this.addQuad(vertices, w - 1, y, w, h, a, r, g, b);
+            addQuad(vertices, x, y, w, y + 1, a, r, g, b);
+            addQuad(vertices, x, h - 1, w, h, a, r, g, b);
+            addQuad(vertices, x, y, x + 1, h, a, r, g, b);
+            addQuad(vertices, w - 1, y, w, h, a, r, g, b);
         });
-    }
-
-    protected void addQuad(VertexConsumer consumer, double x1, double y1, double x2, double y2, float a, float r, float g, float b) {
-        consumer.vertex(x2, y1, 0.0D).color(r, g, b, a).next();
-        consumer.vertex(x1, y1, 0.0D).color(r, g, b, a).next();
-        consumer.vertex(x1, y2, 0.0D).color(r, g, b, a).next();
-        consumer.vertex(x2, y2, 0.0D).color(r, g, b, a).next();
     }
 
     @Override

@@ -1,11 +1,9 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui;
 
-
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatter;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.Rect2i;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
@@ -70,31 +68,14 @@ public class SliderControlElement extends ControlElement<Integer> {
         int thumbX = sliderX + thumbOffset - THUMB_WIDTH;
         int trackY = sliderY + (sliderHeight / 2) - TRACK_HEIGHT;
 
-        this.drawRectangle(thumbX, sliderY, thumbX + (THUMB_WIDTH * 2), sliderY + sliderHeight, 0xFFFFFFFF);
-        this.drawRectangle(sliderX, trackY, sliderX + sliderWidth, trackY + TRACK_HEIGHT, 0xFFFFFFFF);
+        this.drawRect(thumbX, sliderY, thumbX + (THUMB_WIDTH * 2), sliderY + sliderHeight, 0xFFFFFFFF);
+        this.drawRect(sliderX, trackY, sliderX + sliderWidth, trackY + TRACK_HEIGHT, 0xFFFFFFFF);
 
         String label = String.valueOf(this.getIntValue());
 
         int labelWidth = this.font.getWidth(label);
 
         this.drawString(matrixStack, label, sliderX - labelWidth - 6, sliderY + (sliderHeight / 2) - 4, 0xFFFFFFFF);
-    }
-
-    //Fixme: Duplicated, fix in 1.17 when Sodium release.
-    protected void drawRectangle(double x1, double y1, double x2, double y2, int color) {
-        float a = (float) (color >> 24 & 255) / 255.0F;
-        float r = (float) (color >> 16 & 255) / 255.0F;
-        float g = (float) (color >> 8 & 255) / 255.0F;
-        float b = (float) (color & 255) / 255.0F;
-
-        this.drawQuads(vertices -> this.addQuad(vertices, x1, y1, x2, y2, a, r, g, b));
-    }
-
-    protected void addQuad(VertexConsumer consumer, double x1, double y1, double x2, double y2, float a, float r, float g, float b) {
-        consumer.vertex(x2, y1, 0.0D).color(r, g, b, a).next();
-        consumer.vertex(x1, y1, 0.0D).color(r, g, b, a).next();
-        consumer.vertex(x1, y2, 0.0D).color(r, g, b, a).next();
-        consumer.vertex(x2, y2, 0.0D).color(r, g, b, a).next();
     }
 
     public int getIntValue() {
