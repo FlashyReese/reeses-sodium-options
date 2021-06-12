@@ -68,6 +68,18 @@ public class BasicFrame extends AbstractFrame {
             return this;
         }
 
+        public boolean isRenderOutline() {
+            return renderOutline;
+        }
+
+        public Dim2i getDim() {
+            return dim;
+        }
+
+        public List<Function<Dim2i, AbstractWidget>> getFunctions() {
+            return functions;
+        }
+
         public BasicFrame build() {
             return new BasicFrame(this.dim, this.functions, this.renderOutline);
         }

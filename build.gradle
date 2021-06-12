@@ -21,6 +21,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     modImplementation "com.github.FlashyReese:sodium-fabric:${project.sodium_version}"
+    modImplementation "com.github.IrisShaders:Iris:1.0.0"
 }
 
 processResources {

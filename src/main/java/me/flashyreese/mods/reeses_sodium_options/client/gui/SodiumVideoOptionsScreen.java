@@ -51,6 +51,11 @@ public class SodiumVideoOptionsScreen extends Screen {
 
     @Override
     protected void init() {
+        this.frame = this.parentFrameBuilder().build();
+        this.children.add(this.frame);
+    }
+
+    protected BasicFrame.Builder parentFrameBuilder() {
         Dim2i basicFrameDim = new Dim2i(0, 0, this.width, this.height);
         Dim2i tabFrameDim = new Dim2i(basicFrameDim.getWidth() / 4 / 2, basicFrameDim.getHeight() / 4 / 2, basicFrameDim.getWidth() / 4 * 3, basicFrameDim.getHeight() / 4 * 3);
 
@@ -72,21 +77,18 @@ public class SodiumVideoOptionsScreen extends Screen {
             this.setDonationButtonVisibility(false);
         }
 
-        this.frame =
-                BasicFrame.createBuilder()
-                        .setDimension(basicFrameDim)
-                        .addChild(parentDim -> TabFrame.createBuilder()
-                                .setDimension(tabFrameDim)
-                                .addTabs(tabs -> this.pages.forEach(page -> tabs.add(dim -> new Tab.Builder<>().from(page, dim))))
-                                .build()
-                        )
-                        .addChild(dim -> this.undoButton)
-                        .addChild(dim -> this.applyButton)
-                        .addChild(dim -> this.closeButton)
-                        .addChild(dim -> this.donateButton)
-                        .addChild(dim -> this.hideDonateButton)
-                        .build();
-        this.children.add(this.frame);
+        return BasicFrame.createBuilder()
+                .setDimension(basicFrameDim)
+                .addChild(parentDim -> TabFrame.createBuilder()
+                        .setDimension(tabFrameDim)
+                        .addTabs(tabs -> this.pages.forEach(page -> tabs.add(dim -> new Tab.Builder<>().from(page, dim))))
+                        .build()
+                )
+                .addChild(dim -> this.undoButton)
+                .addChild(dim -> this.applyButton)
+                .addChild(dim -> this.closeButton)
+                .addChild(dim -> this.donateButton)
+                .addChild(dim -> this.hideDonateButton);
     }
 
     @Override
