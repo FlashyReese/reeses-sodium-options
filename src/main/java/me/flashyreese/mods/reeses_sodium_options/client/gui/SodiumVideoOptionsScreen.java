@@ -4,7 +4,9 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.BasicFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.Tab;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.TabFrame;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptionPages;
+import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
 import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
@@ -16,8 +18,10 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.VideoOptionsScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -32,6 +36,7 @@ public class SodiumVideoOptionsScreen extends Screen {
     private final List<OptionPage> pages = new ArrayList<>();
 
     private FlatButtonWidget applyButton, closeButton, undoButton;
+    private FlatButtonWidget donateButton, hideDonateButton;
     private boolean hasPendingChanges;
 
     public SodiumVideoOptionsScreen(Screen prev) {
@@ -53,9 +58,20 @@ public class SodiumVideoOptionsScreen extends Screen {
         Dim2i applyButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134, tabFrameDim.getLimitY() + 5, 65, 20);
         Dim2i closeButtonDim = new Dim2i(tabFrameDim.getLimitX() - 65, tabFrameDim.getLimitY() + 5, 65, 20);
 
+        Dim2i donateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 122, tabFrameDim.getOriginY() - 26, 100, 20);
+        Dim2i hideDonateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 20, tabFrameDim.getOriginY() - 26, 20, 20);
+
         this.undoButton = new FlatButtonWidget(undoButtonDim, "Undo", this::undoChanges);
         this.applyButton = new FlatButtonWidget(applyButtonDim, "Apply", this::applyChanges);
         this.closeButton = new FlatButtonWidget(closeButtonDim, "Close", this::onClose);
+
+        this.donateButton = new FlatButtonWidget(donateButtonDim, "Buy us a coffee!", this::openDonationPage);
+        this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, "x", this::hideDonationButton);
+
+        if (SodiumClientMod.options().notifications.hideDonationButton) {
+            this.setDonationButtonVisibility(false);
+        }
+
         this.frame =
                 BasicFrame.createBuilder()
                         .setDimension(basicFrameDim)
@@ -67,6 +83,8 @@ public class SodiumVideoOptionsScreen extends Screen {
                         .addChild(dim -> this.undoButton)
                         .addChild(dim -> this.applyButton)
                         .addChild(dim -> this.closeButton)
+                        .addChild(dim -> this.donateButton)
+                        .addChild(dim -> this.hideDonateButton)
                         .build();
         this.children.add(this.frame);
     }
@@ -95,6 +113,29 @@ public class SodiumVideoOptionsScreen extends Screen {
         this.closeButton.setEnabled(!hasChanges);
 
         this.hasPendingChanges = hasChanges;
+    }
+
+    private void setDonationButtonVisibility(boolean value) {
+        this.donateButton.setVisible(value);
+        this.hideDonateButton.setVisible(value);
+    }
+
+    private void hideDonationButton() {
+        SodiumGameOptions options = SodiumClientMod.options();
+        options.notifications.hideDonationButton = true;
+
+        try {
+            options.writeChanges();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save configuration", e);
+        }
+
+        this.setDonationButtonVisibility(false);
+    }
+
+    private void openDonationPage() {
+        Util.getOperatingSystem()
+                .open("https://caffeinemc.net/donate");
     }
 
     private Stream<Option<?>> getAllOptions() {
