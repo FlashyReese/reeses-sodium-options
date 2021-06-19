@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.8-SNAPSHOT'
+    id 'fabric-loom' version '0.7-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -10,19 +10,18 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
 dependencies {
     //to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    // Jitpack doesn't work with Gradle 7, so this is the easiest solution
-    implementation("me.jellysquid.mods:sodium-fabric") {
-        version {
-            branch = "1.16.x/next"
-        }
-        transitive = false
-    }
+    modImplementation "com.github.FlashyReese:sodium-fabric:${project.sodium_version}"
+    modImplementation "com.github.IrisShaders:Iris:1.0.0"
 }
 
 processResources {

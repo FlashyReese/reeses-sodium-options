@@ -1,6 +1,8 @@
 package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
+import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumIrisVideoOptionsScreen;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.options.OptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -20,7 +22,11 @@ public class MixinOptionsScreen extends Screen {
     @Dynamic
     @Inject(method = "method_19828(Lnet/minecraft/client/gui/widget/ButtonWidget;)V", at = @At("HEAD"), cancellable = true)
     private void open(ButtonWidget widget, CallbackInfo ci) {
-        this.client.openScreen(new SodiumVideoOptionsScreen(this));
+        if (FabricLoader.getInstance().isModLoaded("iris")) {
+            this.client.openScreen(new SodiumIrisVideoOptionsScreen(this));
+        } else {
+            this.client.openScreen(new SodiumVideoOptionsScreen(this));
+        }
 
         ci.cancel();
     }

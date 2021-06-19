@@ -25,7 +25,6 @@
   },
   "depends": {
     "fabricloader": ">=0.11.3",
-    "sodium": "0.2.x",
-    "java": ">=16"
+    "sodium": "*"
   }
 }
