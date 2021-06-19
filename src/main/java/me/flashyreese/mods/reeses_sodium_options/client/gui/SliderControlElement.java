@@ -4,8 +4,8 @@ import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatter;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.util.Rect2i;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Rect2i;
 import net.minecraft.util.math.MathHelper;
 
 public class SliderControlElement extends ControlElement<Integer> {

@@ -1,12 +1,13 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui;
 
-import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.BasicFrame;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resource.language.I18n;
+
+import java.lang.reflect.InvocationTargetException;
 
 public class SodiumIrisVideoOptionsScreen extends SodiumVideoOptionsScreen {
     public SodiumIrisVideoOptionsScreen(Screen prev) {
@@ -28,7 +29,18 @@ public class SodiumIrisVideoOptionsScreen extends SodiumVideoOptionsScreen {
         } else {
             shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.getOriginY() - 26, 10 + size, 20);
         }
-        FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, text, () -> this.client.openScreen(new net.coderbot.iris.gui.screen.ShaderPackScreen(this)));
+        FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, text, () -> {
+
+            /*this.client.openScreen(new net.coderbot.iris.gui.screen.ShaderPackScreen(this))*/
+            // Let's hope Iris doesn't change the constructor nor the classpath :>
+            try {
+                Class<? extends Screen> screen = (Class<? extends Screen>) Class.forName("net.coderbot.iris.gui.screen.ShaderPackScreen");
+                Screen instance = screen.getDeclaredConstructor(Screen.class).newInstance(this);
+                this.client.openScreen(instance);
+            } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        });
         basicFrame.addChild(dim -> shaderPackButton);
 
         return basicFrame;

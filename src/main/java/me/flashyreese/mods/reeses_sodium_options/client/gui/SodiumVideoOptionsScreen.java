@@ -15,7 +15,7 @@ import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.VideoOptionsScreen;
+import net.minecraft.client.gui.screen.option.VideoOptionsScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Util;
@@ -52,7 +52,7 @@ public class SodiumVideoOptionsScreen extends Screen {
     @Override
     protected void init() {
         this.frame = this.parentFrameBuilder().build();
-        this.children.add(this.frame);
+        this.addDrawableChild(this.frame);
     }
 
     protected BasicFrame.Builder parentFrameBuilder() {
@@ -167,7 +167,7 @@ public class SodiumVideoOptionsScreen extends Screen {
         }
 
         if (flags.contains(OptionFlag.REQUIRES_ASSET_RELOAD)) {
-            client.resetMipmapLevels(client.options.mipmapLevels);
+            client.setMipmapLevels(client.options.mipmapLevels);
             client.reloadResourcesConcurrently();
         }
 
