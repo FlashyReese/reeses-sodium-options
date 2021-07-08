@@ -20,8 +20,8 @@ public class TabFrame extends AbstractFrame {
 
     public TabFrame(Dim2i dim, List<Function<Dim2i, Tab<?>>> functions) {
         super(dim);
-        this.tabSection = new Dim2i(this.dim.getOriginX(), this.dim.getOriginY(), (int) (this.dim.getWidth() * 0.35D), this.dim.getHeight());
-        this.frameSection = new Dim2i(this.tabSection.getLimitX(), this.dim.getOriginY(), this.dim.getWidth() - this.tabSection.getWidth(), this.dim.getHeight());
+        this.tabSection = new Dim2i(this.dim.x(), this.dim.y(), (int) (this.dim.width() * 0.35D), this.dim.height());
+        this.frameSection = new Dim2i(this.tabSection.getLimitX(), this.dim.y(), this.dim.width() - this.tabSection.width(), this.dim.height());
         functions.forEach(function -> this.tabs.add(function.apply(this.frameSection)));
         this.buildFrame();
     }
@@ -60,9 +60,9 @@ public class TabFrame extends AbstractFrame {
         if (this.tabs == null) return;
         int offsetY = 0;
         for (Tab<?> tab : this.tabs) {
-            int x = this.tabSection.getOriginX();
-            int y = this.tabSection.getOriginY() + offsetY;
-            int width = this.tabSection.getWidth() - 4;
+            int x = this.tabSection.x();
+            int y = this.tabSection.y() + offsetY;
+            int width = this.tabSection.width() - 4;
             int height = 18;
             Dim2i tabDim = new Dim2i(x, y, width, height);
 

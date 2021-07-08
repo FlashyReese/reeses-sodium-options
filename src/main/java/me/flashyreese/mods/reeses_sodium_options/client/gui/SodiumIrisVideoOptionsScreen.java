@@ -19,15 +19,15 @@ public class SodiumIrisVideoOptionsScreen extends SodiumVideoOptionsScreen {
         BasicFrame.Builder basicFrame = super.parentFrameBuilder();
 
         Dim2i basicFrameDim = basicFrame.getDim();
-        Dim2i tabFrameDim = new Dim2i(basicFrameDim.getWidth() / 4 / 2, basicFrameDim.getHeight() / 4 / 2, basicFrameDim.getWidth() / 4 * 3, basicFrameDim.getHeight() / 4 * 3);
+        Dim2i tabFrameDim = new Dim2i(basicFrameDim.width() / 4 / 2, basicFrameDim.height() / 4 / 2, basicFrameDim.width() / 4 * 3, basicFrameDim.height() / 4 * 3);
 
         String text = I18n.translate("options.iris.shaderPackSelection");
         int size = this.client.textRenderer.getWidth(text);
         Dim2i shaderPackButtonDim;
         if (!SodiumClientMod.options().notifications.hideDonationButton) {
-            shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134 - size, tabFrameDim.getOriginY() - 26, 10 + size, 20);
+            shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134 - size, tabFrameDim.y() - 26, 10 + size, 20);
         } else {
-            shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.getOriginY() - 26, 10 + size, 20);
+            shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.y() - 26, 10 + size, 20);
         }
         FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, text, () -> {
 

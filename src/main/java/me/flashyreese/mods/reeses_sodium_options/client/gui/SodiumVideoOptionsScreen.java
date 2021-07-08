@@ -57,14 +57,14 @@ public class SodiumVideoOptionsScreen extends Screen {
 
     protected BasicFrame.Builder parentFrameBuilder() {
         Dim2i basicFrameDim = new Dim2i(0, 0, this.width, this.height);
-        Dim2i tabFrameDim = new Dim2i(basicFrameDim.getWidth() / 4 / 2, basicFrameDim.getHeight() / 4 / 2, basicFrameDim.getWidth() / 4 * 3, basicFrameDim.getHeight() / 4 * 3);
+        Dim2i tabFrameDim = new Dim2i(basicFrameDim.width() / 4 / 2, basicFrameDim.height() / 4 / 2, basicFrameDim.width() / 4 * 3, basicFrameDim.height() / 4 * 3);
 
         Dim2i undoButtonDim = new Dim2i(tabFrameDim.getLimitX() - 203, tabFrameDim.getLimitY() + 5, 65, 20);
         Dim2i applyButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134, tabFrameDim.getLimitY() + 5, 65, 20);
         Dim2i closeButtonDim = new Dim2i(tabFrameDim.getLimitX() - 65, tabFrameDim.getLimitY() + 5, 65, 20);
 
-        Dim2i donateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 122, tabFrameDim.getOriginY() - 26, 100, 20);
-        Dim2i hideDonateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 20, tabFrameDim.getOriginY() - 26, 20, 20);
+        Dim2i donateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 122, tabFrameDim.y() - 26, 100, 20);
+        Dim2i hideDonateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 20, tabFrameDim.y() - 26, 20, 20);
 
         this.undoButton = new FlatButtonWidget(undoButtonDim, "Undo", this::undoChanges);
         this.applyButton = new FlatButtonWidget(applyButtonDim, "Apply", this::applyChanges);

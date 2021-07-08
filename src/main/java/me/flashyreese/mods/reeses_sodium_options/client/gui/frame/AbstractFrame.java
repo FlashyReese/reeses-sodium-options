@@ -63,7 +63,7 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (this.renderOutline) {
-            this.drawRectOutline(this.dim.getOriginX(), this.dim.getOriginY(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
+            this.drawRectOutline(this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
         }
         for (Drawable drawable : this.drawable) {
             drawable.render(matrices, mouseX, mouseY, delta);

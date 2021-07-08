@@ -48,9 +48,9 @@ public class OptionPageScrollFrame extends AbstractFrame {
             }
         }
 
-        this.canScroll = this.dim.getHeight() < y;
+        this.canScroll = this.dim.height() < y;
         if (this.canScroll) {
-            this.scrollBar = new ScrollBarComponent(new Dim2i(this.dim.getLimitX() - 10, this.dim.getOriginY(), 10, this.dim.getHeight()), ScrollBarComponent.Mode.VERTICAL, y, this.dim.getHeight(), this::buildFrame, this.dim);
+            this.scrollBar = new ScrollBarComponent(new Dim2i(this.dim.getLimitX() - 10, this.dim.y(), 10, this.dim.height()), ScrollBarComponent.Mode.VERTICAL, y, this.dim.height(), this::buildFrame, this.dim);
         }
     }
 
@@ -67,7 +67,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
             // Add each option's control element
             for (Option<?> option : group.getOptions()) {
                 Control<?> control = option.getControl();
-                ControlElement<?> element = control.createElement(new Dim2i(this.dim.getOriginX(), this.dim.getOriginY() + y - (this.canScroll ? this.scrollBar.getOffset() : 0), this.dim.getWidth() - (this.canScroll ? 11 : 0), 18));
+                ControlElement<?> element = control.createElement(new Dim2i(this.dim.x(), this.dim.y() + y - (this.canScroll ? this.scrollBar.getOffset() : 0), this.dim.width() - (this.canScroll ? 11 : 0), 18));
                 this.children.add(element);
 
                 // Move down to the next option
@@ -91,7 +91,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
                 .filter(ControlElement::isHovered)
                 .findFirst()
                 .orElse(null);
-        this.applyScissor(this.dim.getOriginX(), this.dim.getOriginY(), this.dim.getWidth(), this.dim.getHeight(), () -> super.render(matrices, mouseX, mouseY, delta));
+        this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> super.render(matrices, mouseX, mouseY, delta));
         if (this.canScroll) {
             this.scrollBar.render(matrices, mouseX, mouseY, delta);
         }
@@ -106,11 +106,11 @@ public class OptionPageScrollFrame extends AbstractFrame {
         int textPadding = 3;
         int boxPadding = 3;
 
-        int boxWidth = dim.getWidth();
+        int boxWidth = dim.width();
 
         //Offset based on mouse position, width and height of content and width and height of the window
         int boxY = dim.getLimitY();
-        int boxX = dim.getOriginX();
+        int boxX = dim.x();
 
         Option<?> option = element.getOption();
         List<OrderedText> tooltip = new ArrayList<>(MinecraftClient.getInstance().textRenderer.wrapLines(option.getTooltip(), boxWidth - (textPadding * 2)));
@@ -127,7 +127,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
 
         // If the box is going to be cutoff on the Y-axis, move it back up the difference
         if (boxYLimit > boxYCutoff) {
-            boxY -= boxHeight + dim.getHeight();
+            boxY -= boxHeight + dim.height();
         }
 
         if (boxY < 0){
