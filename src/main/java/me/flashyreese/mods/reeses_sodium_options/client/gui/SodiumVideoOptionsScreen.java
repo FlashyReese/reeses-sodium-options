@@ -13,15 +13,18 @@ import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.VideoOptionsScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -56,6 +59,8 @@ public class SodiumVideoOptionsScreen extends Screen {
     }
 
     protected BasicFrame.Builder parentFrameBuilder() {
+        BasicFrame.Builder basicFrameBuilder;
+
         Dim2i basicFrameDim = new Dim2i(0, 0, this.width, this.height);
         Dim2i tabFrameDim = new Dim2i(basicFrameDim.width() / 4 / 2, basicFrameDim.height() / 4 / 2, basicFrameDim.width() / 4 * 3, basicFrameDim.height() / 4 * 3);
 
@@ -66,18 +71,18 @@ public class SodiumVideoOptionsScreen extends Screen {
         Dim2i donateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 122, tabFrameDim.y() - 26, 100, 20);
         Dim2i hideDonateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 20, tabFrameDim.y() - 26, 20, 20);
 
-        this.undoButton = new FlatButtonWidget(undoButtonDim, "Undo", this::undoChanges);
-        this.applyButton = new FlatButtonWidget(applyButtonDim, "Apply", this::applyChanges);
-        this.closeButton = new FlatButtonWidget(closeButtonDim, "Close", this::onClose);
+        this.undoButton = new FlatButtonWidget(undoButtonDim, new TranslatableText("sodium.options.buttons.undo"), this::undoChanges);
+        this.applyButton = new FlatButtonWidget(applyButtonDim, new TranslatableText("sodium.options.buttons.apply"), this::applyChanges);
+        this.closeButton = new FlatButtonWidget(closeButtonDim, new TranslatableText("sodium.options.buttons.close"), this::onClose);
 
-        this.donateButton = new FlatButtonWidget(donateButtonDim, "Buy us a coffee!", this::openDonationPage);
-        this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, "x", this::hideDonationButton);
+        this.donateButton = new FlatButtonWidget(donateButtonDim, new TranslatableText("sodium.options.buttons.donate"), this::openDonationPage);
+        this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, new LiteralText("x"), this::hideDonationButton);
 
         if (SodiumClientMod.options().notifications.hideDonationButton) {
             this.setDonationButtonVisibility(false);
         }
 
-        return BasicFrame.createBuilder()
+        basicFrameBuilder = BasicFrame.createBuilder()
                 .setDimension(basicFrameDim)
                 .addChild(parentDim -> TabFrame.createBuilder()
                         .setDimension(tabFrameDim)
@@ -89,6 +94,31 @@ public class SodiumVideoOptionsScreen extends Screen {
                 .addChild(dim -> this.closeButton)
                 .addChild(dim -> this.donateButton)
                 .addChild(dim -> this.hideDonateButton);
+
+        if (FabricLoader.getInstance().isModLoaded("iris")) {
+            int size = this.client.textRenderer.getWidth(new TranslatableText("options.iris.shaderPackSelection"));
+            Dim2i shaderPackButtonDim;
+            if (!SodiumClientMod.options().notifications.hideDonationButton) {
+                shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134 - size, tabFrameDim.y() - 26, 10 + size, 20);
+            } else {
+                shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.y() - 26, 10 + size, 20);
+            }
+            FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, new TranslatableText("options.iris.shaderPackSelection"), () -> {
+
+                /*this.client.openScreen(new net.coderbot.iris.gui.screen.ShaderPackScreen(this))*/
+                // Let's hope Iris doesn't change the constructor nor the classpath :>
+                try {
+                    Class<? extends Screen> screen = (Class<? extends Screen>) Class.forName("net.coderbot.iris.gui.screen.ShaderPackScreen");
+                    Screen instance = screen.getDeclaredConstructor(Screen.class).newInstance(this);
+                    this.client.openScreen(instance);
+                } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            });
+            basicFrameBuilder.addChild(dim -> shaderPackButton);
+        }
+
+        return basicFrameBuilder;
     }
 
     @Override

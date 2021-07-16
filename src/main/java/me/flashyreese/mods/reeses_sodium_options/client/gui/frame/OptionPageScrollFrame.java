@@ -10,8 +10,8 @@ import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Language;
 
@@ -118,7 +118,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
         OptionImpact impact = option.getImpact();
 
         if (impact != null) {
-            tooltip.add(Language.getInstance().reorder(new LiteralText(Formatting.GRAY + "Performance Impact: " + impact.toDisplayString())));
+            tooltip.add(Language.getInstance().reorder(new TranslatableText("sodium.options.performance_impact_string", impact.getLocalizedName()).formatted(Formatting.GRAY)));
         }
 
         int boxHeight = (tooltip.size() * 12) + boxPadding;

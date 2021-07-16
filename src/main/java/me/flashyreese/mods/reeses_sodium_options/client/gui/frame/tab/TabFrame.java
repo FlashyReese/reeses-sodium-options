@@ -66,7 +66,7 @@ public class TabFrame extends AbstractFrame {
             int height = 18;
             Dim2i tabDim = new Dim2i(x, y, width, height);
 
-            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getText().asString(), () -> this.setTab(tab));
+            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getText(), () -> this.setTab(tab));
             button.setSelected(this.selectedTab == tab);
             this.children.add(button);
 
