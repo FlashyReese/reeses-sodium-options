@@ -10,6 +10,7 @@ import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL32C;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,11 +73,11 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
 
     public void applyScissor(int x, int y, int width, int height, Runnable action) {
         int scale = (int) MinecraftClient.getInstance().getWindow().getScaleFactor();
-        GL11.glScissor(x * scale, MinecraftClient.getInstance().getWindow().getHeight() - (y + height) * scale,
+        GL32C.glScissor(x * scale, MinecraftClient.getInstance().getWindow().getHeight() - (y + height) * scale,
                 width * scale, height * scale);
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        GL32C.glEnable(GL32C.GL_SCISSOR_TEST);
         action.run();
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        GL32C.glDisable(GL32C.GL_SCISSOR_TEST);
     }
 
     protected void drawRectOutline(double x, double y, double w, double h, int color) {
