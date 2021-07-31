@@ -8,7 +8,9 @@
     "FlashyReese"
   ],
   "contact": {
-    "repo": "https://github.com/FlashyReese/reeses-sodium-options"
+    "homepage": "https://github.com/FlashyReese/reeses-sodium-options",
+    "sources": "https://github.com/FlashyReese/reeses-sodium-options",
+    "issues": "https://github.com/FlashyReese/reeses-sodium-options"
   },
   "icon": "assets/reeses-sodium-options/icon.png",
   "license": "MIT",
