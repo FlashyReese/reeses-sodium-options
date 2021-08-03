@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
@@ -9,8 +10,6 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL32C;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,11 +72,10 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
 
     public void applyScissor(int x, int y, int width, int height, Runnable action) {
         int scale = (int) MinecraftClient.getInstance().getWindow().getScaleFactor();
-        GL32C.glScissor(x * scale, MinecraftClient.getInstance().getWindow().getHeight() - (y + height) * scale,
+        RenderSystem.enableScissor(x * scale, MinecraftClient.getInstance().getWindow().getHeight() - (y + height) * scale,
                 width * scale, height * scale);
-        GL32C.glEnable(GL32C.GL_SCISSOR_TEST);
         action.run();
-        GL32C.glDisable(GL32C.GL_SCISSOR_TEST);
+        RenderSystem.disableScissor();
     }
 
     protected void drawRectOutline(double x, double y, double w, double h, int color) {

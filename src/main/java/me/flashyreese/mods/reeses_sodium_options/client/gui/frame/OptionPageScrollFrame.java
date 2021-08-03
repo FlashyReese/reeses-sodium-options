@@ -91,11 +91,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
                 .filter(ControlElement::isHovered)
                 .findFirst()
                 .orElse(null);
-        this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> {
-            matrices.push();
-            super.render(matrices, mouseX, mouseY, delta);
-            matrices.pop();
-        });
+        this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> super.render(matrices, mouseX, mouseY, delta));
         if (this.canScroll) {
             this.scrollBar.render(matrices, mouseX, mouseY, delta);
         }
