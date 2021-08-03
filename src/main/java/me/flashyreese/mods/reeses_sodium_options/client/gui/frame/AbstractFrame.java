@@ -71,9 +71,9 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
     }
 
     public void applyScissor(int x, int y, int width, int height, Runnable action) {
-        int scale = (int) MinecraftClient.getInstance().getWindow().getScaleFactor();
-        RenderSystem.enableScissor(x * scale, MinecraftClient.getInstance().getWindow().getHeight() - (y + height) * scale,
-                width * scale, height * scale);
+        double scale = MinecraftClient.getInstance().getWindow().getScaleFactor();
+        RenderSystem.enableScissor((int) (x * scale), (int) (MinecraftClient.getInstance().getWindow().getHeight() - (y + height) * scale),
+                (int) (width * scale), (int) (height * scale));
         action.run();
         RenderSystem.disableScissor();
     }
