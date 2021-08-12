@@ -63,10 +63,12 @@ public class SliderControlElement extends ControlElement<Integer> {
         int sliderWidth = this.sliderBounds.getWidth();
         int sliderHeight = this.sliderBounds.getHeight();
 
-        int thumbOffset = (int) Math.floor((double) (this.getIntValue() - this.min) / this.range * sliderWidth);
+        this.thumbPosition = this.getThumbPositionForValue(option.getValue());
 
-        int thumbX = sliderX + thumbOffset - THUMB_WIDTH;
-        int trackY = sliderY + (sliderHeight / 2) - TRACK_HEIGHT;
+        double thumbOffset = MathHelper.clamp((double) (this.getIntValue() - this.min) / this.range * sliderWidth, 0, sliderWidth);
+
+        double thumbX = sliderX + thumbOffset - THUMB_WIDTH;
+        double trackY = sliderY + (sliderHeight / 2D) - ((double) TRACK_HEIGHT / 2);
 
         this.drawRect(thumbX, sliderY, thumbX + (THUMB_WIDTH * 2), sliderY + sliderHeight, 0xFFFFFFFF);
         this.drawRect(sliderX, trackY, sliderX + sliderWidth, trackY + TRACK_HEIGHT, 0xFFFFFFFF);

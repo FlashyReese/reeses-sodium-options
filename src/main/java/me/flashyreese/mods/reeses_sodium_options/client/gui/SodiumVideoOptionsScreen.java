@@ -61,7 +61,7 @@ public class SodiumVideoOptionsScreen extends Screen {
     protected BasicFrame.Builder parentFrameBuilder() {
         BasicFrame.Builder basicFrameBuilder;
 
-        Dim2i basicFrameDim = new Dim2i(0, 0, this.width, this.height);
+        Dim2i basicFrameDim = new Dim2i(0, 0, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
         Dim2i tabFrameDim = new Dim2i(basicFrameDim.width() / 4 / 2, basicFrameDim.height() / 4 / 2, basicFrameDim.width() / 4 * 3, basicFrameDim.height() / 4 * 3);
 
         Dim2i undoButtonDim = new Dim2i(tabFrameDim.getLimitX() - 203, tabFrameDim.getLimitY() + 5, 65, 20);
@@ -110,7 +110,7 @@ public class SodiumVideoOptionsScreen extends Screen {
                 try {
                     Class<? extends Screen> screen = (Class<? extends Screen>) Class.forName("net.coderbot.iris.gui.screen.ShaderPackScreen");
                     Screen instance = screen.getDeclaredConstructor(Screen.class).newInstance(this);
-                    this.client.openScreen(instance);
+                    this.client.setScreen(instance);
                 } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     e.printStackTrace();
                 }
@@ -214,7 +214,7 @@ public class SodiumVideoOptionsScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_P && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0) {
-            MinecraftClient.getInstance().openScreen(new VideoOptionsScreen(this.prevScreen, MinecraftClient.getInstance().options));
+            MinecraftClient.getInstance().setScreen(new VideoOptionsScreen(this.prevScreen, MinecraftClient.getInstance().options));
 
             return true;
         }
@@ -229,6 +229,6 @@ public class SodiumVideoOptionsScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.client.openScreen(this.prevScreen);
+        this.client.setScreen(this.prevScreen);
     }
 }
