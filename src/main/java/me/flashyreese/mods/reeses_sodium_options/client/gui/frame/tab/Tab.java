@@ -6,14 +6,7 @@ import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.text.Text;
 
-public class Tab<T extends AbstractFrame> implements TabOption<T> {
-    private final Text text;
-    private final T frame;
-
-    public Tab(Text text, T frame) {
-        this.text = text;
-        this.frame = frame;
-    }
+public record Tab<T extends AbstractFrame>(Text text, T frame) implements TabOption<T> {
 
     public Text getText() {
         return text;
