@@ -82,18 +82,7 @@ public class SodiumVideoOptionsScreen extends Screen {
             this.setDonationButtonVisibility(false);
         }
 
-        basicFrameBuilder = BasicFrame.createBuilder()
-                .setDimension(basicFrameDim)
-                .addChild(parentDim -> TabFrame.createBuilder()
-                        .setDimension(tabFrameDim)
-                        .addTabs(tabs -> this.pages.forEach(page -> tabs.add(dim -> new Tab.Builder<>().from(page, dim))))
-                        .build()
-                )
-                .addChild(dim -> this.undoButton)
-                .addChild(dim -> this.applyButton)
-                .addChild(dim -> this.closeButton)
-                .addChild(dim -> this.donateButton)
-                .addChild(dim -> this.hideDonateButton);
+        basicFrameBuilder = this.parentBasicFrameBuilder(basicFrameDim, tabFrameDim);
 
         if (FabricLoader.getInstance().isModLoaded("iris")) {
             int size = this.client.textRenderer.getWidth(new TranslatableText("options.iris.shaderPackSelection"));
@@ -119,6 +108,21 @@ public class SodiumVideoOptionsScreen extends Screen {
         }
 
         return basicFrameBuilder;
+    }
+
+    public BasicFrame.Builder parentBasicFrameBuilder(Dim2i parentBasicFrameDim, Dim2i tabFrameDim) {
+        return BasicFrame.createBuilder()
+                .setDimension(parentBasicFrameDim)
+                .addChild(parentDim -> TabFrame.createBuilder()
+                        .setDimension(tabFrameDim)
+                        .addTabs(tabs -> this.pages.forEach(page -> tabs.add(dim -> new Tab.Builder<>().from(page, dim))))
+                        .build()
+                )
+                .addChild(dim -> this.undoButton)
+                .addChild(dim -> this.applyButton)
+                .addChild(dim -> this.closeButton)
+                .addChild(dim -> this.donateButton)
+                .addChild(dim -> this.hideDonateButton);
     }
 
     @Override
