@@ -2,8 +2,8 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.OptionPageScrollFrame;
-import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import me.jellysquid.mods.sodium.config.render.OptionPage;
+import me.jellysquid.mods.sodium.gui.values.Dim2i;
 import net.minecraft.text.Text;
 
 public record Tab<T extends AbstractFrame>(Text text, T frame) implements TabOption<T> {

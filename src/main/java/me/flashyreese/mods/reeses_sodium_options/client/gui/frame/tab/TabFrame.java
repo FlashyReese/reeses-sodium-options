@@ -1,8 +1,8 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
-import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import me.jellysquid.mods.sodium.gui.values.Dim2i;
+import me.jellysquid.mods.sodium.gui.widgets.FlatButtonWidget;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;

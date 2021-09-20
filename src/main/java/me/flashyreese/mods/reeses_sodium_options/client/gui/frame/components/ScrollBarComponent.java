@@ -1,7 +1,7 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components;
 
-import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import me.jellysquid.mods.sodium.gui.values.Dim2i;
+import me.jellysquid.mods.sodium.gui.widgets.AbstractWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 

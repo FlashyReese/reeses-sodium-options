@@ -1,11 +1,11 @@
 package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SliderControlElement;
-import me.jellysquid.mods.sodium.client.gui.options.Option;
-import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
-import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatter;
-import me.jellysquid.mods.sodium.client.gui.options.control.SliderControl;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import me.jellysquid.mods.sodium.config.render.Option;
+import me.jellysquid.mods.sodium.gui.options.ControlElement;
+import me.jellysquid.mods.sodium.gui.options.ControlValueFormatter;
+import me.jellysquid.mods.sodium.gui.options.SliderControl;
+import me.jellysquid.mods.sodium.gui.values.Dim2i;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

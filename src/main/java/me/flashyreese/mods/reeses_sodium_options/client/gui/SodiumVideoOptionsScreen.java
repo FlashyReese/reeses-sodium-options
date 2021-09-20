@@ -4,15 +4,15 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.BasicFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.Tab;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.TabFrame;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.gui.SodiumGameOptionPages;
-import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-import me.jellysquid.mods.sodium.client.gui.options.Option;
-import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
-import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
-import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
-import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import me.jellysquid.mods.sodium.SodiumClient;
+import me.jellysquid.mods.sodium.config.SodiumRenderConfig;
+import me.jellysquid.mods.sodium.config.render.Option;
+import me.jellysquid.mods.sodium.config.render.OptionFlag;
+import me.jellysquid.mods.sodium.config.render.OptionPage;
+import me.jellysquid.mods.sodium.config.render.storage.OptionStorage;
+import me.jellysquid.mods.sodium.gui.SodiumConfigScreenPages;
+import me.jellysquid.mods.sodium.gui.values.Dim2i;
+import me.jellysquid.mods.sodium.gui.widgets.FlatButtonWidget;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -47,9 +47,9 @@ public class SodiumVideoOptionsScreen extends Screen {
 
         this.prevScreen = prev;
 
-        this.pages.add(SodiumGameOptionPages.general());
-        this.pages.add(SodiumGameOptionPages.quality());
-        this.pages.add(SodiumGameOptionPages.advanced());
+        this.pages.add(SodiumConfigScreenPages.general());
+        this.pages.add(SodiumConfigScreenPages.quality());
+        this.pages.add(SodiumConfigScreenPages.advanced());
     }
 
     @Override
@@ -78,7 +78,7 @@ public class SodiumVideoOptionsScreen extends Screen {
         this.donateButton = new FlatButtonWidget(donateButtonDim, new TranslatableText("sodium.options.buttons.donate"), this::openDonationPage);
         this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, new LiteralText("x"), this::hideDonationButton);
 
-        if (SodiumClientMod.options().notifications.hideDonationButton) {
+        if (SodiumClient.options().notifications.hideDonationButton) {
             this.setDonationButtonVisibility(false);
         }
 
@@ -87,7 +87,7 @@ public class SodiumVideoOptionsScreen extends Screen {
         if (FabricLoader.getInstance().isModLoaded("iris")) {
             int size = this.client.textRenderer.getWidth(new TranslatableText("options.iris.shaderPackSelection"));
             Dim2i shaderPackButtonDim;
-            if (!SodiumClientMod.options().notifications.hideDonationButton) {
+            if (!SodiumClient.options().notifications.hideDonationButton) {
                 shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134 - size, tabFrameDim.y() - 26, 10 + size, 20);
             } else {
                 shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.y() - 26, 10 + size, 20);
@@ -157,7 +157,7 @@ public class SodiumVideoOptionsScreen extends Screen {
     }
 
     private void hideDonationButton() {
-        SodiumGameOptions options = SodiumClientMod.options();
+        SodiumRenderConfig options = SodiumClient.options();
         options.notifications.hideDonationButton = true;
 
         try {

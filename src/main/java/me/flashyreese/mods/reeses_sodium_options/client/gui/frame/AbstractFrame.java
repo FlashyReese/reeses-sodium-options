@@ -1,9 +1,9 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
-import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import me.jellysquid.mods.sodium.gui.options.ControlElement;
+import me.jellysquid.mods.sodium.gui.values.Dim2i;
+import me.jellysquid.mods.sodium.gui.widgets.AbstractWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;

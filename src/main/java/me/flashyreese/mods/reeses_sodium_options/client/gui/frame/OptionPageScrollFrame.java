@@ -1,13 +1,13 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
-import me.jellysquid.mods.sodium.client.gui.options.Option;
-import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
-import me.jellysquid.mods.sodium.client.gui.options.OptionImpact;
-import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
-import me.jellysquid.mods.sodium.client.gui.options.control.Control;
-import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import me.jellysquid.mods.sodium.config.render.Option;
+import me.jellysquid.mods.sodium.config.render.OptionGroup;
+import me.jellysquid.mods.sodium.config.render.OptionImpact;
+import me.jellysquid.mods.sodium.config.render.OptionPage;
+import me.jellysquid.mods.sodium.gui.options.Control;
+import me.jellysquid.mods.sodium.gui.options.ControlElement;
+import me.jellysquid.mods.sodium.gui.values.Dim2i;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
