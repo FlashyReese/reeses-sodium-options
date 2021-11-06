@@ -92,7 +92,7 @@ public class SodiumVideoOptionsScreen extends Screen {
             } else {
                 shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.getOriginY() - 26, 10 + size, 20);
             }
-            FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, new TranslatableText("options.iris.shaderPackSelection").asString(), () -> {
+            FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, new TranslatableText("options.iris.shaderPackSelection").getString(), () -> {
 
                 /*this.client.openScreen(new net.coderbot.iris.gui.screen.ShaderPackScreen(this))*/
                 // Let's hope Iris doesn't change the constructor nor the classpath :>
