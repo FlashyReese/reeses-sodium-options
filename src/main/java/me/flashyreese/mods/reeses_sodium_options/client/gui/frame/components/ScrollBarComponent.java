@@ -41,25 +41,25 @@ public class ScrollBarComponent extends AbstractWidget {
     }
 
     public void updateThumbPosition() {
-        int scrollThumbLength = (this.viewPortLength * (this.mode == Mode.VERTICAL ? this.dim.height() : this.dim.width() - 6)) / this.frameLength;
+        int scrollThumbLength = (this.viewPortLength * (this.mode == Mode.VERTICAL ? this.dim.getHeight() : this.dim.getWidth() - 6)) / this.frameLength;
         int maximumScrollThumbOffset = this.viewPortLength - scrollThumbLength;
         int scrollThumbOffset = this.offset * maximumScrollThumbOffset / this.maxScrollBarOffset;
-        this.scrollThumb = new Dim2i(this.dim.x() + 2 + (this.mode == Mode.HORIZONTAL ? scrollThumbOffset : 0), this.dim.y() + 2 + (this.mode == Mode.VERTICAL ? scrollThumbOffset : 0), (this.mode == Mode.VERTICAL ? this.dim.width() : scrollThumbLength) - 4, (this.mode == Mode.VERTICAL ? scrollThumbLength : this.dim.height()) - 4);
+        this.scrollThumb = new Dim2i(this.dim.getOriginX() + 2 + (this.mode == Mode.HORIZONTAL ? scrollThumbOffset : 0), this.dim.getOriginY() + 2 + (this.mode == Mode.VERTICAL ? scrollThumbOffset : 0), (this.mode == Mode.VERTICAL ? this.dim.getWidth() : scrollThumbLength) - 4, (this.mode == Mode.VERTICAL ? scrollThumbLength : this.dim.getHeight()) - 4);
     }
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.drawRectOutline(this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
-        this.drawRect(this.scrollThumb.x(), this.scrollThumb.y(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
+        this.drawRectOutline(this.dim.getOriginX(), this.dim.getOriginY(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
+        this.drawRect(this.scrollThumb.getOriginX(), this.scrollThumb.getOriginY(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.dim.containsCursor(mouseX, mouseY)) {
             if (this.scrollThumb.containsCursor(mouseX, mouseY)) {
-                this.scrollThumbClickOffset = this.mode == Mode.VERTICAL ? (int) mouseY - this.scrollThumb.y() : (int) mouseX - this.scrollThumb.x();
-            }else{
-                int value = this.mode == Mode.VERTICAL ? (int) mouseY - this.dim.y(): (int) mouseX - this.dim.x();
+                this.scrollThumbClickOffset = this.mode == Mode.VERTICAL ? (int) mouseY - this.scrollThumb.getOriginY() : (int) mouseX - this.scrollThumb.getOriginX();
+            } else {
+                int value = this.mode == Mode.VERTICAL ? (int) mouseY - this.dim.getOriginY() : (int) mouseX - this.dim.getOriginX();
                 this.setOffset(value);
             }
             return true;

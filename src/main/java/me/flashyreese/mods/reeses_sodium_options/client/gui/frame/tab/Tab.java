@@ -4,9 +4,17 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.OptionPageScrollFrame;
 import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
-public record Tab<T extends AbstractFrame>(Text text, T frame) implements TabOption<T> {
+public class Tab<T extends AbstractFrame> implements TabOption<T> {
+    private final Text text;
+    private final T frame;
+
+    public Tab(Text text, T frame) {
+        this.text = text;
+        this.frame = frame;
+    }
 
     public Text getText() {
         return text;
@@ -36,7 +44,7 @@ public record Tab<T extends AbstractFrame>(Text text, T frame) implements TabOpt
         }
 
         public Tab<OptionPageScrollFrame> from(OptionPage page, Dim2i dim) {
-            this.text = page.getName();
+            this.text = new LiteralText(page.getName());
             return new Tab<>(this.text, OptionPageScrollFrame.createBuilder().setDimension(dim).setOptionPage(page).build());
         }
     }
