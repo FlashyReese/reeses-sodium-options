@@ -14,7 +14,7 @@ repositories {
     maven { url 'https://jitpack.io' }
     maven {
         name = "Modrinth"
-        url = "https://api.modrinth.com/mods"
+        url = "https://api.modrinth.com/maven"
         content {
             includeGroup "maven.modrinth"
         }
