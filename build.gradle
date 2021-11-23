@@ -16,9 +16,9 @@ group = project.maven_group
 repositories {
     maven {
         name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
+        url = "https://api.modrinth.com/mods"
         content {
-            includeGroup "maven.modrinth"
+            include group: 'com.modrinth'
         }
     }
 }
