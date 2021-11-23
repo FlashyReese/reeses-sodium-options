@@ -12,6 +12,13 @@ group = project.maven_group
 
 repositories {
     maven { url 'https://jitpack.io' }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -20,7 +27,7 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modImplementation "com.github.FlashyReese:sodium-fabric:${project.sodium_version}"
+    modImplementation "maven.modrinth:sodium:${project.sodium_version}"
 }
 
 processResources {

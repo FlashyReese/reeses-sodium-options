@@ -73,7 +73,7 @@ public class SodiumVideoOptionsScreen extends Screen {
 
         this.undoButton = new FlatButtonWidget(undoButtonDim, new TranslatableText("sodium.options.buttons.undo"), this::undoChanges);
         this.applyButton = new FlatButtonWidget(applyButtonDim, new TranslatableText("sodium.options.buttons.apply"), this::applyChanges);
-        this.closeButton = new FlatButtonWidget(closeButtonDim, new TranslatableText("sodium.options.buttons.close"), this::onClose);
+        this.closeButton = new FlatButtonWidget(closeButtonDim, new TranslatableText("gui.done"), this::onClose);
 
         this.donateButton = new FlatButtonWidget(donateButtonDim, new TranslatableText("sodium.options.buttons.donate"), this::openDonationPage);
         this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, new LiteralText("x"), this::hideDonationButton);
