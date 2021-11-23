@@ -18,7 +18,7 @@ repositories {
         name = "Modrinth"
         url = "https://api.modrinth.com/mods"
         content {
-            include group: 'com.modrinth'
+            includeGroup "maven.modrinth"
         }
     }
 }
