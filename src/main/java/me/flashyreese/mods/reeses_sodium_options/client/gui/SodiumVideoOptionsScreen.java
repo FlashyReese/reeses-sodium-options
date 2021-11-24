@@ -49,6 +49,7 @@ public class SodiumVideoOptionsScreen extends Screen {
 
         this.pages.add(SodiumGameOptionPages.general());
         this.pages.add(SodiumGameOptionPages.quality());
+        this.pages.add(SodiumGameOptionPages.performance());
         this.pages.add(SodiumGameOptionPages.advanced());
     }
 
