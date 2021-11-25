@@ -6,8 +6,8 @@ plugins {
     id "com.modrinth.minotaur" version "1.2.1"
 }
 
-sourceCompatibility = "17"
-targetCompatibility = "17"
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = "${project.archives_base_name}-mc${project.minecraft_version}"
 version = project.mod_version
