@@ -1,13 +1,13 @@
 import com.modrinth.minotaur.TaskModrinthUpload
 
 plugins {
-    id 'fabric-loom' version '0.9-SNAPSHOT'
+    id 'fabric-loom' version '0.10-SNAPSHOT'
     id 'maven-publish'
     id "com.modrinth.minotaur" version "1.2.1"
 }
 
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = "${project.archives_base_name}-mc${project.minecraft_version}"
 version = project.mod_version
@@ -16,7 +16,7 @@ group = project.maven_group
 repositories {
     maven {
         name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
+        url = "https://api.modrinth.com/mods"
         content {
             includeGroup "maven.modrinth"
         }
@@ -29,7 +29,8 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    //modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    modImplementation "me.jellysquid.mods:sodium-fabric:${project.sodium_version}"
 }
 
 processResources {
