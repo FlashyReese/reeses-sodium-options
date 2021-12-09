@@ -24,6 +24,7 @@ jobs:
       - name: Publish to Modrinth
         env:
           MODRINTH_API: ${{ secrets.MODRINTH_API }}
+          CHANGELOG: ${{ github.event.release.body }}
         run: ./gradlew publishModrinth
       - name: Upload assets to GitHub
         uses: AButler/upload-release-assets@v2.0
