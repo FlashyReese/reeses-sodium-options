@@ -1,7 +1,7 @@
 import com.modrinth.minotaur.TaskModrinthUpload
 
 plugins {
-    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'fabric-loom' version '0.9-SNAPSHOT'
     id 'maven-publish'
     id "com.modrinth.minotaur" version "1.2.1"
 }
@@ -30,8 +30,8 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-
     modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    modImplementation "maven.modrinth:iris:${project.iris_version}"
 }
 
 processResources {

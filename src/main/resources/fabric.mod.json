@@ -26,9 +26,13 @@
   "depends": {
     "minecraft": ">=1.16",
     "fabricloader": ">=0.11.6",
-    "sodium": "*"
+    "sodium": ">=0.2.0"
+  },
+  "breaks": {
+    "iris": "<1.1.4",
+    "sodium-extra": "<0.3.5"
   },
   "recommends": {
-    "sodium-extra": "*"
+    "sodium-extra": ">=0.3.5"
   }
 }
