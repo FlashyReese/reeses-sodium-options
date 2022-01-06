@@ -2,8 +2,8 @@ name: Publish Release
 
 on:
   release:
-     types:
-       - published
+    types:
+      - published
 
 jobs:
   build:
@@ -11,16 +11,21 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
-      - name: Set up JDK 16
+      - name: Set up JDK 8
         uses: actions/setup-java@v1
         with:
-          java-version: 16
+          java-version: 8
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Upload assets to releases
+      - name: Upload assets to GitHub
         run: ./gradlew build
         env:
           BUILD_RELEASE: ${{ github.event.prerelease == false }}
+      - name: Publish to Modrinth
+        env:
+          MODRINTH_API: ${{ secrets.MODRINTH_API }}
+          CHANGELOG: ${{ github.event.release.body }}
+        run: ./gradlew publishModrinth
       - name: Upload assets to GitHub
         uses: AButler/upload-release-assets@v2.0
         with:

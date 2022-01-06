@@ -167,6 +167,11 @@ public class SodiumVideoOptionsScreen extends Screen {
         }
 
         this.setDonationButtonVisibility(false);
+
+        // Hackalicious! Rebuild UI
+        this.children.remove(this.frame);
+        this.frame = this.parentFrameBuilder().build();
+        this.children.add(this.frame);
     }
 
     private void openDonationPage() {

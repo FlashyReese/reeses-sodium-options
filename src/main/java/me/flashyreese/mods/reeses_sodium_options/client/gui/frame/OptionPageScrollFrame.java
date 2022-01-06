@@ -95,7 +95,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
         if (this.canScroll) {
             this.scrollBar.render(matrices, mouseX, mouseY, delta);
         }
-        if (hoveredElement != null) {
+        if (this.dim.containsCursor(mouseX, mouseY) && hoveredElement != null) {
             this.renderOptionTooltip(matrices, mouseX, mouseY, hoveredElement);
         }
     }

@@ -38,6 +38,11 @@ public class TabFrame extends AbstractFrame {
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return this.dim.containsCursor(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     public void buildFrame() {
         this.children.clear();
         this.drawable.clear();
