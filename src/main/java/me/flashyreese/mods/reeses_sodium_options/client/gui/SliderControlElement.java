@@ -4,13 +4,10 @@ import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatter;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.Mouse;
-import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Rect2i;
 import net.minecraft.util.math.MathHelper;
-import org.lwjgl.glfw.GLFW;
 
 public class SliderControlElement extends ControlElement<Integer> {
     private static final int THUMB_WIDTH = 2, TRACK_HEIGHT = 1;
@@ -24,8 +21,6 @@ public class SliderControlElement extends ControlElement<Integer> {
     private final int interval;
 
     private double thumbPosition;
-
-    private boolean canScroll;
 
     public SliderControlElement(Option<Integer> option, Dim2i dim, int min, int max, int interval, ControlValueFormatter formatter) {
         super(option, dim);
@@ -144,7 +139,7 @@ public class SliderControlElement extends ControlElement<Integer> {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (this.option.isAvailable() && this.sliderBounds.contains((int) mouseX, (int) mouseY) && (InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), InputUtil.GLFW_KEY_RIGHT_SHIFT) || InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), InputUtil.GLFW_KEY_LEFT_SHIFT))) {
+        if (this.option.isAvailable() && this.sliderBounds.contains((int) mouseX, (int) mouseY) && Screen.hasShiftDown()) {
             this.setValueFromMouseScroll(amount);
 
             return true;

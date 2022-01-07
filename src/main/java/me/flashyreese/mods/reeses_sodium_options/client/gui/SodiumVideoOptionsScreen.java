@@ -14,6 +14,7 @@ import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.fabricmc.loader.api.FabricLoader;
+import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.VideoOptionsScreen;
@@ -24,7 +25,6 @@ import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -86,25 +86,14 @@ public class SodiumVideoOptionsScreen extends Screen {
         basicFrameBuilder = this.parentBasicFrameBuilder(basicFrameDim, tabFrameDim);
 
         if (FabricLoader.getInstance().isModLoaded("iris")) {
-            int size = this.client.textRenderer.getWidth(new TranslatableText("options.iris.shaderPackSelection"));
+            int size = this.client.textRenderer.getWidth(new TranslatableText(IrisApi.getInstance().getMainScreenLanguageKey()));
             Dim2i shaderPackButtonDim;
             if (!SodiumClientMod.options().notifications.hideDonationButton) {
                 shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134 - size, tabFrameDim.y() - 26, 10 + size, 20);
             } else {
                 shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.y() - 26, 10 + size, 20);
             }
-            FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, new TranslatableText("options.iris.shaderPackSelection"), () -> {
-
-                /*this.client.openScreen(new net.coderbot.iris.gui.screen.ShaderPackScreen(this))*/
-                // Let's hope Iris doesn't change the constructor nor the classpath :>
-                try {
-                    Class<? extends Screen> screen = (Class<? extends Screen>) Class.forName("net.coderbot.iris.gui.screen.ShaderPackScreen");
-                    Screen instance = screen.getDeclaredConstructor(Screen.class).newInstance(this);
-                    this.client.setScreen(instance);
-                } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-            });
+            FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, new TranslatableText(IrisApi.getInstance().getMainScreenLanguageKey()), () -> this.client.setScreen((Screen) IrisApi.getInstance().openMainIrisScreenObj(this)));
             basicFrameBuilder.addChild(dim -> shaderPackButton);
         }
 
