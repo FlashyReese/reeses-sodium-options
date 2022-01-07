@@ -28,7 +28,11 @@
     "fabricloader": ">=0.12.5",
     "sodium": ">=0.3.3"
   },
+  "breaks": {
+    "iris": "<1.1.4",
+    "sodium-extra": "<0.3.5"
+  },
   "recommends": {
-    "sodium-extra": "*"
+    "sodium-extra": ">=0.3.5"
   }
 }
