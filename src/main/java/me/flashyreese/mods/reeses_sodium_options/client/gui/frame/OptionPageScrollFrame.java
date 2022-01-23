@@ -148,9 +148,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
             return true;
         }
         if (this.canScroll) {
-            if (this.scrollBar.mouseClicked(mouseX, mouseY, button)) {
-                return true;
-            }
+            return this.scrollBar.mouseClicked(mouseX, mouseY, button);
         }
         return false;
     }
@@ -161,11 +159,9 @@ public class OptionPageScrollFrame extends AbstractFrame {
             return true;
         }
         if (this.canScroll) {
-            if (this.scrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
-                return true;
-            }
+            return this.scrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         }
-        return true;
+        return false;
     }
 
     @Override
@@ -174,9 +170,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
             return true;
         }
         if (this.canScroll) {
-            if (this.scrollBar.mouseReleased(mouseX, mouseY, button)) {
-                return true;
-            }
+            return this.scrollBar.mouseReleased(mouseX, mouseY, button);
         }
         return false;
     }
