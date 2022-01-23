@@ -24,6 +24,9 @@ public class OptionPageScrollFrame extends AbstractFrame {
 
     protected final OptionPage page;
 
+    private long lastTime = 0;
+    private ControlElement<?> lastHoveredElement = null;
+
     public OptionPageScrollFrame(Dim2i dim, boolean renderOutline, OptionPage page) {
         super(dim, renderOutline);
         this.page = page;
@@ -95,12 +98,20 @@ public class OptionPageScrollFrame extends AbstractFrame {
         if (this.canScroll) {
             this.scrollBar.render(matrices, mouseX, mouseY, delta);
         }
-        if (this.dim.containsCursor(mouseX, mouseY) && hoveredElement != null) {
+        if (this.dim.containsCursor(mouseX, mouseY) && hoveredElement != null && this.lastHoveredElement == hoveredElement) {
+            if (this.lastTime == 0) {
+                this.lastTime = System.currentTimeMillis();
+            }
             this.renderOptionTooltip(matrices, mouseX, mouseY, hoveredElement);
+        } else {
+            this.lastTime = 0;
+            this.lastHoveredElement = hoveredElement;
         }
     }
 
     private void renderOptionTooltip(MatrixStack matrixStack, int mouseX, int mouseY, ControlElement<?> element) {
+        if (this.lastTime + 500 > System.currentTimeMillis()) return;
+
         Dim2i dim = element.getDimensions();
 
         int textPadding = 3;
