@@ -102,16 +102,16 @@ public class SodiumVideoOptionsScreen extends Screen {
     public BasicFrame.Builder parentBasicFrameBuilder(Dim2i parentBasicFrameDim, Dim2i tabFrameDim) {
         return BasicFrame.createBuilder()
                 .setDimension(parentBasicFrameDim)
-                .addChild(parentDim -> TabFrame.createBuilder()
-                        .setDimension(tabFrameDim)
-                        .addTabs(tabs -> this.pages.forEach(page -> tabs.add(dim -> new Tab.Builder<>().from(page, dim))))
-                        .build()
-                )
                 .addChild(dim -> this.undoButton)
                 .addChild(dim -> this.applyButton)
                 .addChild(dim -> this.closeButton)
                 .addChild(dim -> this.donateButton)
-                .addChild(dim -> this.hideDonateButton);
+                .addChild(dim -> this.hideDonateButton)
+                .addChild(parentDim -> TabFrame.createBuilder()
+                        .setDimension(tabFrameDim)
+                        .addTabs(tabs -> this.pages.forEach(page -> tabs.add(dim -> new Tab.Builder<>().from(page, dim))))
+                        .build()
+                );
     }
 
     @Override

@@ -13,7 +13,7 @@ Reese's Edition of Sodium Options
 
 #### Prerequisites
 
-- Java 17 or above
+- Java 8 or above
 
 #### Compiling
 
