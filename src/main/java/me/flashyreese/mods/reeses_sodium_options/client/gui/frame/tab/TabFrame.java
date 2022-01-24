@@ -105,11 +105,9 @@ public class TabFrame extends AbstractFrame {
             return true;
         }
         if (this.tabSectionCanScroll && this.tabSection.containsCursor(mouseX, mouseY)) {
-            if (this.tabSectionScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
-                return true;
-            }
+            return this.tabSectionScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         }
-        return true;
+        return false;
     }
 
     @Override
