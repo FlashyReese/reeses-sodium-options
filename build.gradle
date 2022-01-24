@@ -14,6 +14,7 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
+    maven { url 'https://jitpack.io' }
     maven {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
@@ -33,6 +34,10 @@ dependencies {
     modImplementation "maven.modrinth:sodium:${project.sodium_version}"
     implementation "org.joml:joml:1.10.2"
     modImplementation "maven.modrinth:iris:${project.iris_version}"
+
+    modRuntime("com.github.astei:lazydfu:0.1.2") {
+        exclude(module: "fabric-loader")
+    }
 }
 
 processResources {
