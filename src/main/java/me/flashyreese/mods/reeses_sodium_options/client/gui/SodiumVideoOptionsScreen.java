@@ -110,7 +110,7 @@ public class SodiumVideoOptionsScreen extends Screen {
                 .addChild(dim -> this.hideDonateButton)
                 .addChild(parentDim -> TabFrame.createBuilder()
                         .setDimension(tabFrameDim)
-                        .addTabs(tabs -> this.pages.forEach(page -> tabs.add(dim -> new Tab.Builder<>().from(page, dim))))
+                        .addTabs(tabs -> this.pages.forEach(page -> tabs.add(dim -> Tab.createBuilder().from(page, dim))))
                         .build()
                 );
     }

@@ -17,6 +17,10 @@ public record Tab<T extends AbstractFrame>(Text text, T frame) implements TabOpt
         return this.frame;
     }
 
+    public static Tab.Builder<?> createBuilder() {
+        return new Tab.Builder<>();
+    }
+
     public static class Builder<T extends AbstractFrame> {
         private Text text = null;
         private T frame = null;
