@@ -15,6 +15,7 @@ public class ScrollBarComponent extends AbstractWidget {
     private final int maxScrollBarOffset;
     private final Runnable onSetOffset;
     private int offset = 0;
+    private boolean isDragging;
 
     private Dim2i scrollThumb = null;
     private int scrollThumbClickOffset = -1;
@@ -57,22 +58,37 @@ public class ScrollBarComponent extends AbstractWidget {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.dim.containsCursor(mouseX, mouseY)) {
             if (this.scrollThumb.containsCursor(mouseX, mouseY)) {
-                this.scrollThumbClickOffset = this.mode == Mode.VERTICAL ? (int) mouseY - this.scrollThumb.y() : (int) mouseX - this.scrollThumb.x();
-            }else{
-                int value = this.mode == Mode.VERTICAL ? (int) mouseY - this.dim.y(): (int) mouseX - this.dim.x();
+                if (this.mode == Mode.VERTICAL) {
+                    this.scrollThumbClickOffset = (int) (mouseY - (this.scrollThumb.y() + this.scrollThumb.height() / 2));
+                } else {
+                    this.scrollThumbClickOffset = (int) (mouseX - (this.scrollThumb.x() + this.scrollThumb.width() / 2));
+                }
+                this.isDragging = true;
+            } else {
+                int value;
+                if (this.mode == Mode.VERTICAL) {
+                    value = (int) ((mouseY - this.dim.y() - (this.scrollThumb.height() / 2)) / (this.dim.height() - this.scrollThumb.height()) * this.maxScrollBarOffset);
+                } else {
+                    value = (int) ((mouseX - this.dim.x() - (this.scrollThumb.width() / 2)) / (this.dim.width() - this.scrollThumb.width()) * this.maxScrollBarOffset);
+                }
                 this.setOffset(value);
+                this.isDragging = false;
             }
             return true;
-        } else {
-            this.scrollThumbClickOffset = -1;
         }
+        this.isDragging = false;
         return false;
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (this.scrollThumbClickOffset > -1) {
-            int value = this.mode == Mode.VERTICAL ? (int) mouseY - this.scrollThumbClickOffset : (int) mouseX - this.scrollThumbClickOffset;
+        if (this.isDragging) {
+            int value;
+            if (this.mode == Mode.VERTICAL) {
+                value = (int) ((mouseY - this.scrollThumbClickOffset - this.dim.y() - (this.scrollThumb.height() / 2)) / (this.dim.height() - this.scrollThumb.height()) * this.maxScrollBarOffset);
+            } else {
+                value = (int) ((mouseX - this.scrollThumbClickOffset - this.dim.x() - (this.scrollThumb.width() / 2)) / (this.dim.width() - this.scrollThumb.width()) * this.maxScrollBarOffset);
+            }
             this.setOffset(value);
             return true;
         }
@@ -91,19 +107,14 @@ public class ScrollBarComponent extends AbstractWidget {
         return false;
     }
 
-    private void setOffset(int value) {
-        this.offset = MathHelper.clamp(value, 0, this.maxScrollBarOffset);
-        this.updateThumbPosition();
-        this.onSetOffset.run();
-    }
-
     public int getOffset() {
         return this.offset;
     }
 
-    public enum Mode {
-        HORIZONTAL,
-        VERTICAL
+    private void setOffset(int value) {
+        this.offset = MathHelper.clamp(value, 0, this.maxScrollBarOffset);
+        this.updateThumbPosition();
+        this.onSetOffset.run();
     }
 
     protected void drawRectOutline(double x, double y, double w, double h, int color) {
@@ -118,5 +129,10 @@ public class ScrollBarComponent extends AbstractWidget {
             addQuad(vertices, x, y, x + 1, h, a, r, g, b);
             addQuad(vertices, w - 1, y, w, h, a, r, g, b);
         });
+    }
+
+    public enum Mode {
+        HORIZONTAL,
+        VERTICAL
     }
 }
