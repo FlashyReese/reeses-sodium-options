@@ -23,6 +23,10 @@ public class BasicFrame extends AbstractFrame {
         this.buildFrame();
     }
 
+    public static Builder createBuilder() {
+        return new Builder();
+    }
+
     @Override
     public void buildFrame() {
         this.children.clear();
@@ -39,14 +43,10 @@ public class BasicFrame extends AbstractFrame {
         super.render(matrices, mouseX, mouseY, delta);
     }
 
-    public static Builder createBuilder() {
-        return new Builder();
-    }
-
     public static class Builder {
+        private final List<Function<Dim2i, AbstractWidget>> functions = new ArrayList<>();
         private boolean renderOutline = false;
         private Dim2i dim = null;
-        private final List<Function<Dim2i, AbstractWidget>> functions = new ArrayList<>();
 
         public Builder setDimension(Dim2i dim) {
             this.dim = dim;
