@@ -33,11 +33,9 @@ import java.util.stream.Stream;
 
 public class SodiumVideoOptionsScreen extends Screen {
 
-    private AbstractFrame frame;
-
     private final Screen prevScreen;
     private final List<OptionPage> pages = new ArrayList<>();
-
+    private AbstractFrame frame;
     private FlatButtonWidget applyButton, closeButton, undoButton;
     private FlatButtonWidget donateButton, hideDonateButton;
     private boolean hasPendingChanges;
