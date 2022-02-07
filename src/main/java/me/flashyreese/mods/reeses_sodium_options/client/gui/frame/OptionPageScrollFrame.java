@@ -19,11 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OptionPageScrollFrame extends AbstractFrame {
+    protected final OptionPage page;
     private boolean canScroll;
     private ScrollBarComponent scrollBar = null;
-
-    protected final OptionPage page;
-
     private long lastTime = 0;
     private ControlElement<?> lastHoveredElement = null;
 
@@ -32,6 +30,10 @@ public class OptionPageScrollFrame extends AbstractFrame {
         this.page = page;
         this.setupFrame();
         this.buildFrame();
+    }
+
+    public static Builder createBuilder() {
+        return new Builder();
     }
 
     public void setupFrame() {
@@ -139,7 +141,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
             boxY -= boxHeight + dim.height();
         }
 
-        if (boxY < 0){
+        if (boxY < 0) {
             boxY = dim.getLimitY();
         }
 
@@ -190,15 +192,9 @@ public class OptionPageScrollFrame extends AbstractFrame {
             return true;
         }
         if (this.canScroll) {
-            if (this.scrollBar.mouseScrolled(mouseX, mouseY, amount)) {
-                return true;
-            }
+            return this.scrollBar.mouseScrolled(mouseX, mouseY, amount);
         }
         return false;
-    }
-
-    public static Builder createBuilder() {
-        return new Builder();
     }
 
     public static class Builder {

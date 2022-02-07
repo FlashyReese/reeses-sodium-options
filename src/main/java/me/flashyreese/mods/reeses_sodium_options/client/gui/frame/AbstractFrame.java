@@ -16,15 +16,12 @@ import java.util.List;
 
 public abstract class AbstractFrame extends AbstractWidget implements ParentElement {
     protected final Dim2i dim;
-
-    protected boolean renderOutline = false;
-
-    private Element focused;
-    private boolean dragging;
-
     protected final List<AbstractWidget> children = new ArrayList<>();
     protected final List<Drawable> drawable = new ArrayList<>();
     protected final List<ControlElement<?>> controlElements = new ArrayList<>();
+    protected boolean renderOutline = false;
+    private Element focused;
+    private boolean dragging;
 
     public AbstractFrame(Dim2i dim) {
         this.dim = dim;
