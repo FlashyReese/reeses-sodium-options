@@ -8,6 +8,10 @@ import net.minecraft.text.Text;
 
 public record Tab<T extends AbstractFrame>(Text text, T frame) implements TabOption<T> {
 
+    public static Tab.Builder<?> createBuilder() {
+        return new Tab.Builder<>();
+    }
+
     public Text getText() {
         return text;
     }

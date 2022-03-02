@@ -1,7 +1,7 @@
 import com.modrinth.minotaur.TaskModrinthUpload
 
 plugins {
-    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'fabric-loom' version '0.11-SNAPSHOT'
     id 'maven-publish'
     id "com.modrinth.minotaur" version "1.2.1"
 }
@@ -14,7 +14,6 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-    maven { url 'https://jitpack.io' }
     maven {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
@@ -35,9 +34,7 @@ dependencies {
     implementation "org.joml:joml:1.10.2"
     modImplementation "maven.modrinth:iris:${project.iris_version}"
 
-    modRuntime("com.github.astei:lazydfu:0.1.2") {
-        exclude(module: "fabric-loader")
-    }
+    modRuntimeOnly "maven.modrinth:lazydfu:0.1.2"
 }
 
 processResources {
