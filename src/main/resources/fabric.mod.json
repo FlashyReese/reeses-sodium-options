@@ -24,8 +24,8 @@
     }
   },
   "depends": {
-    "minecraft": "1.18.x",
-    "fabricloader": ">=0.12.5",
+    "minecraft": "1.18.2",
+    "fabricloader": ">=0.13",
     "sodium": "*"
   },
   "breaks": {
@@ -33,6 +33,6 @@
     "sodium-extra": "<0.3.7"
   },
   "recommends": {
-    "sodium-extra": ">=0.3.7"
+    "sodium-extra": ">=0.4.0"
   }
 }

@@ -15,14 +15,12 @@ import java.util.function.Function;
 
 public class TabFrame extends AbstractFrame {
 
-    private ScrollBarComponent tabSectionScrollBar = null;
     private final boolean tabSectionCanScroll;
-
     private final Dim2i tabSection;
     private final Dim2i frameSection;
-
-    private Tab<?> selectedTab;
     private final List<Tab<?>> tabs = new ArrayList<>();
+    private ScrollBarComponent tabSectionScrollBar = null;
+    private Tab<?> selectedTab;
 
     public TabFrame(Dim2i dim, List<Function<Dim2i, Tab<?>>> functions) {
         super(dim);
@@ -42,6 +40,10 @@ public class TabFrame extends AbstractFrame {
     public TabFrame(Dim2i dim, List<Function<Dim2i, Tab<?>>> functions, boolean renderOutline) {
         this(dim, functions);
         this.renderOutline = renderOutline;
+    }
+
+    public static Builder createBuilder() {
+        return new Builder();
     }
 
     public void setTab(Tab<?> tab) {
@@ -76,8 +78,8 @@ public class TabFrame extends AbstractFrame {
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> {
-            for (AbstractWidget widget: this.children) {
-                if (widget != this.selectedTab.getFrame()){
+            for (AbstractWidget widget : this.children) {
+                if (widget != this.selectedTab.getFrame()) {
                     widget.render(matrices, mouseX, mouseY, delta);
                 }
             }
@@ -157,10 +159,6 @@ public class TabFrame extends AbstractFrame {
             frame.buildFrame();
             this.children.add(frame);
         }
-    }
-
-    public static Builder createBuilder() {
-        return new Builder();
     }
 
     public static class Builder {
