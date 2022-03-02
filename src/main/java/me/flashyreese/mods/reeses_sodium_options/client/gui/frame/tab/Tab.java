@@ -16,6 +16,10 @@ public class Tab<T extends AbstractFrame> implements TabOption<T> {
         this.frame = frame;
     }
 
+    public static Tab.Builder<?> createBuilder() {
+        return new Tab.Builder<>();
+    }
+
     public Text getText() {
         return text;
     }
