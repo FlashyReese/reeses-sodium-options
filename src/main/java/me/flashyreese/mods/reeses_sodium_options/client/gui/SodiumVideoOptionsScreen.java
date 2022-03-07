@@ -5,7 +5,6 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.BasicFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.Tab;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.TabFrame;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.gui.SodiumGameOptionPages;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
@@ -40,14 +39,10 @@ public class SodiumVideoOptionsScreen extends Screen {
     private FlatButtonWidget donateButton, hideDonateButton;
     private boolean hasPendingChanges;
 
-    public SodiumVideoOptionsScreen(Screen prev) {
+    public SodiumVideoOptionsScreen(Screen prev, List<OptionPage> pages) {
         super(new LiteralText("Reese's Sodium Menu"));
-
         this.prevScreen = prev;
-
-        this.pages.add(SodiumGameOptionPages.general());
-        this.pages.add(SodiumGameOptionPages.quality());
-        this.pages.add(SodiumGameOptionPages.advanced());
+        this.pages.addAll(pages);
     }
 
     @Override
@@ -59,8 +54,8 @@ public class SodiumVideoOptionsScreen extends Screen {
     protected BasicFrame.Builder parentFrameBuilder() {
         BasicFrame.Builder basicFrameBuilder;
 
-        Dim2i basicFrameDim = new Dim2i(0, 0, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
-        Dim2i tabFrameDim = new Dim2i(basicFrameDim.getWidth() / 4 / 2, basicFrameDim.getHeight() / 4 / 2, basicFrameDim.getWidth() / 4 * 3, basicFrameDim.getHeight() / 4 * 3);
+        Dim2i basicFrameDim = new Dim2i(0, 0, this.width, this.height);
+        Dim2i tabFrameDim = new Dim2i(basicFrameDim.getWidth() / 20 / 2, basicFrameDim.getHeight() / 4 / 2, basicFrameDim.getWidth() - (basicFrameDim.getWidth() / 20), basicFrameDim.getHeight() / 4 * 3);
 
         Dim2i undoButtonDim = new Dim2i(tabFrameDim.getLimitX() - 203, tabFrameDim.getLimitY() + 5, 65, 20);
         Dim2i applyButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134, tabFrameDim.getLimitY() + 5, 65, 20);
@@ -107,7 +102,7 @@ public class SodiumVideoOptionsScreen extends Screen {
                 .addChild(dim -> this.hideDonateButton)
                 .addChild(parentDim -> TabFrame.createBuilder()
                         .setDimension(tabFrameDim)
-                        .addTabs(tabs -> this.pages.forEach(page -> tabs.add(dim -> Tab.createBuilder().from(page, dim))))
+                        .addTabs(tabs -> this.pages.stream().filter(page -> !page.getGroups().isEmpty()).forEach(page -> tabs.add(dim -> Tab.createBuilder().from(page, dim))))
                         .build()
                 );
     }
