@@ -6,14 +6,14 @@ import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.text.Text;
 
-public record Tab<T extends AbstractFrame>(Text text, T frame) implements TabOption<T> {
+public record Tab<T extends AbstractFrame>(Text title, T frame) implements TabOption<T> {
 
     public static Tab.Builder<?> createBuilder() {
         return new Tab.Builder<>();
     }
 
-    public Text getText() {
-        return text;
+    public Text getTitle() {
+        return title;
     }
 
     @Override
@@ -22,11 +22,11 @@ public record Tab<T extends AbstractFrame>(Text text, T frame) implements TabOpt
     }
 
     public static class Builder<T extends AbstractFrame> {
-        private Text text = null;
+        private Text title = null;
         private T frame = null;
 
-        public Builder<T> setText(Text text) {
-            this.text = text;
+        public Builder<T> setTitle(Text title) {
+            this.title = title;
             return this;
         }
 
@@ -36,12 +36,12 @@ public record Tab<T extends AbstractFrame>(Text text, T frame) implements TabOpt
         }
 
         public Tab<T> build() {
-            return new Tab<T>(this.text, this.frame);
+            return new Tab<T>(this.title, this.frame);
         }
 
         public Tab<OptionPageScrollFrame> from(OptionPage page, Dim2i dim) {
-            this.text = page.getName();
-            return new Tab<>(this.text, OptionPageScrollFrame.createBuilder().setDimension(dim).setOptionPage(page).build());
+            this.title = page.getName();
+            return new Tab<>(this.title, OptionPageScrollFrame.createBuilder().setDimension(dim).setOptionPage(page).build());
         }
     }
 }
