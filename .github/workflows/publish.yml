@@ -37,3 +37,7 @@ jobs:
           loaders: fabric
 
           version-resolver: latest
+          dependencies: |
+            sodium | depends | *
+            sodium-extra | recommends | *
+            iris | recommends | *
