@@ -8,11 +8,11 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
 public class Tab<T extends AbstractFrame> implements TabOption<T> {
-    private final Text text;
+    private final Text title;
     private final T frame;
 
-    public Tab(Text text, T frame) {
-        this.text = text;
+    public Tab(Text title, T frame) {
+        this.title = title;
         this.frame = frame;
     }
 
@@ -20,8 +20,8 @@ public class Tab<T extends AbstractFrame> implements TabOption<T> {
         return new Tab.Builder<>();
     }
 
-    public Text getText() {
-        return text;
+    public Text getTitle() {
+        return title;
     }
 
     @Override
@@ -30,11 +30,11 @@ public class Tab<T extends AbstractFrame> implements TabOption<T> {
     }
 
     public static class Builder<T extends AbstractFrame> {
-        private Text text = null;
+        private Text title = null;
         private T frame = null;
 
-        public Builder<T> setText(Text text) {
-            this.text = text;
+        public Builder<T> setTitle(Text title) {
+            this.title = title;
             return this;
         }
 
@@ -44,12 +44,12 @@ public class Tab<T extends AbstractFrame> implements TabOption<T> {
         }
 
         public Tab<T> build() {
-            return new Tab<T>(this.text, this.frame);
+            return new Tab<T>(this.title, this.frame);
         }
 
         public Tab<OptionPageScrollFrame> from(OptionPage page, Dim2i dim) {
-            this.text = new LiteralText(page.getName());
-            return new Tab<>(this.text, OptionPageScrollFrame.createBuilder().setDimension(dim).setOptionPage(page).build());
+            this.title = new LiteralText(page.getName());
+            return new Tab<>(this.title, OptionPageScrollFrame.createBuilder().setDimension(dim).setOptionPage(page).build());
         }
     }
 }
