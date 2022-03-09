@@ -42,12 +42,14 @@ public class OptionPageScrollFrame extends AbstractFrame {
         this.controlElements.clear();
 
         int y = 0;
-        OptionGroup lastGroup = this.page.getGroups().get(this.page.getGroups().size() - 1);
+        if (!this.page.getGroups().isEmpty()) {
+            OptionGroup lastGroup = this.page.getGroups().get(this.page.getGroups().size() - 1);
 
-        for (OptionGroup group : this.page.getGroups()) {
-            y += group.getOptions().size() * 18;
-            if (group != lastGroup) {
-                y += 4;
+            for (OptionGroup group : this.page.getGroups()) {
+                y += group.getOptions().size() * 18;
+                if (group != lastGroup) {
+                    y += 4;
+                }
             }
         }
 
