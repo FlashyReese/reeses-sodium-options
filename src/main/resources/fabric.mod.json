@@ -25,14 +25,11 @@
   },
   "depends": {
     "minecraft": ">=1.16",
-    "fabricloader": ">=0.11.6",
+    "fabricloader": ">=0.13",
     "sodium": ">=0.2.0"
   },
   "breaks": {
     "iris": "<1.1.4",
     "sodium-extra": "<0.4.1"
-  },
-  "recommends": {
-    "sodium-extra": ">=0.4.2"
   }
 }
