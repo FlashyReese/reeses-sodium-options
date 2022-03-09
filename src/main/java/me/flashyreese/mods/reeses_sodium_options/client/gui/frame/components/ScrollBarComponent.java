@@ -18,12 +18,12 @@ public class ScrollBarComponent extends AbstractWidget {
     private boolean isDragging;
 
     private Dim2i scrollThumb = null;
-    private int scrollThumbClickOffset = -1;
+    private int scrollThumbClickOffset;
 
     private Dim2i extendedScrollArea = null;
 
-    public ScrollBarComponent(Dim2i scrollBarArea, Mode mode, int frameLength, int viewPortLength, Runnable onSetOffset) {
-        this.dim = scrollBarArea;
+    public ScrollBarComponent(Dim2i trackArea, Mode mode, int frameLength, int viewPortLength, Runnable onSetOffset) {
+        this.dim = trackArea;
         this.mode = mode;
         this.frameLength = frameLength;
         this.viewPortLength = viewPortLength;
@@ -31,14 +31,9 @@ public class ScrollBarComponent extends AbstractWidget {
         this.maxScrollBarOffset = this.frameLength - this.viewPortLength;
     }
 
-    public ScrollBarComponent(Dim2i scrollBarArea, Mode mode, int frameLength, int viewPortLength, Runnable onSetOffset, Dim2i extendedScrollArea) {
-        this.dim = scrollBarArea;
-        this.mode = mode;
-        this.frameLength = frameLength;
-        this.viewPortLength = viewPortLength;
-        this.extendedScrollArea = extendedScrollArea;
-        this.onSetOffset = onSetOffset;
-        this.maxScrollBarOffset = this.frameLength - this.viewPortLength;
+    public ScrollBarComponent(Dim2i scrollBarArea, Mode mode, int frameLength, int viewPortLength, Runnable onSetOffset, Dim2i extendedTrackArea) {
+        this(scrollBarArea, mode, frameLength, viewPortLength, onSetOffset);
+        this.extendedScrollArea = extendedTrackArea;
     }
 
     public void updateThumbPosition() {
