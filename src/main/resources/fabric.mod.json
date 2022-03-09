@@ -24,15 +24,15 @@
     }
   },
   "depends": {
-    "minecraft": "1.18.2",
+    "minecraft": ">=1.18",
     "fabricloader": ">=0.13",
     "sodium": "*"
   },
   "breaks": {
     "iris": "<1.1.4",
-    "sodium-extra": "<0.3.7"
+    "sodium-extra": "<0.4.1"
   },
   "recommends": {
-    "sodium-extra": ">=0.4.0"
+    "sodium-extra": ">=0.4.2"
   }
 }

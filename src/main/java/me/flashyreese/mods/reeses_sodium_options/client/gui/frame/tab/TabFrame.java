@@ -95,7 +95,7 @@ public class TabFrame extends AbstractFrame {
         if (this.dim.containsCursor(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        if (this.tabSectionCanScroll && this.tabSection.containsCursor(mouseX, mouseY)) {
+        if (this.tabSectionCanScroll) {
             return this.tabSectionScrollBar.mouseClicked(mouseX, mouseY, button);
         }
         return false;
@@ -106,7 +106,7 @@ public class TabFrame extends AbstractFrame {
         if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
             return true;
         }
-        if (this.tabSectionCanScroll && this.tabSection.containsCursor(mouseX, mouseY)) {
+        if (this.tabSectionCanScroll) {
             return this.tabSectionScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         }
         return false;
@@ -117,7 +117,7 @@ public class TabFrame extends AbstractFrame {
         if (super.mouseReleased(mouseX, mouseY, button)) {
             return true;
         }
-        if (this.tabSectionCanScroll && this.tabSection.containsCursor(mouseX, mouseY)) {
+        if (this.tabSectionCanScroll) {
             return this.tabSectionScrollBar.mouseReleased(mouseX, mouseY, button);
         }
         return false;
@@ -128,7 +128,7 @@ public class TabFrame extends AbstractFrame {
         if (super.mouseScrolled(mouseX, mouseY, amount)) {
             return true;
         }
-        if (this.tabSectionCanScroll && this.tabSection.containsCursor(mouseX, mouseY)) {
+        if (this.tabSectionCanScroll) {
             return this.tabSectionScrollBar.mouseScrolled(mouseX, mouseY, amount);
         }
         return false;
@@ -144,7 +144,7 @@ public class TabFrame extends AbstractFrame {
             int height = 18;
             Dim2i tabDim = new Dim2i(x, y, width, height);
 
-            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getText(), () -> this.setTab(tab));
+            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(tab));
             button.setSelected(this.selectedTab == tab);
             this.children.add(button);
 
