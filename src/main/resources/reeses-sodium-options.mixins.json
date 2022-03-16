@@ -5,8 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "sodium.MixinControlElement",
-    "sodium.MixinSodiumOptionsGUI",
-    "sodium.MixinSliderControl"
+    "sodium.MixinSliderControlElement",
+    "sodium.MixinSodiumOptionsGUI"
   ],
   "injectors": {
     "defaultRequire": 1
