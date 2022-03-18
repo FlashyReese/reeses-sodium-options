@@ -40,4 +40,5 @@ jobs:
           dependencies: |
             sodium | depends | *
             sodium-extra | recommends | *
+            irisshaders | recommends | *
             iris | recommends | *
