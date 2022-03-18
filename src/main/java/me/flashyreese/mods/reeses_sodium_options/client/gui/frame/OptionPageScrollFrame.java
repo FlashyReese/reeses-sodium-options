@@ -14,6 +14,7 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Language;
+import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,14 +105,14 @@ public class OptionPageScrollFrame extends AbstractFrame {
             if (this.lastTime == 0) {
                 this.lastTime = System.currentTimeMillis();
             }
-            this.renderOptionTooltip(matrices, mouseX, mouseY, hoveredElement);
+            this.renderOptionTooltip(matrices, hoveredElement);
         } else {
             this.lastTime = 0;
             this.lastHoveredElement = hoveredElement;
         }
     }
 
-    private void renderOptionTooltip(MatrixStack matrixStack, int mouseX, int mouseY, ControlElement<?> element) {
+    private void renderOptionTooltip(MatrixStack matrixStack, ControlElement<?> element) {
         if (this.lastTime + 500 > System.currentTimeMillis()) return;
 
         Dim2i dim = element.getDimensions();
@@ -209,9 +210,9 @@ public class OptionPageScrollFrame extends AbstractFrame {
             return this;
         }
 
-        public Builder shouldRenderOutline(boolean state) {
-            this.renderOutline = state;
-            return this;
+        public Builder shouldRenderOutline(boolean renderOutline) {
+            this.renderOutline = renderOutline;
+            return  this;
         }
 
         public Builder setOptionPage(OptionPage page) {
@@ -220,6 +221,8 @@ public class OptionPageScrollFrame extends AbstractFrame {
         }
 
         public OptionPageScrollFrame build() {
+            Validate.notNull(this.dim, "Dimension must be specified");
+
             return new OptionPageScrollFrame(this.dim, this.renderOutline, this.page);
         }
     }
