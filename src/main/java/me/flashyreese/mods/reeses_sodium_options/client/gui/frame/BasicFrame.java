@@ -3,6 +3,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.util.math.MatrixStack;
+import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +13,7 @@ public class BasicFrame extends AbstractFrame {
 
     protected List<Function<Dim2i, AbstractWidget>> functions;
 
-    public BasicFrame(Dim2i dim, boolean renderOutline) {
-        super(dim, renderOutline);
-        this.buildFrame();
-    }
-
-    public BasicFrame(Dim2i dim, List<Function<Dim2i, AbstractWidget>> functions, boolean renderOutline) {
+    public BasicFrame(Dim2i dim, boolean renderOutline, List<Function<Dim2i, AbstractWidget>> functions) {
         super(dim, renderOutline);
         this.functions = functions;
         this.buildFrame();
@@ -45,16 +41,16 @@ public class BasicFrame extends AbstractFrame {
 
     public static class Builder {
         private final List<Function<Dim2i, AbstractWidget>> functions = new ArrayList<>();
-        private boolean renderOutline = false;
-        private Dim2i dim = null;
+        private Dim2i dim;
+        private boolean renderOutline;
 
         public Builder setDimension(Dim2i dim) {
             this.dim = dim;
             return this;
         }
 
-        public Builder shouldRenderOutline(boolean state) {
-            this.renderOutline = state;
+        public Builder shouldRenderOutline(boolean renderOutline) {
+            this.renderOutline = renderOutline;
             return this;
         }
 
@@ -63,25 +59,10 @@ public class BasicFrame extends AbstractFrame {
             return this;
         }
 
-        public Builder addChildren(List<Function<Dim2i, AbstractWidget>> functions) {
-            this.functions.addAll(functions);
-            return this;
-        }
-
-        public boolean isRenderOutline() {
-            return renderOutline;
-        }
-
-        public Dim2i getDim() {
-            return dim;
-        }
-
-        public List<Function<Dim2i, AbstractWidget>> getFunctions() {
-            return functions;
-        }
-
         public BasicFrame build() {
-            return new BasicFrame(this.dim, this.functions, this.renderOutline);
+            Validate.notNull(this.dim, "Dimension must be specified");
+
+            return new BasicFrame(this.dim, this.renderOutline, this.functions);
         }
     }
 }
