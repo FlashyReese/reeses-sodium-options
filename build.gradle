@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.11-SNAPSHOT'
+    id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -18,6 +18,7 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -27,9 +28,9 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    modImplementation "com.github.FlashyReese:sodium-fabric:36da09d9ad"//"maven.modrinth:sodium:${project.sodium_version}"
     implementation "org.joml:joml:1.10.2"
-    modImplementation "maven.modrinth:iris:${project.iris_version}"
+    //modImplementation "maven.modrinth:iris:${project.iris_version}"
 
     modRuntimeOnly "maven.modrinth:lazydfu:0.1.2"
 }

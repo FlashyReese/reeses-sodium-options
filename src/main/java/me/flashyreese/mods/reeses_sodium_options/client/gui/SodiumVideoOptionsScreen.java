@@ -12,14 +12,13 @@ import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.fabricmc.loader.api.FabricLoader;
-import net.irisshaders.iris.api.v0.IrisApi;
+/*import net.fabricmc.loader.api.FabricLoader;
+import net.irisshaders.iris.api.v0.IrisApi;*/
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.VideoOptionsScreen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
 
@@ -40,7 +39,7 @@ public class SodiumVideoOptionsScreen extends Screen {
     private boolean hasPendingChanges;
 
     public SodiumVideoOptionsScreen(Screen prev, List<OptionPage> pages) {
-        super(new LiteralText("Reese's Sodium Menu"));
+        super(Text.literal("Reese's Sodium Menu"));
         this.prevScreen = prev;
         this.pages.addAll(pages);
     }
@@ -64,12 +63,12 @@ public class SodiumVideoOptionsScreen extends Screen {
         Dim2i donateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 122, tabFrameDim.y() - 26, 100, 20);
         Dim2i hideDonateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 20, tabFrameDim.y() - 26, 20, 20);
 
-        this.undoButton = new FlatButtonWidget(undoButtonDim, new TranslatableText("sodium.options.buttons.undo"), this::undoChanges);
-        this.applyButton = new FlatButtonWidget(applyButtonDim, new TranslatableText("sodium.options.buttons.apply"), this::applyChanges);
-        this.closeButton = new FlatButtonWidget(closeButtonDim, new TranslatableText("gui.done"), this::close);
+        this.undoButton = new FlatButtonWidget(undoButtonDim, Text.translatable("sodium.options.buttons.undo"), this::undoChanges);
+        this.applyButton = new FlatButtonWidget(applyButtonDim, Text.translatable("sodium.options.buttons.apply"), this::applyChanges);
+        this.closeButton = new FlatButtonWidget(closeButtonDim, Text.translatable("gui.done"), this::close);
 
-        this.donateButton = new FlatButtonWidget(donateButtonDim, new TranslatableText("sodium.options.buttons.donate"), this::openDonationPage);
-        this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, new LiteralText("x"), this::hideDonationButton);
+        this.donateButton = new FlatButtonWidget(donateButtonDim, Text.translatable("sodium.options.buttons.donate"), this::openDonationPage);
+        this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, Text.literal("x"), this::hideDonationButton);
 
         if (SodiumClientMod.options().notifications.hideDonationButton) {
             this.setDonationButtonVisibility(false);
@@ -77,17 +76,17 @@ public class SodiumVideoOptionsScreen extends Screen {
 
         basicFrameBuilder = this.parentBasicFrameBuilder(basicFrameDim, tabFrameDim);
 
-        if (FabricLoader.getInstance().isModLoaded("iris")) {
-            int size = this.client.textRenderer.getWidth(new TranslatableText(IrisApi.getInstance().getMainScreenLanguageKey()));
+        /*if (FabricLoader.getInstance().isModLoaded("iris")) {
+            int size = this.client.textRenderer.getWidth(Text.translatable(IrisApi.getInstance().getMainScreenLanguageKey()));
             Dim2i shaderPackButtonDim;
             if (!SodiumClientMod.options().notifications.hideDonationButton) {
                 shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134 - size, tabFrameDim.y() - 26, 10 + size, 20);
             } else {
                 shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.y() - 26, 10 + size, 20);
             }
-            FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, new TranslatableText(IrisApi.getInstance().getMainScreenLanguageKey()), () -> this.client.setScreen((Screen) IrisApi.getInstance().openMainIrisScreenObj(this)));
+            FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, Text.translatable(IrisApi.getInstance().getMainScreenLanguageKey()), () -> this.client.setScreen((Screen) IrisApi.getInstance().openMainIrisScreenObj(this)));
             basicFrameBuilder.addChild(dim -> shaderPackButton);
-        }
+        }*/
 
         return basicFrameBuilder;
     }
@@ -190,7 +189,7 @@ public class SodiumVideoOptionsScreen extends Screen {
         }
 
         if (flags.contains(OptionFlag.REQUIRES_ASSET_RELOAD)) {
-            client.setMipmapLevels(client.options.mipmapLevels);
+            client.setMipmapLevels(client.options.getMipmapLevels().getValue());
             client.reloadResourcesConcurrently();
         }
 
