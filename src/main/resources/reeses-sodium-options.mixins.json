@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_16",
   "client": [
     "sodium.MixinControlElement",
+    "sodium.MixinCyclingControlElement",
     "sodium.MixinSliderControlElement",
     "sodium.MixinSodiumOptionsGUI"
   ],
