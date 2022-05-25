@@ -6,7 +6,6 @@ import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatte
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.Rect2i;
-import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,8 +40,6 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
     @Shadow
     public abstract double getThumbPositionForValue(int value);
 
-    @Shadow
-    public abstract int getIntValue();
 
     @Inject(method = "<init>", at = @At(value = "TAIL"))
     public void postInit(Option<Integer> option, Dim2i dim, int min, int max, int interval, ControlValueFormatter formatter, CallbackInfo ci) {
@@ -53,16 +50,6 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
         if (this.option.getValue() + this.interval * (int) amount <= this.max && this.option.getValue() + this.interval * (int) amount >= this.min) {
             this.option.setValue(this.option.getValue() + this.interval * (int) amount);
             this.thumbPosition = this.getThumbPositionForValue(this.option.getValue());
-        }
-    }
-
-    private void setValue(double d) {
-        this.thumbPosition = MathHelper.clamp(d, 0.0D, 1.0D);
-
-        int value = this.getIntValue();
-
-        if (this.option.getValue() != value) {
-            this.option.setValue(value);
         }
     }
 
