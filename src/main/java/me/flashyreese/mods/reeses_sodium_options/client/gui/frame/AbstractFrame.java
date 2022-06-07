@@ -19,27 +19,12 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
     protected final List<AbstractWidget> children = new ArrayList<>();
     protected final List<Drawable> drawable = new ArrayList<>();
     protected final List<ControlElement<?>> controlElements = new ArrayList<>();
-    protected boolean renderOutline = false;
+    protected boolean renderOutline;
     private Element focused;
     private boolean dragging;
 
-    public AbstractFrame(Dim2i dim) {
-        this.dim = dim;
-    }
-
-    public AbstractFrame(Dim2i dim, List<AbstractWidget> children) {
-        this(dim);
-        this.children.addAll(children);
-    }
-
     public AbstractFrame(Dim2i dim, boolean renderOutline) {
-        this(dim);
-        this.renderOutline = renderOutline;
-    }
-
-    public AbstractFrame(Dim2i dim, List<AbstractWidget> children, boolean renderOutline) {
-        this(dim);
-        this.children.addAll(children);
+        this.dim = dim;
         this.renderOutline = renderOutline;
     }
 
