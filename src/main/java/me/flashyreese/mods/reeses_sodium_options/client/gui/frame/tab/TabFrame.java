@@ -22,8 +22,8 @@ public class TabFrame extends AbstractFrame {
     private ScrollBarComponent tabSectionScrollBar = null;
     private Tab<?> selectedTab;
 
-    public TabFrame(Dim2i dim, List<Function<Dim2i, Tab<?>>> functions) {
-        super(dim);
+    public TabFrame(Dim2i dim, boolean renderOutline, List<Function<Dim2i, Tab<?>>> functions) {
+        super(dim, renderOutline);
         this.tabSection = new Dim2i(this.dim.getOriginX(), this.dim.getOriginY(), (int) (this.dim.getWidth() * 0.35D), this.dim.getHeight());
         this.frameSection = new Dim2i(this.tabSection.getLimitX(), this.dim.getOriginY(), this.dim.getWidth() - this.tabSection.getWidth(), this.dim.getHeight());
         functions.forEach(function -> this.tabs.add(function.apply(this.frameSection)));
@@ -35,11 +35,6 @@ public class TabFrame extends AbstractFrame {
         }
 
         this.buildFrame();
-    }
-
-    public TabFrame(Dim2i dim, List<Function<Dim2i, Tab<?>>> functions, boolean renderOutline) {
-        this(dim, functions);
-        this.renderOutline = renderOutline;
     }
 
     public static Builder createBuilder() {
@@ -59,7 +54,7 @@ public class TabFrame extends AbstractFrame {
         this.controlElements.clear();
 
         if (this.selectedTab == null) {
-            if (this.tabs != null && !this.tabs.isEmpty()) {
+            if (!this.tabs.isEmpty()) {
                 // Just use the first tab for now
                 this.selectedTab = this.tabs.get(0);
             }
@@ -135,7 +130,6 @@ public class TabFrame extends AbstractFrame {
     }
 
     private void rebuildTabs() {
-        if (this.tabs == null) return;
         int offsetY = 0;
         for (Tab<?> tab : this.tabs) {
             int x = this.tabSection.getOriginX();
@@ -163,26 +157,16 @@ public class TabFrame extends AbstractFrame {
 
     public static class Builder {
         private final List<Function<Dim2i, Tab<?>>> functions = new ArrayList<>();
-        private boolean renderOutline = false;
-        private Dim2i dim = null;
+        private Dim2i dim;
+        private boolean renderOutline;
 
         public Builder setDimension(Dim2i dim) {
             this.dim = dim;
             return this;
         }
 
-        public Builder shouldRenderOutline(boolean state) {
-            this.renderOutline = state;
-            return this;
-        }
-
-        public Builder addTab(Function<Dim2i, Tab<?>> function) {
-            this.functions.add(function);
-            return this;
-        }
-
-        public Builder addTabs(List<Function<Dim2i, Tab<?>>> functions) {
-            this.functions.addAll(functions);
+        public Builder shouldRenderOutline(boolean renderOutline) {
+            this.renderOutline = renderOutline;
             return this;
         }
 
@@ -194,7 +178,7 @@ public class TabFrame extends AbstractFrame {
         public TabFrame build() {
             Validate.notNull(this.dim, "Dimension must be specified");
 
-            return new TabFrame(this.dim, this.functions, this.renderOutline);
+            return new TabFrame(this.dim, this.renderOutline, this.functions);
         }
     }
 }

@@ -30,8 +30,8 @@ public class Tab<T extends AbstractFrame> implements TabOption<T> {
     }
 
     public static class Builder<T extends AbstractFrame> {
-        private Text title = null;
-        private T frame = null;
+        private Text title;
+        private T frame;
 
         public Builder<T> setTitle(Text title) {
             this.title = title;
@@ -48,8 +48,7 @@ public class Tab<T extends AbstractFrame> implements TabOption<T> {
         }
 
         public Tab<OptionPageScrollFrame> from(OptionPage page, Dim2i dim) {
-            this.title = new LiteralText(page.getName());
-            return new Tab<>(this.title, OptionPageScrollFrame.createBuilder().setDimension(dim).setOptionPage(page).build());
+            return new Tab<>(new LiteralText(page.getName()), OptionPageScrollFrame.createBuilder().setDimension(dim).shouldRenderOutline(false).setOptionPage(page).build());
         }
     }
 }
