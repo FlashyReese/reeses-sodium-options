@@ -103,7 +103,7 @@ public class SodiumVideoOptionsScreen extends Screen {
                 .addChild(parentDim -> TabFrame.createBuilder()
                         .setDimension(tabFrameDim)
                         .shouldRenderOutline(false)
-                        .addTabs(tabs -> this.pages.stream().filter(page -> !page.getGroups().isEmpty()).forEach(page -> tabs.add(dim -> Tab.createBuilder().from(page, dim))))
+                        .addTabs(tabs -> this.pages.stream().filter(page -> !page.getGroups().isEmpty()).forEach(page -> tabs.add(Tab.createBuilder().from(page))))
                         .build()
                 );
     }
