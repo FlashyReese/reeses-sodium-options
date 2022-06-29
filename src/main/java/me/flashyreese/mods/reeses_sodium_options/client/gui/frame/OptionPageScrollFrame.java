@@ -97,7 +97,9 @@ public class OptionPageScrollFrame extends AbstractFrame {
                 .filter(ControlElement::isHovered)
                 .findFirst()
                 .orElse(null);
+        matrices.push();
         this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> super.render(matrices, mouseX, mouseY, delta));
+        matrices.pop();
         if (this.canScroll) {
             this.scrollBar.render(matrices, mouseX, mouseY, delta);
         }
@@ -212,7 +214,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
 
         public Builder shouldRenderOutline(boolean renderOutline) {
             this.renderOutline = renderOutline;
-            return  this;
+            return this;
         }
 
         public Builder setOptionPage(OptionPage page) {
