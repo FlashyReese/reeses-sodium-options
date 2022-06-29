@@ -40,7 +40,6 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
     @Shadow
     public abstract double getThumbPositionForValue(int value);
 
-
     @Inject(method = "<init>", at = @At(value = "TAIL"))
     public void postInit(Option<Integer> option, Dim2i dim, int min, int max, int interval, ControlValueFormatter formatter, CallbackInfo ci) {
         this.max = max;

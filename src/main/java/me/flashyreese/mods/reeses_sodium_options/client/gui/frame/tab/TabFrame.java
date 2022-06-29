@@ -11,7 +11,6 @@ import org.apache.commons.lang3.Validate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class TabFrame extends AbstractFrame {
 
@@ -21,12 +20,13 @@ public class TabFrame extends AbstractFrame {
     private final List<Tab<?>> tabs = new ArrayList<>();
     private ScrollBarComponent tabSectionScrollBar = null;
     private Tab<?> selectedTab;
+    private AbstractFrame selectedFrame;
 
-    public TabFrame(Dim2i dim, boolean renderOutline, List<Function<Dim2i, Tab<?>>> functions) {
+    public TabFrame(Dim2i dim, boolean renderOutline, List<Tab<?>> functions) {
         super(dim, renderOutline);
         this.tabSection = new Dim2i(this.dim.getOriginX(), this.dim.getOriginY(), (int) (this.dim.getWidth() * 0.35D), this.dim.getHeight());
         this.frameSection = new Dim2i(this.tabSection.getLimitX(), this.dim.getOriginY(), this.dim.getWidth() - this.tabSection.getWidth(), this.dim.getHeight());
-        functions.forEach(function -> this.tabs.add(function.apply(this.frameSection)));
+        this.tabs.addAll(functions);
 
         int tabSectionY = this.tabs.size() * 18;
         this.tabSectionCanScroll = tabSectionY > this.tabSection.getHeight();
@@ -74,12 +74,12 @@ public class TabFrame extends AbstractFrame {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.applyScissor(this.dim.getOriginX(), this.dim.getOriginY(), this.dim.getWidth(), this.dim.getHeight(), () -> {
             for (AbstractWidget widget: this.children) {
-                if (widget != this.selectedTab.getFrame()){
+                if (widget != this.selectedFrame){
                     widget.render(matrices, mouseX, mouseY, delta);
                 }
             }
         });
-        this.selectedTab.getFrame().render(matrices, mouseX, mouseY, delta);
+        this.selectedFrame.render(matrices, mouseX, mouseY, delta);
         if (this.tabSectionCanScroll) {
             this.tabSectionScrollBar.render(matrices, mouseX, mouseY, delta);
         }
@@ -148,15 +148,16 @@ public class TabFrame extends AbstractFrame {
 
     private void rebuildTabFrame() {
         if (this.selectedTab == null) return;
-        AbstractFrame frame = this.selectedTab.getFrame();
+        AbstractFrame frame = this.selectedTab.getFrameFunction().apply(this.frameSection);
         if (frame != null) {
+            this.selectedFrame = frame;
             frame.buildFrame();
             this.children.add(frame);
         }
     }
 
     public static class Builder {
-        private final List<Function<Dim2i, Tab<?>>> functions = new ArrayList<>();
+        private final List<Tab<?>> functions = new ArrayList<>();
         private Dim2i dim;
         private boolean renderOutline;
 
@@ -170,7 +171,7 @@ public class TabFrame extends AbstractFrame {
             return this;
         }
 
-        public Builder addTabs(Consumer<List<Function<Dim2i, Tab<?>>>> tabs) {
+        public Builder addTabs(Consumer<List<Tab<?>>> tabs) {
             tabs.accept(this.functions);
             return this;
         }
