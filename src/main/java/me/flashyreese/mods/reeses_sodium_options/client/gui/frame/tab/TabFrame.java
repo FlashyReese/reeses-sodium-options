@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab;
 
+import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class TabFrame extends AbstractFrame {
@@ -22,11 +24,14 @@ public class TabFrame extends AbstractFrame {
     private Tab<?> selectedTab;
     private AbstractFrame selectedFrame;
 
-    public TabFrame(Dim2i dim, boolean renderOutline, List<Tab<?>> functions) {
+    public TabFrame(Dim2i dim, boolean renderOutline, List<Tab<?>> tabs) {
         super(dim, renderOutline);
-        this.tabSection = new Dim2i(this.dim.getOriginX(), this.dim.getOriginY(), (int) (this.dim.getWidth() * 0.35D), this.dim.getHeight());
+
+        Optional<Integer> result = tabs.stream().map(tab -> this.getStringWidth(tab.getTitle().getString())).max(Integer::compareTo);
+
+        this.tabSection = new Dim2i(this.dim.getOriginX(), this.dim.getOriginY(), result.map(integer -> (int) (integer * 2.5)).orElseGet(() -> (int) (this.dim.getWidth() * 0.35D)), this.dim.getHeight());
         this.frameSection = new Dim2i(this.tabSection.getLimitX(), this.dim.getOriginY(), this.dim.getWidth() - this.tabSection.getWidth(), this.dim.getHeight());
-        this.tabs.addAll(functions);
+        this.tabs.addAll(tabs);
 
         int tabSectionY = this.tabs.size() * 18;
         this.tabSectionCanScroll = tabSectionY > this.tabSection.getHeight();
@@ -140,6 +145,7 @@ public class TabFrame extends AbstractFrame {
 
             FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle().asString(), () -> this.setTab(tab));
             button.setSelected(this.selectedTab == tab);
+            ((FlatButtonWidgetExtended) button).setLeftAligned(true);
             this.children.add(button);
 
             offsetY += 18;
