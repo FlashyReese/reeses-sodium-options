@@ -6,6 +6,7 @@
   "client": [
     "sodium.MixinControlElement",
     "sodium.MixinCyclingControlElement",
+    "sodium.MixinFlatButtonWidget",
     "sodium.MixinSliderControlElement",
     "sodium.MixinSodiumOptionsGUI"
   ],
