@@ -6,7 +6,9 @@ import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.text.Text;
 
-public record Tab<T extends AbstractFrame>(Text title, T frame) implements TabOption<T> {
+import java.util.function.Function;
+
+public record Tab<T extends AbstractFrame>(Text title, Function<Dim2i, T> frameFunction) {
 
     public static Tab.Builder<?> createBuilder() {
         return new Tab.Builder<>();
@@ -16,31 +18,30 @@ public record Tab<T extends AbstractFrame>(Text title, T frame) implements TabOp
         return title;
     }
 
-    @Override
-    public T getFrame() {
-        return this.frame;
+    public Function<Dim2i, T> getFrameFunction() {
+        return this.frameFunction;
     }
 
     public static class Builder<T extends AbstractFrame> {
         private Text title;
-        private T frame;
+        private Function<Dim2i, T> frameFunction;
 
         public Builder<T> setTitle(Text title) {
             this.title = title;
             return this;
         }
 
-        public Builder<T> setFrame(T frame) {
-            this.frame = frame;
+        public Builder<T> setFrameFunction(Function<Dim2i, T> frameFunction) {
+            this.frameFunction = frameFunction;
             return this;
         }
 
         public Tab<T> build() {
-            return new Tab<T>(this.title, this.frame);
+            return new Tab<T>(this.title, this.frameFunction);
         }
 
-        public Tab<OptionPageScrollFrame> from(OptionPage page, Dim2i dim) {
-            return new Tab<>(page.getName(), OptionPageScrollFrame.createBuilder().setDimension(dim).shouldRenderOutline(false).setOptionPage(page).build());
+        public Tab<OptionPageScrollFrame> from(OptionPage page) {
+            return new Tab<>(page.getName(), dim2i -> OptionPageScrollFrame.createBuilder().setDimension(dim2i).setOptionPage(page).build());
         }
     }
 }
