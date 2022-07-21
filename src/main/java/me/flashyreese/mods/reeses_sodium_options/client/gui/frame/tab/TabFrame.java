@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab;
 
+import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
@@ -10,8 +11,8 @@ import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class TabFrame extends AbstractFrame {
 
@@ -21,12 +22,16 @@ public class TabFrame extends AbstractFrame {
     private final List<Tab<?>> tabs = new ArrayList<>();
     private ScrollBarComponent tabSectionScrollBar = null;
     private Tab<?> selectedTab;
+    private AbstractFrame selectedFrame;
 
-    public TabFrame(Dim2i dim, boolean renderOutline, List<Function<Dim2i, Tab<?>>> functions) {
+    public TabFrame(Dim2i dim, boolean renderOutline, List<Tab<?>> tabs) {
         super(dim, renderOutline);
-        this.tabSection = new Dim2i(this.dim.x(), this.dim.y(), (int) (this.dim.width() * 0.35D), this.dim.height());
+
+        Optional<Integer> result = tabs.stream().map(tab -> this.getStringWidth(tab.title().getString())).max(Integer::compareTo);
+
+        this.tabSection = new Dim2i(this.dim.x(), this.dim.y(), result.map(integer -> (int) (integer * 2.5)).orElseGet(() -> (int) (this.dim.width() * 0.35D)), this.dim.height());
         this.frameSection = new Dim2i(this.tabSection.getLimitX(), this.dim.y(), this.dim.width() - this.tabSection.width(), this.dim.height());
-        functions.forEach(function -> this.tabs.add(function.apply(this.frameSection)));
+        this.tabs.addAll(tabs);
 
         int tabSectionY = this.tabs.size() * 18;
         this.tabSectionCanScroll = tabSectionY > this.tabSection.height();
@@ -74,12 +79,12 @@ public class TabFrame extends AbstractFrame {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> {
             for (AbstractWidget widget : this.children) {
-                if (widget != this.selectedTab.getFrame()) {
+                if (widget != this.selectedFrame) {
                     widget.render(matrices, mouseX, mouseY, delta);
                 }
             }
         });
-        this.selectedTab.getFrame().render(matrices, mouseX, mouseY, delta);
+        this.selectedFrame.render(matrices, mouseX, mouseY, delta);
         if (this.tabSectionCanScroll) {
             this.tabSectionScrollBar.render(matrices, mouseX, mouseY, delta);
         }
@@ -140,6 +145,7 @@ public class TabFrame extends AbstractFrame {
 
             FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(tab));
             button.setSelected(this.selectedTab == tab);
+            ((FlatButtonWidgetExtended) button).setLeftAligned(true);
             this.children.add(button);
 
             offsetY += 18;
@@ -148,15 +154,16 @@ public class TabFrame extends AbstractFrame {
 
     private void rebuildTabFrame() {
         if (this.selectedTab == null) return;
-        AbstractFrame frame = this.selectedTab.getFrame();
+        AbstractFrame frame = this.selectedTab.getFrameFunction().apply(this.frameSection);
         if (frame != null) {
+            this.selectedFrame = frame;
             frame.buildFrame();
             this.children.add(frame);
         }
     }
 
     public static class Builder {
-        private final List<Function<Dim2i, Tab<?>>> functions = new ArrayList<>();
+        private final List<Tab<?>> functions = new ArrayList<>();
         private Dim2i dim;
         private boolean renderOutline;
 
@@ -170,7 +177,7 @@ public class TabFrame extends AbstractFrame {
             return this;
         }
 
-        public Builder addTabs(Consumer<List<Function<Dim2i, Tab<?>>>> tabs) {
+        public Builder addTabs(Consumer<List<Tab<?>>> tabs) {
             tabs.accept(this.functions);
             return this;
         }
