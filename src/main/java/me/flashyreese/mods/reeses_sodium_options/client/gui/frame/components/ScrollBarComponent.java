@@ -5,6 +5,8 @@ import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 
+import java.util.function.Consumer;
+
 public class ScrollBarComponent extends AbstractWidget {
 
     protected final Dim2i dim;
@@ -13,7 +15,7 @@ public class ScrollBarComponent extends AbstractWidget {
     private final int frameLength;
     private final int viewPortLength;
     private final int maxScrollBarOffset;
-    private final Runnable onSetOffset;
+    private final Consumer<Integer> onSetOffset;
     private int offset = 0;
     private boolean isDragging;
 
@@ -22,7 +24,7 @@ public class ScrollBarComponent extends AbstractWidget {
 
     private Dim2i extendedScrollArea = null;
 
-    public ScrollBarComponent(Dim2i trackArea, Mode mode, int frameLength, int viewPortLength, Runnable onSetOffset) {
+    public ScrollBarComponent(Dim2i trackArea, Mode mode, int frameLength, int viewPortLength, Consumer<Integer> onSetOffset) {
         this.dim = trackArea;
         this.mode = mode;
         this.frameLength = frameLength;
@@ -31,7 +33,7 @@ public class ScrollBarComponent extends AbstractWidget {
         this.maxScrollBarOffset = this.frameLength - this.viewPortLength;
     }
 
-    public ScrollBarComponent(Dim2i scrollBarArea, Mode mode, int frameLength, int viewPortLength, Runnable onSetOffset, Dim2i extendedTrackArea) {
+    public ScrollBarComponent(Dim2i scrollBarArea, Mode mode, int frameLength, int viewPortLength, Consumer<Integer> onSetOffset, Dim2i extendedTrackArea) {
         this(scrollBarArea, mode, frameLength, viewPortLength, onSetOffset);
         this.extendedScrollArea = extendedTrackArea;
     }
@@ -106,10 +108,10 @@ public class ScrollBarComponent extends AbstractWidget {
         return this.offset;
     }
 
-    private void setOffset(int value) {
+    public void setOffset(int value) {
         this.offset = MathHelper.clamp(value, 0, this.maxScrollBarOffset);
         this.updateThumbPosition();
-        this.onSetOffset.run();
+        this.onSetOffset.accept(this.offset);
     }
 
     protected void drawRectOutline(double x, double y, double w, double h, int color) {
