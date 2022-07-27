@@ -1,6 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
-import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
 import me.jellysquid.mods.sodium.client.gui.options.OptionImpact;
@@ -19,22 +19,16 @@ import org.apache.commons.lang3.Validate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OptionPageScrollFrame extends AbstractFrame {
+public class OptionPageFrame extends AbstractFrame {
     protected final OptionPage page;
-    private boolean canScroll;
-    private ScrollBarComponent scrollBar = null;
     private long lastTime = 0;
     private ControlElement<?> lastHoveredElement = null;
-
-    public OptionPageScrollFrame(Dim2i dim, boolean renderOutline, OptionPage page) {
+    
+    public OptionPageFrame(Dim2i dim, boolean renderOutline, OptionPage page) {
         super(dim, renderOutline);
         this.page = page;
         this.setupFrame();
         this.buildFrame();
-    }
-
-    public static Builder createBuilder() {
-        return new Builder();
     }
 
     public void setupFrame() {
@@ -54,10 +48,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
             }
         }
 
-        this.canScroll = this.dim.height() < y;
-        if (this.canScroll) {
-            this.scrollBar = new ScrollBarComponent(new Dim2i(this.dim.getLimitX() - 10, this.dim.y(), 10, this.dim.height()), ScrollBarComponent.Mode.VERTICAL, y, this.dim.height(), this::buildFrame, this.dim);
-        }
+        ((Dim2iExtended) ((Object) this.dim)).setHeight(y);
     }
 
     @Override
@@ -73,7 +64,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
             // Add each option's control element
             for (Option<?> option : group.getOptions()) {
                 Control<?> control = option.getControl();
-                ControlElement<?> element = control.createElement(new Dim2i(this.dim.x(), this.dim.y() + y - (this.canScroll ? this.scrollBar.getOffset() : 0), this.dim.width() - (this.canScroll ? 11 : 0), 18));
+                ControlElement<?> element = control.createElement(new Dim2i(this.dim.x(), this.dim.y() + y, this.dim.width(), 18));
                 this.children.add(element);
 
                 // Move down to the next option
@@ -82,10 +73,6 @@ public class OptionPageScrollFrame extends AbstractFrame {
 
             // Add padding beneath each option group
             y += 4;
-        }
-
-        if (this.canScroll) {
-            this.scrollBar.updateThumbPosition();
         }
 
         super.buildFrame();
@@ -97,12 +84,7 @@ public class OptionPageScrollFrame extends AbstractFrame {
                 .filter(ControlElement::isHovered)
                 .findFirst()
                 .orElse(null);
-        matrices.push();
-        this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> super.render(matrices, mouseX, mouseY, delta));
-        matrices.pop();
-        if (this.canScroll) {
-            this.scrollBar.render(matrices, mouseX, mouseY, delta);
-        }
+        super.render(matrices, mouseX, mouseY, delta);
         if (this.dim.containsCursor(mouseX, mouseY) && hoveredElement != null && this.lastHoveredElement == hoveredElement) {
             if (this.lastTime == 0) {
                 this.lastTime = System.currentTimeMillis();
@@ -158,50 +140,6 @@ public class OptionPageScrollFrame extends AbstractFrame {
         }
     }
 
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
-            return true;
-        }
-        if (this.canScroll) {
-            return this.scrollBar.mouseClicked(mouseX, mouseY, button);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
-            return true;
-        }
-        if (this.canScroll) {
-            return this.scrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (super.mouseReleased(mouseX, mouseY, button)) {
-            return true;
-        }
-        if (this.canScroll) {
-            return this.scrollBar.mouseReleased(mouseX, mouseY, button);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (super.mouseScrolled(mouseX, mouseY, amount)) {
-            return true;
-        }
-        if (this.canScroll) {
-            return this.scrollBar.mouseScrolled(mouseX, mouseY, amount);
-        }
-        return false;
-    }
-
     public static class Builder {
         private Dim2i dim;
         private boolean renderOutline;
@@ -222,10 +160,10 @@ public class OptionPageScrollFrame extends AbstractFrame {
             return this;
         }
 
-        public OptionPageScrollFrame build() {
+        public OptionPageFrame build() {
             Validate.notNull(this.dim, "Dimension must be specified");
 
-            return new OptionPageScrollFrame(this.dim, this.renderOutline, this.page);
+            return new OptionPageFrame(this.dim, this.renderOutline, this.page);
         }
     }
 }

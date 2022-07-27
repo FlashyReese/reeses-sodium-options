@@ -7,11 +7,13 @@ import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class TabFrame extends AbstractFrame {
@@ -23,8 +25,10 @@ public class TabFrame extends AbstractFrame {
     private ScrollBarComponent tabSectionScrollBar = null;
     private Tab<?> selectedTab;
     private AbstractFrame selectedFrame;
+    private final Runnable onSetTab;
+    private final AtomicReference<Text> tabSectionSelectedTab;
 
-    public TabFrame(Dim2i dim, boolean renderOutline, List<Tab<?>> tabs) {
+    public TabFrame(Dim2i dim, boolean renderOutline, List<Tab<?>> tabs, Runnable onSetTab, AtomicReference<Text> tabSectionSelectedTab, AtomicReference<Integer> tabSectionScrollBarOffset) {
         super(dim, renderOutline);
 
         Optional<Integer> result = tabs.stream().map(tab -> this.getStringWidth(tab.title().getString())).max(Integer::compareTo);
@@ -33,10 +37,21 @@ public class TabFrame extends AbstractFrame {
         this.frameSection = new Dim2i(this.tabSection.getLimitX(), this.dim.y(), this.dim.width() - this.tabSection.width(), this.dim.height());
         this.tabs.addAll(tabs);
 
+        this.onSetTab = onSetTab;
+
         int tabSectionY = this.tabs.size() * 18;
         this.tabSectionCanScroll = tabSectionY > this.tabSection.height();
         if (this.tabSectionCanScroll) {
-            this.tabSectionScrollBar = new ScrollBarComponent(new Dim2i(this.tabSection.getLimitX() - 11, this.tabSection.y(), 10, this.tabSection.height()), ScrollBarComponent.Mode.VERTICAL, tabSectionY, this.dim.height(), this::buildFrame, this.dim);
+            this.tabSectionScrollBar = new ScrollBarComponent(new Dim2i(this.tabSection.getLimitX() - 11, this.tabSection.y(), 10, this.tabSection.height()), ScrollBarComponent.Mode.VERTICAL, tabSectionY, this.dim.height(), offset -> {
+                this.buildFrame();
+                tabSectionScrollBarOffset.set(offset);
+            }, this.dim);
+            this.tabSectionScrollBar.setOffset(tabSectionScrollBarOffset.get());
+        }
+        this.tabSectionSelectedTab = tabSectionSelectedTab;
+
+        if (this.tabSectionSelectedTab.get() != null) {
+            this.selectedTab = this.tabs.stream().filter(tab -> tab.getTitle().getString().equals(this.tabSectionSelectedTab.get().getString())).findAny().get();
         }
 
         this.buildFrame();
@@ -48,7 +63,10 @@ public class TabFrame extends AbstractFrame {
 
     public void setTab(Tab<?> tab) {
         this.selectedTab = tab;
-
+        this.tabSectionSelectedTab.set(this.selectedTab.getTitle());
+        if (this.onSetTab != null) {
+            this.onSetTab.run();
+        }
         this.buildFrame();
     }
 
@@ -166,6 +184,9 @@ public class TabFrame extends AbstractFrame {
         private final List<Tab<?>> functions = new ArrayList<>();
         private Dim2i dim;
         private boolean renderOutline;
+        private Runnable onSetTab;
+        private AtomicReference<Text> tabSectionSelectedTab = new AtomicReference<>(null);
+        private AtomicReference<Integer> tabSectionScrollBarOffset = new AtomicReference<>(0);
 
         public Builder setDimension(Dim2i dim) {
             this.dim = dim;
@@ -182,10 +203,25 @@ public class TabFrame extends AbstractFrame {
             return this;
         }
 
+        public Builder onSetTab(Runnable onSetTab) {
+            this.onSetTab = onSetTab;
+            return this;
+        }
+
+        public Builder setTabSectionSelectedTab(AtomicReference<Text> tabSectionSelectedTab) {
+            this.tabSectionSelectedTab = tabSectionSelectedTab;
+            return this;
+        }
+
+        public Builder setTabSectionScrollBarOffset(AtomicReference<Integer> tabSectionScrollBarOffset) {
+            this.tabSectionScrollBarOffset = tabSectionScrollBarOffset;
+            return this;
+        }
+
         public TabFrame build() {
             Validate.notNull(this.dim, "Dimension must be specified");
 
-            return new TabFrame(this.dim, this.renderOutline, this.functions);
+            return new TabFrame(this.dim, this.renderOutline, this.functions, this.onSetTab, this.tabSectionSelectedTab, this.tabSectionScrollBarOffset);
         }
     }
 }
