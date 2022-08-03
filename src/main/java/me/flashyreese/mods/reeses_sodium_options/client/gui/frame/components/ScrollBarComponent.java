@@ -78,6 +78,14 @@ public class ScrollBarComponent extends AbstractWidget {
     }
 
     @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (button == 0) {
+            this.isDragging = false;
+        }
+        return false;
+    }
+
+    @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (this.isDragging) {
             int value;

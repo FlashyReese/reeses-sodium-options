@@ -30,17 +30,16 @@ public class TabFrame extends AbstractFrame {
 
     public TabFrame(Dim2i dim, boolean renderOutline, List<Tab<?>> tabs, Runnable onSetTab, AtomicReference<Text> tabSectionSelectedTab, AtomicReference<Integer> tabSectionScrollBarOffset) {
         super(dim, renderOutline);
+        this.tabs.addAll(tabs);
+        int tabSectionY = this.tabs.size() * 18;
+        this.tabSectionCanScroll = tabSectionY > this.dim.getHeight();
 
         Optional<Integer> result = tabs.stream().map(tab -> this.getStringWidth(tab.getTitle().getString())).max(Integer::compareTo);
 
-        this.tabSection = new Dim2i(this.dim.getOriginX(), this.dim.getOriginY(), result.map(integer -> (int) (integer * 2.5)).orElseGet(() -> (int) (this.dim.getWidth() * 0.35D)), this.dim.getHeight());
+        this.tabSection = new Dim2i(this.dim.getOriginX(), this.dim.getOriginY(), result.map(integer -> integer + (this.tabSectionCanScroll ? 32 : 24)).orElseGet(() -> (int) (this.dim.getWidth() * 0.35D)), this.dim.getHeight());
         this.frameSection = new Dim2i(this.tabSection.getLimitX(), this.dim.getOriginY(), this.dim.getWidth() - this.tabSection.getWidth(), this.dim.getHeight());
-        this.tabs.addAll(tabs);
 
         this.onSetTab = onSetTab;
-
-        int tabSectionY = this.tabs.size() * 18;
-        this.tabSectionCanScroll = tabSectionY > this.tabSection.getHeight();
         if (this.tabSectionCanScroll) {
             this.tabSectionScrollBar = new ScrollBarComponent(new Dim2i(this.tabSection.getLimitX() - 11, this.tabSection.getOriginY(), 10, this.tabSection.getHeight()), ScrollBarComponent.Mode.VERTICAL, tabSectionY, this.dim.getHeight(), offset -> {
                 this.buildFrame();
@@ -110,46 +109,22 @@ public class TabFrame extends AbstractFrame {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.dim.containsCursor(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, button)) {
-            return true;
-        }
-        if (this.tabSectionCanScroll) {
-            return this.tabSectionScrollBar.mouseClicked(mouseX, mouseY, button);
-        }
-        return false;
+        return (this.dim.containsCursor(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, button)) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseClicked(mouseX, mouseY, button));
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
-            return true;
-        }
-        if (this.tabSectionCanScroll) {
-            return this.tabSectionScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-        }
-        return false;
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY));
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (super.mouseReleased(mouseX, mouseY, button)) {
-            return true;
-        }
-        if (this.tabSectionCanScroll) {
-            return this.tabSectionScrollBar.mouseReleased(mouseX, mouseY, button);
-        }
-        return false;
+        return super.mouseReleased(mouseX, mouseY, button) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseReleased(mouseX, mouseY, button));
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (super.mouseScrolled(mouseX, mouseY, amount)) {
-            return true;
-        }
-        if (this.tabSectionCanScroll) {
-            return this.tabSectionScrollBar.mouseScrolled(mouseX, mouseY, amount);
-        }
-        return false;
+        return super.mouseScrolled(mouseX, mouseY, amount) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseScrolled(mouseX, mouseY, amount));
     }
 
     private void rebuildTabs() {

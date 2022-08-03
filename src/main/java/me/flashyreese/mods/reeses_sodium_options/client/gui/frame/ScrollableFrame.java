@@ -136,70 +136,22 @@ public class ScrollableFrame extends AbstractFrame {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
-            return true;
-        }
-        if (this.canScrollHorizontal) {
-            if (this.horizontalScrollBar.mouseClicked(mouseX, mouseY, button)) {
-                return true;
-            }
-        }
-        if (this.canScrollVertical) {
-            return this.verticalScrollBar.mouseClicked(mouseX, mouseY, button);
-        }
-        return false;
+        return super.mouseClicked(mouseX, mouseY, button) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseClicked(mouseX, mouseY, button)) || (this.canScrollVertical && this.verticalScrollBar.mouseClicked(mouseX, mouseY, button));
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
-            return true;
-        }
-        if (this.canScrollHorizontal) {
-            if (this.horizontalScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
-                this.horizontalScrollBar.mouseReleased(mouseX, mouseY, button);
-                return true;
-            }
-        }
-        if (this.canScrollVertical) {
-            if (this.verticalScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
-                this.verticalScrollBar.mouseReleased(mouseX, mouseY, button);
-                return true;
-            }
-        }
-        return false;
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) || (this.canScrollVertical && this.verticalScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY));
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (super.mouseReleased(mouseX, mouseY, button)) {
-            return true;
-        }
-        if (this.canScrollHorizontal) {
-            if (this.horizontalScrollBar.mouseReleased(mouseX, mouseY, button)) {
-                return true;
-            }
-        }
-        if (this.canScrollVertical) {
-            return this.verticalScrollBar.mouseReleased(mouseX, mouseY, button);
-        }
-        return false;
+        return super.mouseReleased(mouseX, mouseY, button) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseReleased(mouseX, mouseY, button)) || (this.canScrollVertical && this.verticalScrollBar.mouseReleased(mouseX, mouseY, button));
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (super.mouseScrolled(mouseX, mouseY, amount)) {
-            return true;
-        }
-        if (this.canScrollHorizontal) {
-            if (this.horizontalScrollBar.mouseScrolled(mouseX, mouseY, amount)) {
-                return true;
-            }
-        }
-        if (this.canScrollVertical) {
-            return this.verticalScrollBar.mouseScrolled(mouseX, mouseY, amount);
-        }
-        return false;
+        return super.mouseScrolled(mouseX, mouseY, amount) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseScrolled(mouseX, mouseY, amount)) || (this.canScrollVertical && this.verticalScrollBar.mouseScrolled(mouseX, mouseY, amount));
     }
 
     public static class Builder {
