@@ -23,9 +23,11 @@ public class OptionPageFrame extends AbstractFrame {
     protected final OptionPage page;
     private long lastTime = 0;
     private ControlElement<?> lastHoveredElement = null;
-
+    private final int lastDimLimitY;
+    
     public OptionPageFrame(Dim2i dim, boolean renderOutline, OptionPage page) {
         super(dim, renderOutline);
+        this.lastDimLimitY = dim.getLimitY();
         this.page = page;
         this.setupFrame();
         this.buildFrame();
@@ -121,7 +123,7 @@ public class OptionPageFrame extends AbstractFrame {
 
         int boxHeight = (tooltip.size() * 12) + boxPadding;
         int boxYLimit = boxY + boxHeight;
-        int boxYCutoff = this.dim.getLimitY();
+        int boxYCutoff = this.lastDimLimitY;//this.dim.getLimitY();
 
         // If the box is going to be cutoff on the Y-axis, move it back up the difference
         if (boxYLimit > boxYCutoff) {
