@@ -19,6 +19,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.VideoOptionsScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
@@ -28,9 +29,14 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 public class SodiumVideoOptionsScreen extends Screen {
+
+    private static final AtomicReference<Text> tabFrameSelectedTab = new AtomicReference<>(null);
+    private static final AtomicReference<Integer> tabFrameScrollBarOffset = new AtomicReference<>(0);
+    private static final AtomicReference<Integer> optionPageScrollBarOffset = new AtomicReference<>(0);
 
     private final Screen prevScreen;
     private final List<OptionPage> pages = new ArrayList<>();
@@ -104,7 +110,12 @@ public class SodiumVideoOptionsScreen extends Screen {
                 .addChild(parentDim -> TabFrame.createBuilder()
                         .setDimension(tabFrameDim)
                         .shouldRenderOutline(false)
-                        .addTabs(tabs -> this.pages.stream().filter(page -> !page.getGroups().isEmpty()).forEach(page -> tabs.add(Tab.createBuilder().from(page))))
+                        .setTabSectionScrollBarOffset(tabFrameScrollBarOffset)
+                        .setTabSectionSelectedTab(tabFrameSelectedTab)
+                        .addTabs(tabs -> this.pages.stream().filter(page -> !page.getGroups().isEmpty()).forEach(page -> tabs.add(Tab.createBuilder().from(page, optionPageScrollBarOffset))))
+                        .onSetTab(() -> {
+                            optionPageScrollBarOffset.set(0);
+                        })
                         .build()
                 );
     }

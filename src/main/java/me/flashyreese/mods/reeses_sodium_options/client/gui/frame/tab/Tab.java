@@ -1,12 +1,14 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.OptionPageScrollFrame;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.OptionPageFrame;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.ScrollableFrame;
 import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 public class Tab<T extends AbstractFrame> {
@@ -48,8 +50,8 @@ public class Tab<T extends AbstractFrame> {
             return new Tab<T>(this.title, this.frameFunction);
         }
 
-        public Tab<OptionPageScrollFrame> from(OptionPage page) {
-            return new Tab<>(new LiteralText(page.getName()), dim2i -> OptionPageScrollFrame.createBuilder().setDimension(dim2i).shouldRenderOutline(false).setOptionPage(page).build());
+        public Tab<ScrollableFrame> from(OptionPage page, AtomicReference<Integer> verticalScrollBarOffset) {
+            return new Tab<>(new LiteralText(page.getName()), dim2i -> ScrollableFrame.createBuilder().setDimension(dim2i).setFrame(new OptionPageFrame(new Dim2i(dim2i.getOriginX(), dim2i.getOriginY(), dim2i.getWidth(), dim2i.getHeight()), false, page)).setVerticalScrollBarOffset(verticalScrollBarOffset).build());
         }
     }
 }
