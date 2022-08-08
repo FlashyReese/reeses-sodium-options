@@ -9,6 +9,7 @@ import net.minecraft.client.util.math.Rect2i;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -27,6 +28,7 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
     @Final
     private int min;
 
+    @Unique
     private int max;
 
     @Shadow
