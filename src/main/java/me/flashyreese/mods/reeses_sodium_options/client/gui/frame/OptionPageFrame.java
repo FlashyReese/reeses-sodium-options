@@ -21,10 +21,10 @@ import java.util.List;
 
 public class OptionPageFrame extends AbstractFrame {
     protected final OptionPage page;
+    private final int lastDimLimitY;
     private long lastTime = 0;
     private ControlElement<?> lastHoveredElement = null;
-    private final int lastDimLimitY;
-    
+
     public OptionPageFrame(Dim2i dim, boolean renderOutline, OptionPage page) {
         super(dim, renderOutline);
         this.lastDimLimitY = dim.getLimitY();

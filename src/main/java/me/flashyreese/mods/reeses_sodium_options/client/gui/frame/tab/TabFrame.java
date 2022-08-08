@@ -22,11 +22,11 @@ public class TabFrame extends AbstractFrame {
     private final Dim2i tabSection;
     private final Dim2i frameSection;
     private final List<Tab<?>> tabs = new ArrayList<>();
+    private final Runnable onSetTab;
+    private final AtomicReference<Text> tabSectionSelectedTab;
     private ScrollBarComponent tabSectionScrollBar = null;
     private Tab<?> selectedTab;
     private AbstractFrame selectedFrame;
-    private final Runnable onSetTab;
-    private final AtomicReference<Text> tabSectionSelectedTab;
 
     public TabFrame(Dim2i dim, boolean renderOutline, List<Tab<?>> tabs, Runnable onSetTab, AtomicReference<Text> tabSectionSelectedTab, AtomicReference<Integer> tabSectionScrollBarOffset) {
         super(dim, renderOutline);
