@@ -3,9 +3,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -116,11 +114,7 @@ public class ScrollableFrame extends AbstractFrame {
             if (this.renderOutline) {
                 this.drawRectOutline(this.dim.getOriginX(), this.dim.getOriginY(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
             }
-            int scale = (int) MinecraftClient.getInstance().getWindow().getScaleFactor();
-            GL11.glScissor(this.viewPortDimension.getOriginX() * scale, MinecraftClient.getInstance().getWindow().getHeight() - this.viewPortDimension.getLimitY() * scale, this.viewPortDimension.getWidth() * scale, this.viewPortDimension.getHeight() * scale);
-            GL11.glEnable(GL11.GL_SCISSOR_TEST);
-            super.render(matrices, mouseX, mouseY, delta);
-            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+            this.applyScissor(this.viewPortDimension.getOriginX(), this.viewPortDimension.getOriginY(), this.viewPortDimension.getWidth(), this.viewPortDimension.getHeight(), () -> super.render(matrices, mouseX, mouseY, delta));
         } else {
             super.render(matrices, mouseX, mouseY, delta);
         }
