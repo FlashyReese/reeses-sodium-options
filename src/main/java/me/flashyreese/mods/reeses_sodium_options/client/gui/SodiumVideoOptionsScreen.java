@@ -60,8 +60,14 @@ public class SodiumVideoOptionsScreen extends Screen {
     protected BasicFrame.Builder parentFrameBuilder() {
         BasicFrame.Builder basicFrameBuilder;
 
-        Dim2i basicFrameDim = new Dim2i(0, 0, this.width, this.height);
-        Dim2i tabFrameDim = new Dim2i(basicFrameDim.width() / 20 / 2, basicFrameDim.height() / 4 / 2, basicFrameDim.width() - (basicFrameDim.width() / 20), basicFrameDim.height() / 4 * 3);
+        // Calculates if resolution exceeds 16:9 ratio, force 16:9
+        int newWidth = this.width;
+        if ((float) this.width / (float) this.height > 1.77777777778) {
+            newWidth = (int) (this.height * 1.77777777778);
+        }
+
+        Dim2i basicFrameDim = new Dim2i((this.width - newWidth) / 2, 0, newWidth, this.height);
+        Dim2i tabFrameDim = new Dim2i(basicFrameDim.x() + basicFrameDim.width() / 20 / 2, basicFrameDim.y() + basicFrameDim.height() / 4 / 2, basicFrameDim.width() - (basicFrameDim.width() / 20), basicFrameDim.height() / 4 * 3);
 
         Dim2i undoButtonDim = new Dim2i(tabFrameDim.getLimitX() - 203, tabFrameDim.getLimitY() + 5, 65, 20);
         Dim2i applyButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134, tabFrameDim.getLimitY() + 5, 65, 20);
