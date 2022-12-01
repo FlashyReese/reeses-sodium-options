@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(value = ControlElement.class, remap = false)
+@Mixin(ControlElement.class)
 public abstract class MixinControlElement extends AbstractWidget {
 
     @Shadow
