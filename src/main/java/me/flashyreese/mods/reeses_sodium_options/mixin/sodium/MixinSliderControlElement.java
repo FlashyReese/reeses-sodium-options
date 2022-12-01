@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(targets = "me.jellysquid.mods.sodium.client.gui.options.control.SliderControl$Button")
+@Mixin(targets = "me.jellysquid.mods.sodium.client.gui.options.control.SliderControl$Button", remap = false)
 public abstract class MixinSliderControlElement extends ControlElement<Integer> {
 
     @Shadow
