@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(value = FlatButtonWidget.class, remap = false)
+@Mixin(FlatButtonWidget.class)
 public abstract class MixinFlatButtonWidget extends AbstractWidget implements FlatButtonWidgetExtended {
 
     @Shadow
