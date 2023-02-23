@@ -42,9 +42,25 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
     @Shadow
     public abstract double getThumbPositionForValue(int value);
 
+    @Shadow
+    protected abstract void setValueFromMouse(double d);
+
     @Inject(method = "<init>", at = @At(value = "TAIL"))
     public void postInit(Option<Integer> option, Dim2i dim, int min, int max, int interval, ControlValueFormatter formatter, CallbackInfo ci) {
         this.max = max;
+    }
+
+    // Fixme: Reverts keyboard slider control hack but breaks sliders on RSO if removed :>
+    // I will need to add keyboard navigation support soon:tm: but it's not on my priority. Help wanted :>
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (this.option.isAvailable() && button == 0 && this.sliderBounds.contains((int) mouseX, (int) mouseY)) {
+            this.setValueFromMouse(mouseX);
+
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void setValueFromMouseScroll(double amount) {
