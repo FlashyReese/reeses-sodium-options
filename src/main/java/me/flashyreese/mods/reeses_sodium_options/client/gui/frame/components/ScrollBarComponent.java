@@ -54,6 +54,9 @@ public class ScrollBarComponent extends AbstractWidget {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.drawRectOutline(this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
         this.drawRect(this.scrollThumb.x(), this.scrollThumb.y(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
+        if (this.isFocused()) {
+            this.drawBorder(this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY());
+        }
     }
 
     @Override
@@ -170,12 +173,6 @@ public class ScrollBarComponent extends AbstractWidget {
         }
 
         return false;
-    }
-
-    @Override
-    public @Nullable GuiNavigationPath getNavigationPath(GuiNavigation navigation) {
-        System.out.println("working?");
-        return super.getNavigationPath(navigation);
     }
 
     public enum Mode {

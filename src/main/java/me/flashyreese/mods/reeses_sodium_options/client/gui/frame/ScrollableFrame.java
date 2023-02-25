@@ -101,10 +101,12 @@ public class ScrollableFrame extends AbstractFrame {
 
         if (this.canScrollHorizontal) {
             ((Dim2iExtended) ((Object) this.frame.dim)).setX(this.frameOrigin.x() - this.horizontalScrollBar.getOffset());
+            this.children.add(this.horizontalScrollBar);
         }
 
         if (this.canScrollVertical) {
             ((Dim2iExtended) ((Object) this.frame.dim)).setY(this.frameOrigin.y() - this.verticalScrollBar.getOffset());
+            this.children.add(this.verticalScrollBar);
         }
 
         this.frame.buildFrame();
@@ -154,7 +156,7 @@ public class ScrollableFrame extends AbstractFrame {
 
     @Override
     public @Nullable GuiNavigationPath getNavigationPath(GuiNavigation navigation) {
-        this.snapFocusedInViewport();
+        //this.snapFocusedInViewport();
         return super.getNavigationPath(navigation);
     }
 
