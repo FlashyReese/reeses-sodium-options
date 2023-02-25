@@ -2,8 +2,13 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components;
 
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
+import net.minecraft.client.gui.navigation.FocusedRect;
+import net.minecraft.client.gui.navigation.GuiNavigation;
+import net.minecraft.client.gui.navigation.GuiNavigationPath;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
@@ -134,6 +139,43 @@ public class ScrollBarComponent extends AbstractWidget {
             addQuad(vertices, x, y, x + 1, h, a, r, g, b);
             addQuad(vertices, w - 1, y, w, h, a, r, g, b);
         });
+    }
+
+    @Override
+    public FocusedRect getNavigationFocus() {
+        return new FocusedRect(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height());
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (!this.isFocused())
+            return false;
+
+        if (this.mode == Mode.VERTICAL) {
+            if (keyCode == InputUtil.GLFW_KEY_UP) {
+                this.setOffset(this.getOffset() - 6);
+                return true;
+            } else if (keyCode == InputUtil.GLFW_KEY_DOWN) {
+                this.setOffset(this.getOffset() + 6);
+                return true;
+            }
+        } else {
+            if (keyCode == InputUtil.GLFW_KEY_LEFT) {
+                this.setOffset(this.getOffset() - 6);
+                return true;
+            } else if (keyCode == InputUtil.GLFW_KEY_RIGHT) {
+                this.setOffset(this.getOffset() + 6);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public @Nullable GuiNavigationPath getNavigationPath(GuiNavigation navigation) {
+        System.out.println("working?");
+        return super.getNavigationPath(navigation);
     }
 
     public enum Mode {
