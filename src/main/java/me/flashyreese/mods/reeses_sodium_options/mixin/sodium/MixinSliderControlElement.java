@@ -1,9 +1,9 @@
 package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
+import me.flashyreese.mods.reeses_sodium_options.client.gui.SliderControlElementExtended;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatter;
-import me.jellysquid.mods.sodium.client.gui.options.control.SliderControl;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
@@ -16,11 +16,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(targets = "me.jellysquid.mods.sodium.client.gui.options.control.SliderControl$Button")
-public abstract class MixinSliderControlElement extends ControlElement<Integer> {
+public abstract class MixinSliderControlElement extends ControlElement<Integer> implements SliderControlElementExtended {
 
     @Shadow
     @Final
@@ -36,15 +35,29 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
     @Unique
     private int max;
 
+    @Unique
+    private boolean editMode;
+
     @Shadow
     @Final
     private Rect2i sliderBounds;
 
-    @Unique
-    private boolean editMode;
+    @Shadow
+    @Final
+    private int range;
 
     public MixinSliderControlElement(Option<Integer> option, Dim2i dim) {
         super(option, dim);
+    }
+
+    @Override
+    public boolean isEditMode() {
+        return this.editMode;
+    }
+
+    @Override
+    public void setEditMode(boolean editMode) {
+        this.editMode = editMode;
     }
 
     @Shadow
@@ -53,9 +66,8 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
     @Shadow
     protected abstract void setValueFromMouse(double d);
 
-    @Shadow public abstract int getIntValue();
-
-    @Shadow @Final private int range;
+    @Shadow
+    public abstract int getIntValue();
 
     @Inject(method = "<init>", at = @At(value = "TAIL"))
     public void postInit(Option<Integer> option, Dim2i dim, int min, int max, int interval, ControlValueFormatter formatter, CallbackInfo ci) {
@@ -82,9 +94,9 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
         int sliderWidth = this.sliderBounds.getWidth();
         int sliderHeight = this.sliderBounds.getHeight();
         this.thumbPosition = this.getThumbPositionForValue(this.option.getValue());
-        double thumbOffset = MathHelper.clamp((double)(this.getIntValue() - this.min) / (double)this.range * (double)sliderWidth, 0.0, sliderWidth);
-        double thumbX = (double)sliderX + thumbOffset - 2.0;
-        if (this.isFocused() && this.editMode) {
+        double thumbOffset = MathHelper.clamp((double) (this.getIntValue() - this.min) / (double) this.range * (double) sliderWidth, 0.0, sliderWidth);
+        double thumbX = (double) sliderX + thumbOffset - 2.0;
+        if (this.isFocused() && this.isEditMode()) {
             this.drawRect(thumbX - 1, sliderY - 1, thumbX + 5, sliderY + sliderHeight + 1, 0xFFFFFFFF);
         }
     }
@@ -94,11 +106,11 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
         if (!isFocused()) return false;
 
         if (keyCode == InputUtil.GLFW_KEY_ENTER) {
-            this.editMode = !this.editMode;
+            this.setEditMode(!this.isEditMode());;
             return true;
         }
 
-        if (this.editMode) {
+        if (this.isEditMode()) {
             if (keyCode == InputUtil.GLFW_KEY_LEFT) {
                 this.option.setValue(MathHelper.clamp(this.option.getValue() - interval, min, max));
                 return true;
