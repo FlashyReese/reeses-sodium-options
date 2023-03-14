@@ -2,8 +2,12 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
+import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
+import net.minecraft.client.gui.navigation.GuiNavigation;
+import net.minecraft.client.gui.navigation.GuiNavigationPath;
 import net.minecraft.client.util.math.MatrixStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -97,10 +101,12 @@ public class ScrollableFrame extends AbstractFrame {
 
         if (this.canScrollHorizontal) {
             ((Dim2iExtended) ((Object) this.frame.dim)).setX(this.frameOrigin.x() - this.horizontalScrollBar.getOffset());
+            this.children.add(this.horizontalScrollBar);
         }
 
         if (this.canScrollVertical) {
             ((Dim2iExtended) ((Object) this.frame.dim)).setY(this.frameOrigin.y() - this.verticalScrollBar.getOffset());
+            this.children.add(this.verticalScrollBar);
         }
 
         this.frame.buildFrame();
@@ -126,6 +132,32 @@ public class ScrollableFrame extends AbstractFrame {
         if (this.canScrollVertical) {
             this.verticalScrollBar.render(matrices, mouseX, mouseY, delta);
         }
+    }
+
+    // fixme: Ridiculous hack to snap to focused element, it also unfocuses the element for some unknown reason :>
+    // for the meanwhile this works until a proper solution is implemented.
+    // this shouldn't be hardcoded into scrollable frame
+    private void snapFocusedInViewport() {
+        if (this.frame.getFocused() instanceof ControlElement controlElement) {
+            Dim2i dim = controlElement.getDimensions();
+            if (this.canScrollVertical && !(dim.y() >= viewPortDimension.y() && dim.getLimitY() <= viewPortDimension.getLimitY())) {
+                int newOffset = this.verticalScrollBar.getOffset();
+                if (dim.y() < this.viewPortDimension.y()) {
+                    newOffset -= 23;
+                } else if (dim.getLimitY() > this.viewPortDimension.getLimitY()) {
+                    newOffset += 23; // widget size of 18 and 4 gap for groups
+                }
+
+                this.verticalScrollBar.setOffset(newOffset);
+                controlElement.setFocused(true);
+            }
+        }
+    }
+
+    @Override
+    public @Nullable GuiNavigationPath getNavigationPath(GuiNavigation navigation) {
+        //this.snapFocusedInViewport();
+        return super.getNavigationPath(navigation);
     }
 
     @Override

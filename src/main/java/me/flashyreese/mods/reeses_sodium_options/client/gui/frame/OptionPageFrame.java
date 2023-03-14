@@ -85,9 +85,12 @@ public class OptionPageFrame extends AbstractFrame {
         ControlElement<?> hoveredElement = this.controlElements.stream()
                 .filter(ControlElement::isHovered)
                 .findFirst()
-                .orElse(null);
+                .orElse(this.controlElements.stream()
+                        .filter(ControlElement::isFocused)
+                        .findFirst()
+                        .orElse(null));
         super.render(matrices, mouseX, mouseY, delta);
-        if (this.dim.containsCursor(mouseX, mouseY) && hoveredElement != null && this.lastHoveredElement == hoveredElement) {
+        if (hoveredElement != null && this.lastHoveredElement == hoveredElement && ((hoveredElement.isHovered() && hoveredElement.isMouseOver(mouseX, mouseY)) || hoveredElement.isFocused())) {
             if (this.lastTime == 0) {
                 this.lastTime = System.currentTimeMillis();
             }
