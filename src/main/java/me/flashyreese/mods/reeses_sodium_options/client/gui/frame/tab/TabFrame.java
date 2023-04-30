@@ -6,7 +6,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.Scr
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.Validate;
 
@@ -93,17 +93,17 @@ public class TabFrame extends AbstractFrame {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
         this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> {
             for (AbstractWidget widget : this.children) {
                 if (widget != this.selectedFrame) {
-                    widget.render(matrices, mouseX, mouseY, delta);
+                    widget.render(drawContext, mouseX, mouseY, delta);
                 }
             }
         });
-        this.selectedFrame.render(matrices, mouseX, mouseY, delta);
+        this.selectedFrame.render(drawContext, mouseX, mouseY, delta);
         if (this.tabSectionCanScroll) {
-            this.tabSectionScrollBar.render(matrices, mouseX, mouseY, delta);
+            this.tabSectionScrollBar.render(drawContext, mouseX, mouseY, delta);
         }
     }
 

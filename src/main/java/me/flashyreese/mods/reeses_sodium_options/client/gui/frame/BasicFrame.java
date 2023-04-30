@@ -2,7 +2,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
@@ -35,8 +35,8 @@ public class BasicFrame extends AbstractFrame {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
+        super.render(drawContext, mouseX, mouseY, delta);
     }
 
     public static class Builder {

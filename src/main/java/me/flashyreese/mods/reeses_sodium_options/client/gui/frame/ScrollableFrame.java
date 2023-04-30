@@ -4,9 +4,9 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.navigation.GuiNavigation;
 import net.minecraft.client.gui.navigation.GuiNavigationPath;
-import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -115,22 +115,22 @@ public class ScrollableFrame extends AbstractFrame {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
         if (this.canScrollHorizontal || this.canScrollVertical) {
             if (this.renderOutline) {
                 this.drawRectOutline(this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
             }
-            this.applyScissor(this.viewPortDimension.x(), this.viewPortDimension.y(), this.viewPortDimension.width(), this.viewPortDimension.height(), () -> super.render(matrices, mouseX, mouseY, delta));
+            this.applyScissor(this.viewPortDimension.x(), this.viewPortDimension.y(), this.viewPortDimension.width(), this.viewPortDimension.height(), () -> super.render(drawContext, mouseX, mouseY, delta));
         } else {
-            super.render(matrices, mouseX, mouseY, delta);
+            super.render(drawContext, mouseX, mouseY, delta);
         }
 
         if (this.canScrollHorizontal) {
-            this.horizontalScrollBar.render(matrices, mouseX, mouseY, delta);
+            this.horizontalScrollBar.render(drawContext, mouseX, mouseY, delta);
         }
 
         if (this.canScrollVertical) {
-            this.verticalScrollBar.render(matrices, mouseX, mouseY, delta);
+            this.verticalScrollBar.render(drawContext, mouseX, mouseY, delta);
         }
     }
 

@@ -4,7 +4,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExte
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,12 +23,12 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     @Unique
     private boolean leftAligned;
 
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/gui/widgets/FlatButtonWidget;drawString(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/text/Text;III)V"))
-    public void redirectDrawString(FlatButtonWidget instance, MatrixStack matrixStack, Text text, int x, int y, int color) {
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/gui/widgets/FlatButtonWidget;drawString(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/text/Text;III)V"))
+    public void redirectDrawString(FlatButtonWidget instance, DrawContext drawContext, Text text, int x, int y, int color) {
         if (this.leftAligned) {
-            this.drawString(matrixStack, text, this.dim.x() + 10, y, color);
+            this.drawString(drawContext, text, this.dim.x() + 10, y, color);
         } else {
-            this.drawString(matrixStack, text, x, y, color);
+            this.drawString(drawContext, text, x, y, color);
         }
     }
 

@@ -5,9 +5,9 @@ import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatter;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Rect2i;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Final;
@@ -88,7 +88,7 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
     }
 
     @Inject(method = "renderSlider", at = @At(value = "TAIL"))
-    public void rso$renderSlider(MatrixStack matrixStack, CallbackInfo ci) {
+    public void rso$renderSlider(DrawContext drawContext, CallbackInfo ci) {
         int sliderX = this.sliderBounds.getX();
         int sliderY = this.sliderBounds.getY();
         int sliderWidth = this.sliderBounds.getWidth();

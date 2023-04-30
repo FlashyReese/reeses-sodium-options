@@ -9,6 +9,7 @@ import me.jellysquid.mods.sodium.client.gui.options.control.Control;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
@@ -81,7 +82,7 @@ public class OptionPageFrame extends AbstractFrame {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
         ControlElement<?> hoveredElement = this.controlElements.stream()
                 .filter(ControlElement::isHovered)
                 .findFirst()
@@ -89,19 +90,19 @@ public class OptionPageFrame extends AbstractFrame {
                         .filter(ControlElement::isFocused)
                         .findFirst()
                         .orElse(null));
-        super.render(matrices, mouseX, mouseY, delta);
+        super.render(drawContext, mouseX, mouseY, delta);
         if (hoveredElement != null && this.lastHoveredElement == hoveredElement && ((hoveredElement.isHovered() && hoveredElement.isMouseOver(mouseX, mouseY)) || hoveredElement.isFocused())) {
             if (this.lastTime == 0) {
                 this.lastTime = System.currentTimeMillis();
             }
-            this.renderOptionTooltip(matrices, hoveredElement);
+            this.renderOptionTooltip(drawContext, hoveredElement);
         } else {
             this.lastTime = 0;
             this.lastHoveredElement = hoveredElement;
         }
     }
 
-    private void renderOptionTooltip(MatrixStack matrixStack, ControlElement<?> element) {
+    private void renderOptionTooltip(DrawContext drawContext, ControlElement<?> element) {
         if (this.lastTime + 500 > System.currentTimeMillis()) return;
 
         Dim2i dim = element.getDimensions();
@@ -141,7 +142,7 @@ public class OptionPageFrame extends AbstractFrame {
         this.drawRectOutline(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3);
 
         for (int i = 0; i < tooltip.size(); i++) {
-            MinecraftClient.getInstance().textRenderer.draw(matrixStack, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
+            drawContext.drawText(MinecraftClient.getInstance().textRenderer, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, false);
         }
     }
 
