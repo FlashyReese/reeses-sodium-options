@@ -138,18 +138,15 @@ public class OptionPageFrame extends AbstractFrame {
             boxY = dim.getLimitY();
         }
 
+        drawContext.getMatrices().push();
         drawContext.getMatrices().translate(0, 0, 90);
-        //this.drawRect(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
-        drawContext.fill(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
-        //this.drawRectOutline(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3);
-        drawContext.fill(boxX, boxY, boxX + boxWidth, boxY + 1, 0xFF94E4D3); // top
-        drawContext.fill(boxX, boxY + boxHeight - 1, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3); // bottom
-        drawContext.fill(boxX, boxY, boxX + 1, boxY + boxHeight, 0xFF94E4D3); // left
-        drawContext.fill(boxX + boxWidth - 1, boxY, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3); // right
+        this.drawRect(drawContext, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
+        this.drawBorder(drawContext, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3);
 
         for (int i = 0; i < tooltip.size(); i++) {
             drawContext.drawText(MinecraftClient.getInstance().textRenderer, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
         }
+        drawContext.getMatrices().pop();
     }
 
     public static class Builder {

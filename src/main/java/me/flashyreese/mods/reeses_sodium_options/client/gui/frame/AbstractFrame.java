@@ -47,7 +47,7 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
     @Override
     public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
         if (this.renderOutline) {
-            this.drawRectOutline(this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
+            this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
         }
         for (Drawable drawable : this.drawable) {
             drawable.render(drawContext, mouseX, mouseY, delta);
@@ -60,20 +60,6 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
                 (int) (width * scale), (int) (height * scale));
         action.run();
         RenderSystem.disableScissor();
-    }
-
-    protected void drawRectOutline(double x, double y, double w, double h, int color) {
-        final float a = (float) (color >> 24 & 255) / 255.0F;
-        final float r = (float) (color >> 16 & 255) / 255.0F;
-        final float g = (float) (color >> 8 & 255) / 255.0F;
-        final float b = (float) (color & 255) / 255.0F;
-
-        this.drawQuads(vertices -> {
-            addQuad(vertices, x, y, w, y + 1, a, r, g, b);
-            addQuad(vertices, x, h - 1, w, h, a, r, g, b);
-            addQuad(vertices, x, y, x + 1, h, a, r, g, b);
-            addQuad(vertices, w - 1, y, w, h, a, r, g, b);
-        });
     }
 
     @Override

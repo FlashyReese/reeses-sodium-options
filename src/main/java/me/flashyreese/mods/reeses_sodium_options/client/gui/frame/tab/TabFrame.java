@@ -34,7 +34,7 @@ public class TabFrame extends AbstractFrame {
         int tabSectionY = this.tabs.size() * 18;
         this.tabSectionCanScroll = tabSectionY > this.dim.height();
 
-        Optional<Integer> result = tabs.stream().map(tab -> this.getStringWidth(tab.title().getString())).max(Integer::compareTo);
+        Optional<Integer> result = tabs.stream().map(tab -> this.getStringWidth(tab.title())).max(Integer::compareTo);
 
         this.tabSection = new Dim2i(this.dim.x(), this.dim.y(), result.map(integer -> integer + (this.tabSectionCanScroll ? 32 : 24)).orElseGet(() -> (int) (this.dim.width() * 0.35D)), this.dim.height());
         this.frameSection = new Dim2i(this.tabSection.getLimitX(), this.dim.y(), this.dim.width() - this.tabSection.width(), this.dim.height());

@@ -49,10 +49,11 @@ public class ScrollBarComponent extends AbstractWidget {
 
     @Override
     public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
-        this.drawRectOutline(this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
-        this.drawRect(this.scrollThumb.x(), this.scrollThumb.y(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
+        this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
+        //this.drawRectOutline(this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
+        this.drawRect(drawContext, this.scrollThumb.x(), this.scrollThumb.y(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
         if (this.isFocused()) {
-            this.drawBorder(this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY());
+            this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), -1);
         }
     }
 
@@ -125,20 +126,6 @@ public class ScrollBarComponent extends AbstractWidget {
         this.offset = MathHelper.clamp(value, 0, this.maxScrollBarOffset);
         this.updateThumbPosition();
         this.onSetOffset.accept(this.offset);
-    }
-
-    protected void drawRectOutline(double x, double y, double w, double h, int color) {
-        final float a = (float) (color >> 24 & 255) / 255.0F;
-        final float r = (float) (color >> 16 & 255) / 255.0F;
-        final float g = (float) (color >> 8 & 255) / 255.0F;
-        final float b = (float) (color & 255) / 255.0F;
-
-        this.drawQuads(vertices -> {
-            addQuad(vertices, x, y, w, y + 1, a, r, g, b);
-            addQuad(vertices, x, h - 1, w, h, a, r, g, b);
-            addQuad(vertices, x, y, x + 1, h, a, r, g, b);
-            addQuad(vertices, w - 1, y, w, h, a, r, g, b);
-        });
     }
 
     @Override

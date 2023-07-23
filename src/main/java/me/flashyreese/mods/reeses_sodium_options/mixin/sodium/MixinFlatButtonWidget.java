@@ -32,12 +32,12 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
         }
     }
 
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/gui/widgets/FlatButtonWidget;drawRect(DDDDI)V", ordinal = 1))
-    public void redirectDrawRect(FlatButtonWidget instance, double x1, double y1, double x2, double y2, int color) {
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/gui/widgets/FlatButtonWidget;drawRect(Lnet/minecraft/client/gui/DrawContext;IIIII)V", ordinal = 1))
+    public void redirectDrawRect(FlatButtonWidget instance, DrawContext drawContext, int x1, int y1, int x2, int y2, int color) {
         if (this.leftAligned) {
-            this.drawRect(x1, this.dim.y(), x1 + 1, y2, color);
+            this.drawRect(drawContext, x1, this.dim.y(), x1 + 1, y2, color);
         } else {
-            this.drawRect(x1, y1, x2, y2, color);
+            this.drawRect(drawContext, x1, y1, x2, y2, color);
         }
     }
 

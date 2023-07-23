@@ -35,8 +35,8 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    //modImplementation "me.jellysquid.mods:sodium-fabric:0.4.10+build.219"
-    modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    modImplementation "me.jellysquid.mods:sodium-fabric:0.5.0+git.2b0f690"
+    //modImplementation "maven.modrinth:sodium:${project.sodium_version}"
     //modImplementation "maven.modrinth:iris:${project.iris_version}"
 
     //modRuntimeOnly "maven.modrinth:lazydfu:0.1.3"
