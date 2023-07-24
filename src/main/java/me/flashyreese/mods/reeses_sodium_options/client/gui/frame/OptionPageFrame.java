@@ -10,7 +10,6 @@ import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -21,14 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OptionPageFrame extends AbstractFrame {
+    protected final Dim2i originalDim;
     protected final OptionPage page;
-    private final int lastDimLimitY;
     private long lastTime = 0;
     private ControlElement<?> lastHoveredElement = null;
 
     public OptionPageFrame(Dim2i dim, boolean renderOutline, OptionPage page) {
         super(dim, renderOutline);
-        this.lastDimLimitY = dim.getLimitY();
+        this.originalDim = new Dim2i(dim.x(), dim.y(), dim.width(), dim.height());
         this.page = page;
         this.setupFrame();
         this.buildFrame();
@@ -91,7 +90,8 @@ public class OptionPageFrame extends AbstractFrame {
                         .findFirst()
                         .orElse(null));
         super.render(drawContext, mouseX, mouseY, delta);
-        if (hoveredElement != null && this.lastHoveredElement == hoveredElement && ((hoveredElement.isHovered() && hoveredElement.isMouseOver(mouseX, mouseY)) || hoveredElement.isFocused())) {
+        if (this.originalDim.containsCursor(mouseX, mouseY) && hoveredElement != null && this.lastHoveredElement == hoveredElement &&
+                ((hoveredElement.isHovered() && hoveredElement.isMouseOver(mouseX, mouseY)) || hoveredElement.isFocused())) {
             if (this.lastTime == 0) {
                 this.lastTime = System.currentTimeMillis();
             }
@@ -127,7 +127,7 @@ public class OptionPageFrame extends AbstractFrame {
 
         int boxHeight = (tooltip.size() * 12) + boxPadding;
         int boxYLimit = boxY + boxHeight;
-        int boxYCutoff = this.lastDimLimitY;//this.dim.getLimitY();
+        int boxYCutoff = this.originalDim.getLimitY();
 
         // If the box is going to be cutoff on the Y-axis, move it back up the difference
         if (boxYLimit > boxYCutoff) {
