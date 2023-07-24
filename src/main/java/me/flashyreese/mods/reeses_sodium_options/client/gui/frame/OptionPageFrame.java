@@ -33,6 +33,10 @@ public class OptionPageFrame extends AbstractFrame {
         this.buildFrame();
     }
 
+    public static Builder createBuilder() {
+        return new Builder();
+    }
+
     public void setupFrame() {
         this.children.clear();
         this.drawable.clear();
@@ -83,15 +87,18 @@ public class OptionPageFrame extends AbstractFrame {
     @Override
     public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
         ControlElement<?> hoveredElement = this.controlElements.stream()
+                .filter(controlElement -> ((Dim2iExtended) (Object) controlElement.getDimensions()).overlapWith(this.originalDim))
                 .filter(ControlElement::isHovered)
                 .findFirst()
                 .orElse(this.controlElements.stream()
+                        .filter(controlElement -> ((Dim2iExtended) (Object) controlElement.getDimensions()).overlapWith(this.originalDim))
                         .filter(ControlElement::isFocused)
                         .findFirst()
                         .orElse(null));
         super.render(drawContext, mouseX, mouseY, delta);
-        if (this.originalDim.containsCursor(mouseX, mouseY) && hoveredElement != null && this.lastHoveredElement == hoveredElement &&
-                ((hoveredElement.isHovered() && hoveredElement.isMouseOver(mouseX, mouseY)) || hoveredElement.isFocused())) {
+        if (hoveredElement != null && this.lastHoveredElement == hoveredElement &&
+                ((this.originalDim.containsCursor(mouseX, mouseY) && hoveredElement.isHovered() && hoveredElement.isMouseOver(mouseX, mouseY))
+                        || hoveredElement.isFocused())) {
             if (this.lastTime == 0) {
                 this.lastTime = System.currentTimeMillis();
             }
@@ -174,6 +181,7 @@ public class OptionPageFrame extends AbstractFrame {
 
         public OptionPageFrame build() {
             Validate.notNull(this.dim, "Dimension must be specified");
+            Validate.notNull(this.page, "Option Page must be specified");
 
             return new OptionPageFrame(this.dim, this.renderOutline, this.page);
         }
