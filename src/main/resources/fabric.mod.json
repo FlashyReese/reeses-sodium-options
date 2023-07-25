@@ -22,6 +22,9 @@
     "modmenu": {
       "parent": {
         "id": "sodium"
+      },
+      "links": {
+        "modmenu.discord": "https://discord.gg/MPHVG6MH4e"
       }
     }
   },

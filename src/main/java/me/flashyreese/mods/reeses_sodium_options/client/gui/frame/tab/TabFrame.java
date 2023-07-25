@@ -54,6 +54,9 @@ public class TabFrame extends AbstractFrame {
         }
 
         this.buildFrame();
+
+        // Let's build each frame, future note for anyone: do not move this line.
+        this.tabs.stream().filter(tab -> this.selectedTab != tab).forEach(tab -> tab.getFrameFunction().apply(this.frameSection));
     }
 
     public static Builder createBuilder() {
@@ -92,41 +95,6 @@ public class TabFrame extends AbstractFrame {
         super.buildFrame();
     }
 
-    @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> {
-            for (AbstractWidget widget : this.children) {
-                if (widget != this.selectedFrame) {
-                    widget.render(matrices, mouseX, mouseY, delta);
-                }
-            }
-        });
-        this.selectedFrame.render(matrices, mouseX, mouseY, delta);
-        if (this.tabSectionCanScroll) {
-            this.tabSectionScrollBar.render(matrices, mouseX, mouseY, delta);
-        }
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return (this.dim.containsCursor(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, button)) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseClicked(mouseX, mouseY, button));
-    }
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY));
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return super.mouseReleased(mouseX, mouseY, button) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseReleased(mouseX, mouseY, button));
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        return super.mouseScrolled(mouseX, mouseY, amount) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseScrolled(mouseX, mouseY, amount));
-    }
-
     private void rebuildTabs() {
         int offsetY = 0;
         for (Tab<?> tab : this.tabs) {
@@ -153,6 +121,41 @@ public class TabFrame extends AbstractFrame {
             frame.buildFrame();
             this.children.add(frame);
         }
+    }
+
+    @Override
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
+        this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> {
+            for (AbstractWidget widget : this.children) {
+                if (widget != this.selectedFrame) {
+                    widget.render(matrixStack, mouseX, mouseY, delta);
+                }
+            }
+        });
+        this.selectedFrame.render(matrixStack, mouseX, mouseY, delta);
+        if (this.tabSectionCanScroll) {
+            this.tabSectionScrollBar.render(matrixStack, mouseX, mouseY, delta);
+        }
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return (this.dim.containsCursor(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, button)) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseClicked(mouseX, mouseY, button));
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY));
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return super.mouseReleased(mouseX, mouseY, button) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseReleased(mouseX, mouseY, button));
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        return super.mouseScrolled(mouseX, mouseY, amount) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseScrolled(mouseX, mouseY, amount));
     }
 
     public static class Builder {
