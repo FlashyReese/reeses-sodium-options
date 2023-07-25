@@ -1,6 +1,7 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
 import me.jellysquid.mods.sodium.client.gui.options.OptionImpact;
@@ -55,6 +56,11 @@ public class OptionPageFrame extends AbstractFrame {
         }
 
         ((Dim2iExtended) ((Object) this.dim)).setHeight(y);
+        this.page.getGroups().forEach(group -> group.getOptions().forEach(option -> {
+            if (option instanceof OptionExtended optionExtended) {
+                optionExtended.setParentDimension(this.dim);
+            }
+        }));
     }
 
     @Override
