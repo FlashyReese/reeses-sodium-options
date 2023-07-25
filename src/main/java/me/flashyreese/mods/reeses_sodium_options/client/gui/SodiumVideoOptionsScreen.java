@@ -56,14 +56,18 @@ public class SodiumVideoOptionsScreen extends Screen {
 
     // Hackalicious! Rebuild UI
     public void rebuildUI() {
-        this.remove(this.frame);
-        this.init();
+        this.clearAndInit();
     }
 
     @Override
     protected void init() {
         this.frame = this.parentFrameBuilder().build();
         this.addDrawableChild(this.frame);
+
+        this.searchTextField.setFocused(!lastSearch.get().trim().isEmpty());
+        if (this.searchTextField.isFocused()) {
+            this.setFocused(this.searchTextField);
+        }
     }
 
     protected BasicFrame.Builder parentFrameBuilder() {
@@ -272,6 +276,8 @@ public class SodiumVideoOptionsScreen extends Screen {
 
     @Override
     public void close() {
+        lastSearch.set("");
+        lastSearchIndex.set(0);
         this.client.setScreen(this.prevScreen);
     }
 }

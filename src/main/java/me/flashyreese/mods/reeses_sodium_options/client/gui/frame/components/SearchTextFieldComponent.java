@@ -40,13 +40,12 @@ public class SearchTextFieldComponent extends AbstractWidget {
     protected int maxLength = 100;
     protected boolean visible = true;
     protected boolean editable = true;
-    private Predicate<String> textPredicate = Objects::nonNull;
+    private final Predicate<String> textPredicate = Objects::nonNull;
     private int firstCharacterIndex;
     private int selectionStart;
     private int selectionEnd;
     private Consumer<String> changedListener;
-    private BiFunction<String, Integer, OrderedText> renderTextProvider = (string, firstCharacterIndex) -> OrderedText.styledForwardsVisitedString(string, Style.EMPTY);
-
+    private final BiFunction<String, Integer, OrderedText> renderTextProvider = (string, firstCharacterIndex) -> OrderedText.styledForwardsVisitedString(string, Style.EMPTY);
 
     private final AtomicReference<Text> tabFrameSelectedTab;
     private final AtomicReference<Integer> tabFrameScrollBarOffset;
@@ -67,10 +66,13 @@ public class SearchTextFieldComponent extends AbstractWidget {
         this.sodiumVideoOptionsScreen = sodiumVideoOptionsScreen;
         this.lastSearch = lastSearch;
         this.lastSearchIndex = lastSearchIndex;
-        this.text = lastSearch.get();
-        if (!this.text.trim().isEmpty()) {
-            this.setCursorToEnd();
-            this.setFocused(true);
+        if (!lastSearch.get().trim().isEmpty()) {
+            this.write(lastSearch.get());
+            List<Option<?>> fuzzy = StringUtils.fuzzySearch(this.pages, this.text, 2);
+            fuzzy.stream()
+                    .filter(OptionExtended.class::isInstance)
+                    .map(OptionExtended.class::cast)
+                    .forEach(optionExtended -> optionExtended.setHighlight(true));
         }
     }
 
@@ -105,11 +107,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (!string.isEmpty() && bl && j < string.length()) {
             context.drawTextWithShadow(this.textRenderer, this.renderTextProvider.apply(string.substring(j), this.selectionStart), n, m, 0xFFFFFFFF);
         }
-        if (bl3) {
-            context.fill(RenderLayer.getGuiOverlay(), o, m - 1, o + 1, m + 1 + this.textRenderer.fontHeight, -3092272);
-        } else {
-            context.drawTextWithShadow(this.textRenderer, "_", o, m, 0xFFFFFFFF);
-        }
+        context.fill(RenderLayer.getGuiOverlay(), o, m - 1, o + 1, m + 1 + this.textRenderer.fontHeight, -3092272);
         if (k != j) {
             int p = l + this.textRenderer.getWidth(string.substring(0, k));
             this.drawSelectionHighlight(context, o, m - 1, p - 1, m + 1 + this.textRenderer.fontHeight);
@@ -151,44 +149,14 @@ public class SearchTextFieldComponent extends AbstractWidget {
         context.fill(RenderLayer.getGuiTextHighlight(), x1, y1, x2, y2, -16776961);
     }
 
-    public void setMaxLength(int maxLength) {
-        this.maxLength = maxLength;
-        if (this.text.length() > maxLength) {
-            this.text = this.text.substring(0, maxLength);
-            this.onChanged(this.text);
-        }
-    }
-
     private int getMaxLength() {
         return this.maxLength;
-    }
-
-    public String getText() {
-        return this.text;
-    }
-
-    public void setText(String text) {
-        if (this.textPredicate.test(text)) {
-            if (text.length() > this.maxLength) {
-                this.text = text.substring(0, this.maxLength);
-            } else {
-                this.text = text;
-            }
-
-            this.setCursorToEnd();
-            this.setSelectionEnd(this.selectionStart);
-            this.onChanged(text);
-        }
     }
 
     public String getSelectedText() {
         int i = Math.min(this.selectionStart, this.selectionEnd);
         int j = Math.max(this.selectionStart, this.selectionEnd);
         return this.text.substring(i, j);
-    }
-
-    public void setTextPredicate(Predicate<String> textPredicate) {
-        this.textPredicate = textPredicate;
     }
 
     public void write(String text) {
@@ -215,7 +183,6 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (this.changedListener != null) {
             this.changedListener.accept(newText);
         }
-
     }
 
     private void erase(int offset) {
@@ -363,6 +330,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         }
         if (SharedConstants.isValidChar(chr)) {
             if (this.editable) {
+                this.lastSearch.set(this.text.trim());
                 this.write(Character.toString(chr));
                 this.lastSearchIndex.set(0);
             }
@@ -376,19 +344,21 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (!this.isActive()) {
             return false;
         } else {
+            this.lastSearch.set(this.text.trim());
             if (this.editable) {
-                this.lastSearch.set(this.text.trim());
                 this.pages.forEach(page -> page
                         .getOptions()
                         .stream()
                         .filter(OptionExtended.class::isInstance)
                         .map(OptionExtended.class::cast)
                         .forEach(optionExtended -> optionExtended.setHighlight(false)));
-                List<Option<?>> fuzzy = StringUtils.fuzzySearch(this.pages, this.text, 2);
-                fuzzy.stream()
-                        .filter(OptionExtended.class::isInstance)
-                        .map(OptionExtended.class::cast)
-                        .forEach(optionExtended -> optionExtended.setHighlight(true));
+                if (!this.text.trim().isEmpty()) {
+                    List<Option<?>> fuzzy = StringUtils.fuzzySearch(this.pages, this.text, 2);
+                    fuzzy.stream()
+                            .filter(OptionExtended.class::isInstance)
+                            .map(OptionExtended.class::cast)
+                            .forEach(optionExtended -> optionExtended.setHighlight(true));
+                }
             }
             this.selecting = Screen.hasShiftDown();
             if (Screen.isSelectAll(keyCode)) {
@@ -436,6 +406,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                                             this.lastSearchIndex.set(value);
                                             this.tabFrameSelectedTab.set(page.getName());
                                             this.optionPageScrollBarOffset.set(offset);
+                                            this.setFocused(false);
                                             this.sodiumVideoOptionsScreen.rebuildUI();
                                             return true;
                                         }
