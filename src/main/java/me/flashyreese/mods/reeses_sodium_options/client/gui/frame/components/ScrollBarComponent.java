@@ -7,7 +7,6 @@ import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class ScrollBarComponent extends AbstractWidget {
@@ -20,7 +19,7 @@ public class ScrollBarComponent extends AbstractWidget {
     private final int frameLength;
     private final int viewPortLength;
     private final int maxScrollBarOffset;
-    private final BiConsumer<Integer, Integer> onSetOffset;
+    private final Consumer<Integer> onSetOffset;
     private int offset = 0;
     private boolean isDragging;
 
@@ -29,7 +28,7 @@ public class ScrollBarComponent extends AbstractWidget {
 
     private Dim2i extendedScrollArea = null;
 
-    public ScrollBarComponent(Dim2i trackArea, Mode mode, int frameLength, int viewPortLength, BiConsumer<Integer, Integer> onSetOffset) {
+    public ScrollBarComponent(Dim2i trackArea, Mode mode, int frameLength, int viewPortLength, Consumer<Integer> onSetOffset) {
         this.dim = trackArea;
         this.mode = mode;
         this.frameLength = frameLength;
@@ -38,7 +37,7 @@ public class ScrollBarComponent extends AbstractWidget {
         this.maxScrollBarOffset = this.frameLength - this.viewPortLength;
     }
 
-    public ScrollBarComponent(Dim2i scrollBarArea, Mode mode, int frameLength, int viewPortLength, BiConsumer<Integer, Integer> onSetOffset, Dim2i extendedTrackArea) {
+    public ScrollBarComponent(Dim2i scrollBarArea, Mode mode, int frameLength, int viewPortLength, Consumer<Integer> onSetOffset, Dim2i extendedTrackArea) {
         this(scrollBarArea, mode, frameLength, viewPortLength, onSetOffset);
         this.extendedScrollArea = extendedTrackArea;
     }
@@ -128,7 +127,7 @@ public class ScrollBarComponent extends AbstractWidget {
     public void setOffset(int value) {
         this.offset = MathHelper.clamp(value, 0, this.maxScrollBarOffset);
         this.updateThumbPosition();
-        this.onSetOffset.accept(this.offset, this.maxScrollBarOffset);
+        this.onSetOffset.accept(this.offset);
     }
 
     public void setOffsetFromCords(int x, int y) {

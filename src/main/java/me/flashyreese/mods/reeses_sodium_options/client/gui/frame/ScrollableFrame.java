@@ -23,13 +23,11 @@ public class ScrollableFrame extends AbstractFrame {
     private ScrollBarComponent horizontalScrollBar = null;
 
     public ScrollableFrame(Dim2i dim, AbstractFrame frame, boolean renderOutline,
-                           AtomicReference<Integer> verticalScrollBarOffset, AtomicReference<Integer> horizontalScrollBarOffset,
-                           AtomicReference<Integer> verticalScrollBarMaxOffset, AtomicReference<Integer> horizontalScrollBarMaxOffset,
-                           AtomicReference<Dim2i> frameDimensions) {
+                           AtomicReference<Integer> verticalScrollBarOffset, AtomicReference<Integer> horizontalScrollBarOffset) {
         super(dim, renderOutline);
         this.frame = frame;
         this.frameOrigin = new Dim2i(frame.dim.x(), frame.dim.y(), 0, 0);
-        this.setupFrame(verticalScrollBarOffset, horizontalScrollBarOffset, verticalScrollBarMaxOffset, horizontalScrollBarMaxOffset, frameDimensions);
+        this.setupFrame(verticalScrollBarOffset, horizontalScrollBarOffset);
         this.buildFrame();
     }
 
@@ -37,9 +35,7 @@ public class ScrollableFrame extends AbstractFrame {
         return new Builder();
     }
 
-    public void setupFrame(AtomicReference<Integer> verticalScrollBarOffset, AtomicReference<Integer> horizontalScrollBarOffset,
-                           AtomicReference<Integer> verticalScrollBarMaxOffset, AtomicReference<Integer> horizontalScrollBarMaxOffset,
-                           AtomicReference<Dim2i> frameDimensions) {
+    public void setupFrame(AtomicReference<Integer> verticalScrollBarOffset, AtomicReference<Integer> horizontalScrollBarOffset) {
         int maxWidth = 0;
         int maxHeight = 0;
         if (!((Dim2iExtended) ((Object) this.dim)).canFitDimension(this.frame.dim)) {
@@ -74,20 +70,17 @@ public class ScrollableFrame extends AbstractFrame {
             ((Dim2iExtended) ((Object) this.frame.dim)).setWidth(this.frame.dim.width() - 11); // fixme: don't mutate rather
         }
 
-        frameDimensions.set(this.frame.dim);
         if (this.canScrollHorizontal) {
-            this.horizontalScrollBar = new ScrollBarComponent(new Dim2i(this.viewPortDimension.x(), this.viewPortDimension.getLimitY() + 1, this.viewPortDimension.width(), 10), ScrollBarComponent.Mode.HORIZONTAL, this.frame.dim.width(), this.viewPortDimension.width(), (offset, maxOffset) -> {
+            this.horizontalScrollBar = new ScrollBarComponent(new Dim2i(this.viewPortDimension.x(), this.viewPortDimension.getLimitY() + 1, this.viewPortDimension.width(), 10), ScrollBarComponent.Mode.HORIZONTAL, this.frame.dim.width(), this.viewPortDimension.width(), offset -> {
                 this.buildFrame();
                 horizontalScrollBarOffset.set(offset);
-                horizontalScrollBarMaxOffset.set(maxOffset);
             });
             this.horizontalScrollBar.setOffset(horizontalScrollBarOffset.get());
         }
         if (this.canScrollVertical) {
-            this.verticalScrollBar = new ScrollBarComponent(new Dim2i(this.viewPortDimension.getLimitX() + 1, this.viewPortDimension.y(), 10, this.viewPortDimension.height()), ScrollBarComponent.Mode.VERTICAL, this.frame.dim.height(), this.viewPortDimension.height(), (offset, maxOffset) -> {
+            this.verticalScrollBar = new ScrollBarComponent(new Dim2i(this.viewPortDimension.getLimitX() + 1, this.viewPortDimension.y(), 10, this.viewPortDimension.height()), ScrollBarComponent.Mode.VERTICAL, this.frame.dim.height(), this.viewPortDimension.height(), offset -> {
                 this.buildFrame();
                 verticalScrollBarOffset.set(offset);
-                verticalScrollBarMaxOffset.set(maxOffset);
             }, this.viewPortDimension);
             this.verticalScrollBar.setOffset(verticalScrollBarOffset.get());
         }
@@ -194,9 +187,6 @@ public class ScrollableFrame extends AbstractFrame {
         private AbstractFrame frame = null;
         private AtomicReference<Integer> verticalScrollBarOffset = new AtomicReference<>(0);
         private AtomicReference<Integer> horizontalScrollBarOffset = new AtomicReference<>(0);
-        private AtomicReference<Integer> verticalScrollBarMaxOffset = new AtomicReference<>(0);
-        private AtomicReference<Integer> horizontalScrollBarMaxOffset = new AtomicReference<>(0);
-        private AtomicReference<Dim2i> frameDimensions = new AtomicReference<>(null);
 
         public Builder setDimension(Dim2i dim) {
             this.dim = dim;
@@ -218,28 +208,13 @@ public class ScrollableFrame extends AbstractFrame {
             return this;
         }
 
-        public Builder setVerticalScrollBarMaxOffset(AtomicReference<Integer> verticalScrollBarMaxOffset) {
-            this.verticalScrollBarMaxOffset = verticalScrollBarMaxOffset;
-            return this;
-        }
-
-        public Builder setHorizontalScrollBarMaxOffset(AtomicReference<Integer> horizontalScrollBarMaxOffset) {
-            this.horizontalScrollBarMaxOffset = horizontalScrollBarMaxOffset;
-            return this;
-        }
-
-        public Builder setFrameDimensions(AtomicReference<Dim2i> frameDimensions) {
-            this.frameDimensions = frameDimensions;
-            return this;
-        }
-
         public Builder setFrame(AbstractFrame frame) {
             this.frame = frame;
             return this;
         }
 
         public ScrollableFrame build() {
-            return new ScrollableFrame(this.dim, this.frame, this.renderOutline, this.verticalScrollBarOffset, this.horizontalScrollBarOffset, this.verticalScrollBarMaxOffset, this.horizontalScrollBarMaxOffset, this.frameDimensions);
+            return new ScrollableFrame(this.dim, this.frame, this.renderOutline, this.verticalScrollBarOffset, this.horizontalScrollBarOffset);
         }
     }
 }

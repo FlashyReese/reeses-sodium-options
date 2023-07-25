@@ -35,8 +35,6 @@ public class SodiumVideoOptionsScreen extends Screen {
     private static final AtomicReference<Text> tabFrameSelectedTab = new AtomicReference<>(null);
     private static final AtomicReference<Integer> tabFrameScrollBarOffset = new AtomicReference<>(0);
     private static final AtomicReference<Integer> optionPageScrollBarOffset = new AtomicReference<>(0);
-    private static final AtomicReference<Integer> optionPageScrollBarMaxOffset = new AtomicReference<>(0);
-    private static final AtomicReference<Dim2i> optionPageDimensions = new AtomicReference<>(null);
 
     private final Screen prevScreen;
     private final List<OptionPage> pages = new ArrayList<>();
@@ -125,7 +123,7 @@ public class SodiumVideoOptionsScreen extends Screen {
             basicFrameBuilder.addChild(dim -> shaderPackButton);
         }
 
-        this.searchTextField = new TextFieldComponent(searchTextFieldDim, this.pages, optionPageScrollBarOffset, optionPageScrollBarMaxOffset, optionPageDimensions, this);
+        this.searchTextField = new TextFieldComponent(searchTextFieldDim, this.pages, tabFrameSelectedTab, tabFrameScrollBarOffset, optionPageScrollBarOffset, tabFrameDim.height(), this);
 
         basicFrameBuilder.addChild(dim -> this.searchTextField);
 
@@ -149,7 +147,7 @@ public class SodiumVideoOptionsScreen extends Screen {
                         .addTabs(tabs -> this.pages
                                 .stream()
                                 .filter(page -> !page.getGroups().isEmpty())
-                                .forEach(page -> tabs.add(Tab.createBuilder().from(page, optionPageScrollBarOffset, optionPageScrollBarMaxOffset, optionPageDimensions)))
+                                .forEach(page -> tabs.add(Tab.createBuilder().from(page, optionPageScrollBarOffset)))
                         )
                         .onSetTab(() -> {
                             optionPageScrollBarOffset.set(0);

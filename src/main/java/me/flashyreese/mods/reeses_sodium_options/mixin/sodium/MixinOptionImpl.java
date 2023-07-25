@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(OptionImpl.class)
 public class MixinOptionImpl implements OptionExtended {
+    private Dim2i parent;
     private Dim2i dim2i;
     private boolean highlight;
 
@@ -28,5 +29,15 @@ public class MixinOptionImpl implements OptionExtended {
     @Override
     public Dim2i getDim2i() {
         return this.dim2i;
+    }
+
+    @Override
+    public void setParentDimension(Dim2i parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public Dim2i getParentDimension() {
+        return this.parent;
     }
 }

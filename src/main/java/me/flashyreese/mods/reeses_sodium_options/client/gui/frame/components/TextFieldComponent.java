@@ -15,6 +15,7 @@ import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.navigation.GuiNavigation;
 import net.minecraft.client.gui.navigation.GuiNavigationPath;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
@@ -40,17 +41,19 @@ public class TextFieldComponent extends AbstractWidget {
     private int selectionStart;
     private int selectionEnd;
     private Consumer<String> changedListener;
+    private final AtomicReference<Text> tabFrameSelectedTab;
+    private final AtomicReference<Integer> tabFrameScrollBarOffset;
     private final AtomicReference<Integer> optionPageScrollBarOffset;
-    private final AtomicReference<Integer> optionPageScrollBarMaxOffset;
-    private final AtomicReference<Dim2i> optionPageDimensions;
+    private final int tabDimHeight;
     private final SodiumVideoOptionsScreen sodiumVideoOptionsScreen;
 
-    public TextFieldComponent(Dim2i dim, List<OptionPage> pages, AtomicReference<Integer> optionPageScrollBarOffset, AtomicReference<Integer> optionPageScrollBarMaxOffset, AtomicReference<Dim2i> optionPageDimensions, SodiumVideoOptionsScreen sodiumVideoOptionsScreen) {
+    public TextFieldComponent(Dim2i dim, List<OptionPage> pages, AtomicReference<Text> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen) {
         this.dim = dim;
         this.pages = pages;
+        this.tabFrameSelectedTab = tabFrameSelectedTab;
+        this.tabFrameScrollBarOffset = tabFrameScrollBarOffset;
         this.optionPageScrollBarOffset = optionPageScrollBarOffset;
-        this.optionPageScrollBarMaxOffset = optionPageScrollBarMaxOffset;
-        this.optionPageDimensions = optionPageDimensions;
+        this.tabDimHeight = tabDimHeight;
         this.sodiumVideoOptionsScreen = sodiumVideoOptionsScreen;
     }
 
@@ -319,11 +322,15 @@ public class TextFieldComponent extends AbstractWidget {
                         if (this.editable) {
                             for (OptionPage page : this.pages) {
                                 for (Option<?> option : page.getOptions()) {
-                                    if (option instanceof OptionExtended optionExtended && optionExtended.isHighlight() && this.optionPageDimensions.get() != null) {
+                                    if (option instanceof OptionExtended optionExtended && optionExtended.isHighlight() && optionExtended.getParentDimension() != null) {
                                         Dim2i optionDim = optionExtended.getDim2i();
-                                        int input =  optionDim.y() - (this.optionPageDimensions.get().y() - optionDim.height());
-                                        int offset = input * this.optionPageScrollBarMaxOffset.get() / this.optionPageDimensions.get().height();
+                                        Dim2i parentDim = optionExtended.getParentDimension();
+                                        int maxOffset = parentDim.height() - this.tabDimHeight;
+                                        int input = optionDim.y() - parentDim.y();
+                                        int inputOffset = input + optionDim.height() == parentDim.height() ? parentDim.height() : input;
+                                        int offset = inputOffset * maxOffset / parentDim.height();
 
+                                        this.tabFrameSelectedTab.set(page.getName());
                                         this.optionPageScrollBarOffset.set(offset);
                                         this.sodiumVideoOptionsScreen.reinit();
                                         return true;

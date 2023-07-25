@@ -10,4 +10,8 @@ public interface OptionExtended {
     void setDim2i(Dim2i dim2i);
 
     Dim2i getDim2i();
+
+    void setParentDimension(Dim2i dim2i);
+
+    Dim2i getParentDimension();
 }

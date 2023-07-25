@@ -41,7 +41,7 @@ public class TabFrame extends AbstractFrame {
 
         this.onSetTab = onSetTab;
         if (this.tabSectionCanScroll) {
-            this.tabSectionScrollBar = new ScrollBarComponent(new Dim2i(this.tabSection.getLimitX() - 11, this.tabSection.y(), 10, this.tabSection.height()), ScrollBarComponent.Mode.VERTICAL, tabSectionY, this.dim.height(), (offset, maxOffset) -> {
+            this.tabSectionScrollBar = new ScrollBarComponent(new Dim2i(this.tabSection.getLimitX() - 11, this.tabSection.y(), 10, this.tabSection.height()), ScrollBarComponent.Mode.VERTICAL, tabSectionY, this.dim.height(), offset -> {
                 this.buildFrame();
                 tabSectionScrollBarOffset.set(offset);
             }, this.dim);
@@ -52,6 +52,9 @@ public class TabFrame extends AbstractFrame {
         if (this.tabSectionSelectedTab.get() != null) {
             this.selectedTab = this.tabs.stream().filter(tab -> tab.getTitle().getString().equals(this.tabSectionSelectedTab.get().getString())).findAny().get();
         }
+
+        // Let's build each frame
+        // this.tabs.forEach(tab -> tab.getFrameFunction().apply(this.frameSection));
 
         this.buildFrame();
     }
@@ -92,6 +95,34 @@ public class TabFrame extends AbstractFrame {
         super.buildFrame();
     }
 
+    private void rebuildTabs() {
+        int offsetY = 0;
+        for (Tab<?> tab : this.tabs) {
+            int x = this.tabSection.x();
+            int y = this.tabSection.y() + offsetY - (this.tabSectionCanScroll ? this.tabSectionScrollBar.getOffset() : 0);
+            int width = this.tabSection.width() - (this.tabSectionCanScroll ? 12 : 4);
+            int height = 18;
+            Dim2i tabDim = new Dim2i(x, y, width, height);
+
+            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(tab));
+            button.setSelected(this.selectedTab == tab);
+            ((FlatButtonWidgetExtended) button).setLeftAligned(true);
+            this.children.add(button);
+
+            offsetY += 18;
+        }
+    }
+
+    private void rebuildTabFrame() {
+        if (this.selectedTab == null) return;
+        AbstractFrame frame = this.selectedTab.getFrameFunction().apply(this.frameSection);
+        if (frame != null) {
+            this.selectedFrame = frame;
+            frame.buildFrame();
+            this.children.add(frame);
+        }
+    }
+
     @Override
     public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
         this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> {
@@ -125,34 +156,6 @@ public class TabFrame extends AbstractFrame {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         return super.mouseScrolled(mouseX, mouseY, amount) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseScrolled(mouseX, mouseY, amount));
-    }
-
-    private void rebuildTabs() {
-        int offsetY = 0;
-        for (Tab<?> tab : this.tabs) {
-            int x = this.tabSection.x();
-            int y = this.tabSection.y() + offsetY - (this.tabSectionCanScroll ? this.tabSectionScrollBar.getOffset() : 0);
-            int width = this.tabSection.width() - (this.tabSectionCanScroll ? 12 : 4);
-            int height = 18;
-            Dim2i tabDim = new Dim2i(x, y, width, height);
-
-            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(tab));
-            button.setSelected(this.selectedTab == tab);
-            ((FlatButtonWidgetExtended) button).setLeftAligned(true);
-            this.children.add(button);
-
-            offsetY += 18;
-        }
-    }
-
-    private void rebuildTabFrame() {
-        if (this.selectedTab == null) return;
-        AbstractFrame frame = this.selectedTab.getFrameFunction().apply(this.frameSection);
-        if (frame != null) {
-            this.selectedFrame = frame;
-            frame.buildFrame();
-            this.children.add(frame);
-        }
     }
 
     public static class Builder {
