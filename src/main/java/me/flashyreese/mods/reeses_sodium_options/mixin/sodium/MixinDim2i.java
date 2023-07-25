@@ -60,4 +60,9 @@ public abstract class MixinDim2i implements Dim2iExtended {
     public boolean canFitDimension(Dim2i anotherDim) {
         return this.x <= anotherDim.x() && this.y <= anotherDim.y() && this.getLimitX() >= anotherDim.getLimitX() && this.getLimitY() >= anotherDim.getLimitY();
     }
+
+    @Override
+    public boolean overlapWith(Dim2i other) {
+        return this.x < other.getLimitX() && this.getLimitX() > other.x() && this.y < other.getLimitY() && this.getLimitY() > other.y();
+    }
 }
