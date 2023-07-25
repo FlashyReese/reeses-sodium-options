@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class SearchTextFieldComponent extends AbstractWidget {
@@ -52,7 +51,6 @@ public class SearchTextFieldComponent extends AbstractWidget {
     private int firstCharacterIndex;
     private int selectionStart;
     private int selectionEnd;
-    private Consumer<String> changedListener;
 
     public SearchTextFieldComponent(Dim2i dim, List<OptionPage> pages, AtomicReference<Text> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen, AtomicReference<String> lastSearch, AtomicReference<Integer> lastSearchIndex) {
         this.dim = dim;
@@ -92,7 +90,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         boolean bl3 = this.selectionStart < this.text.length() || this.text.length() >= this.getMaxLength();
         int o = n;
         if (!bl) {
-            o = j > 0 ? l + this.dim.width() : l;
+            o = j > 0 ? l + this.dim.width() - 12 : l;
         } else if (bl3) {
             --o;
             --n;
@@ -122,6 +120,12 @@ public class SearchTextFieldComponent extends AbstractWidget {
         this.setCursor(this.textRenderer.trimToWidth(string, i).length() + this.firstCharacterIndex);
 
         this.setFocused(this.dim.containsCursor(mouseX, mouseY));
+        this.pages.forEach(page -> page
+                .getOptions()
+                .stream()
+                .filter(OptionExtended.class::isInstance)
+                .map(OptionExtended.class::cast)
+                .forEach(optionExtended -> optionExtended.setSelected(false)));
         return this.isFocused();
     }
 
@@ -157,6 +161,8 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     public void write(String text) {
+
+
         int i = Math.min(this.selectionStart, this.selectionEnd);
         int j = Math.max(this.selectionStart, this.selectionEnd);
         int k = this.maxLength - this.text.length() - (i - j);
@@ -177,8 +183,22 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     private void onChanged(String newText) {
-        if (this.changedListener != null) {
-            this.changedListener.accept(newText);
+        this.pages.forEach(page -> page
+                .getOptions()
+                .stream()
+                .filter(OptionExtended.class::isInstance)
+                .map(OptionExtended.class::cast)
+                .forEach(optionExtended -> optionExtended.setHighlight(false)));
+
+        this.lastSearch.set(newText.trim());
+        if (this.editable) {
+            if (!newText.trim().isEmpty()) {
+                List<Option<?>> fuzzy = StringUtils.fuzzySearch(this.pages, newText, 2);
+                fuzzy.stream()
+                        .filter(OptionExtended.class::isInstance)
+                        .map(OptionExtended.class::cast)
+                        .forEach(optionExtended -> optionExtended.setHighlight(true));
+            }
         }
     }
 
@@ -214,6 +234,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                     if (this.textPredicate.test(string)) {
                         this.text = string;
                         this.setCursor(j);
+                        this.onChanged(this.text);
                     }
                 }
             }
@@ -338,25 +359,15 @@ public class SearchTextFieldComponent extends AbstractWidget {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        this.pages.forEach(page2 -> page2
+                .getOptions()
+                .stream()
+                .filter(OptionExtended.class::isInstance)
+                .map(OptionExtended.class::cast)
+                .forEach(optionExtended2 -> optionExtended2.setSelected(false)));
         if (!this.isActive()) {
             return false;
         } else {
-            this.lastSearch.set(this.text.trim());
-            if (this.editable) {
-                this.pages.forEach(page -> page
-                        .getOptions()
-                        .stream()
-                        .filter(OptionExtended.class::isInstance)
-                        .map(OptionExtended.class::cast)
-                        .forEach(optionExtended -> optionExtended.setHighlight(false)));
-                if (!this.text.trim().isEmpty()) {
-                    List<Option<?>> fuzzy = StringUtils.fuzzySearch(this.pages, this.text, 2);
-                    fuzzy.stream()
-                            .filter(OptionExtended.class::isInstance)
-                            .map(OptionExtended.class::cast)
-                            .forEach(optionExtended -> optionExtended.setHighlight(true));
-                }
-            }
             this.selecting = Screen.hasShiftDown();
             if (Screen.isSelectAll(keyCode)) {
                 this.setCursorToEnd();
@@ -383,8 +394,6 @@ public class SearchTextFieldComponent extends AbstractWidget {
                     case GLFW.GLFW_KEY_ENTER -> {
                         if (this.editable) {
                             int count = 0;
-
-                            this.pages.forEach(page2 -> page2.getOptions().stream().filter(OptionExtended.class::isInstance).map(OptionExtended.class::cast).forEach(optionExtended -> optionExtended.setSelected(false)));
                             for (OptionPage page : this.pages) {
                                 for (Option<?> option : page.getOptions()) {
                                     if (option instanceof OptionExtended optionExtended && optionExtended.isHighlight() && optionExtended.getParentDimension() != null) {
@@ -398,12 +407,13 @@ public class SearchTextFieldComponent extends AbstractWidget {
 
 
                                             int total = this.pages.stream().mapToInt(page2 -> Math.toIntExact(page2.getOptions().stream().filter(OptionExtended.class::isInstance).map(OptionExtended.class::cast).filter(OptionExtended::isHighlight).count())).sum();
+
                                             int value = total == this.lastSearchIndex.get() + 1 ? 0 : this.lastSearchIndex.get() + 1;
                                             optionExtended.setSelected(true);
                                             this.lastSearchIndex.set(value);
                                             this.tabFrameSelectedTab.set(page.getName());
-                                            // todo: calculate below
-                                            //this.tabFrameScrollBarOffset.set();
+                                            // todo: calculate tab frame scroll bar offset
+                                            this.tabFrameScrollBarOffset.set(0);
 
 
                                             this.optionPageScrollBarOffset.set(offset);
@@ -418,7 +428,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         }
                         return true;
                     }
-                    case 259 -> {
+                    case GLFW.GLFW_KEY_BACKSPACE -> {
                         if (this.editable) {
                             this.selecting = false;
                             this.erase(-1);
@@ -426,10 +436,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         }
                         return true;
                     }
-                    default -> {
-                        return false;
-                    }
-                    case 261 -> {
+                    case GLFW.GLFW_KEY_DELETE -> {
                         if (this.editable) {
                             this.selecting = false;
                             this.erase(1);
@@ -437,7 +444,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         }
                         return true;
                     }
-                    case 262 -> {
+                    case GLFW.GLFW_KEY_RIGHT -> {
                         if (Screen.hasControlDown()) {
                             this.setCursor(this.getWordSkipPosition(1));
                         } else {
@@ -445,7 +452,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         }
                         return true;
                     }
-                    case 263 -> {
+                    case GLFW.GLFW_KEY_LEFT -> {
                         if (Screen.hasControlDown()) {
                             this.setCursor(this.getWordSkipPosition(-1));
                         } else {
@@ -453,13 +460,16 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         }
                         return true;
                     }
-                    case 268 -> {
+                    case GLFW.GLFW_KEY_HOME -> {
                         this.setCursorToStart();
                         return true;
                     }
-                    case 269 -> {
+                    case GLFW.GLFW_KEY_END -> {
                         this.setCursorToEnd();
                         return true;
+                    }
+                    default -> {
+                        return false;
                     }
                 }
             }

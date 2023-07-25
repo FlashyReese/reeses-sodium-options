@@ -6,6 +6,7 @@ import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,12 +31,17 @@ public abstract class MixinControlElement<T> extends AbstractWidget {
         }
     }
 
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/gui/options/control/ControlElement;drawRect(Lnet/minecraft/client/gui/DrawContext;IIIII)V"))
-    public void redirectText(ControlElement<T> instance, DrawContext drawContext, int x1, int y1, int x2, int y2, int color) {
-        this.drawRect(drawContext, x1, y1, x2, y2, color);
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/gui/options/control/ControlElement;drawString(Lnet/minecraft/client/gui/DrawContext;Ljava/lang/String;III)V"))
+    public void drawString(ControlElement<T> instance, DrawContext drawContext, String s, int x, int y, int color) {
         if (this.option instanceof OptionExtended optionExtended && optionExtended.isHighlight()) {
-            this.drawBorder(drawContext, x1, y1, x2, y2, optionExtended.getSelected() ? 0xFFFFAA00 : 0xFF55FFFF);
+            String replacement = optionExtended.getSelected() ? Formatting.DARK_GREEN.toString() : Formatting.YELLOW.toString();
+
+            s = s.replace(Formatting.WHITE.toString(), Formatting.WHITE + replacement);
+            s = s.replace(Formatting.STRIKETHROUGH.toString(), Formatting.STRIKETHROUGH + replacement);
+            s = s.replace(Formatting.ITALIC.toString(), Formatting.ITALIC + replacement);
         }
+
+        this.drawString(drawContext, s, x, y, color);
     }
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/util/Dim2i;containsCursor(DD)Z"))
