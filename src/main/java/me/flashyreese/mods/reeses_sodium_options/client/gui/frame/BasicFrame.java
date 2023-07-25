@@ -35,8 +35,8 @@ public class BasicFrame extends AbstractFrame {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
+        super.render(matrixStack, mouseX, mouseY, delta);
     }
 
     public static class Builder {
