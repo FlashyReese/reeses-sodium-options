@@ -12,4 +12,6 @@ public interface Dim2iExtended {
     void setHeight(int height);
 
     boolean canFitDimension(Dim2i anotherDim);
+
+    boolean overlapWith(Dim2i anotherDim);
 }
