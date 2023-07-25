@@ -42,8 +42,19 @@ public record Tab<T extends AbstractFrame>(Text title, Function<Dim2i, T> frameF
             return new Tab<T>(this.title, this.frameFunction);
         }
 
-        public Tab<ScrollableFrame> from(OptionPage page, AtomicReference<Integer> verticalScrollBarOffset) {
-            return new Tab<>(page.getName(), dim2i -> ScrollableFrame.createBuilder().setDimension(dim2i).setFrame(new OptionPageFrame(new Dim2i(dim2i.x(), dim2i.y(), dim2i.width(), dim2i.height()), false, page)).setVerticalScrollBarOffset(verticalScrollBarOffset).build());
+        public Tab<ScrollableFrame> from(OptionPage page, AtomicReference<Integer> verticalScrollBarOffset, AtomicReference<Integer> verticalScrollBarMaxOffset,  AtomicReference<Dim2i> frameDimensions) {
+            return new Tab<>(page.getName(), dim2i -> ScrollableFrame
+                    .createBuilder()
+                    .setDimension(dim2i)
+                    .setFrame(OptionPageFrame
+                            .createBuilder()
+                            .setDimension(new Dim2i(dim2i.x(), dim2i.y(), dim2i.width(), dim2i.height()))
+                            .setOptionPage(page)
+                            .build())
+                    .setVerticalScrollBarOffset(verticalScrollBarOffset)
+                    .setVerticalScrollBarMaxOffset(verticalScrollBarMaxOffset)
+                    .setFrameDimensions(frameDimensions)
+                    .build());
         }
     }
 }

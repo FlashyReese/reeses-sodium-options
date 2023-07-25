@@ -2,6 +2,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.BasicFrame;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.TextFieldComponent;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.Tab;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.TabFrame;
 import me.flashyreese.mods.reeses_sodium_options.compat.IrisCompat;
@@ -13,7 +14,6 @@ import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -35,6 +35,8 @@ public class SodiumVideoOptionsScreen extends Screen {
     private static final AtomicReference<Text> tabFrameSelectedTab = new AtomicReference<>(null);
     private static final AtomicReference<Integer> tabFrameScrollBarOffset = new AtomicReference<>(0);
     private static final AtomicReference<Integer> optionPageScrollBarOffset = new AtomicReference<>(0);
+    private static final AtomicReference<Integer> optionPageScrollBarMaxOffset = new AtomicReference<>(0);
+    private static final AtomicReference<Dim2i> optionPageDimensions = new AtomicReference<>(null);
 
     private final Screen prevScreen;
     private final List<OptionPage> pages = new ArrayList<>();
@@ -43,10 +45,17 @@ public class SodiumVideoOptionsScreen extends Screen {
     private FlatButtonWidget donateButton, hideDonateButton;
     private boolean hasPendingChanges;
 
+    private TextFieldComponent searchTextField;
+
     public SodiumVideoOptionsScreen(Screen prev, List<OptionPage> pages) {
         super(Text.literal("Reese's Sodium Menu"));
         this.prevScreen = prev;
         this.pages.addAll(pages);
+    }
+
+    public void reinit() {
+        this.remove(this.frame);
+        this.init();
     }
 
     @Override
@@ -88,6 +97,15 @@ public class SodiumVideoOptionsScreen extends Screen {
             this.setDonationButtonVisibility(false);
         }
 
+
+        Dim2i searchTextFieldDim;
+        if (SodiumClientMod.options().notifications.hideDonationButton) {
+            searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width(), 20);
+        } else {
+            searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, donateButtonDim.x() - 12, 20);
+        }
+
+
         basicFrameBuilder = this.parentBasicFrameBuilder(basicFrameDim, tabFrameDim);
 
         if (IrisCompat.isIrisPresent()) { // FabricLoader.getInstance().isModLoaded("iris")) {
@@ -96,14 +114,20 @@ public class SodiumVideoOptionsScreen extends Screen {
             Dim2i shaderPackButtonDim;
             if (!SodiumClientMod.options().notifications.hideDonationButton) {
                 shaderPackButtonDim = new Dim2i(donateButtonDim.x() - 12 - size, tabFrameDim.y() - 26, 10 + size, 20);
+                searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, donateButtonDim.x() - 12 - size - 12, 20);
             } else {
                 shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.y() - 26, 10 + size, 20);
+                searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.getLimitX() - size - 10 - 12, 20);
             }
 
             //FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, Text.translatable(IrisApi.getInstance().getMainScreenLanguageKey()), () -> this.client.setScreen((Screen) IrisApi.getInstance().openMainIrisScreenObj(this)));
             FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, Text.translatable(IrisCompat.getIrisShaderPacksScreenLanguageKey()), () -> this.client.setScreen(IrisCompat.getIrisShaderPacksScreen(this)));
             basicFrameBuilder.addChild(dim -> shaderPackButton);
         }
+
+        this.searchTextField = new TextFieldComponent(searchTextFieldDim, this.pages, optionPageScrollBarOffset, optionPageScrollBarMaxOffset, optionPageDimensions, this);
+
+        basicFrameBuilder.addChild(dim -> this.searchTextField);
 
         return basicFrameBuilder;
     }
@@ -122,7 +146,11 @@ public class SodiumVideoOptionsScreen extends Screen {
                         .shouldRenderOutline(false)
                         .setTabSectionScrollBarOffset(tabFrameScrollBarOffset)
                         .setTabSectionSelectedTab(tabFrameSelectedTab)
-                        .addTabs(tabs -> this.pages.stream().filter(page -> !page.getGroups().isEmpty()).forEach(page -> tabs.add(Tab.createBuilder().from(page, optionPageScrollBarOffset))))
+                        .addTabs(tabs -> this.pages
+                                .stream()
+                                .filter(page -> !page.getGroups().isEmpty())
+                                .forEach(page -> tabs.add(Tab.createBuilder().from(page, optionPageScrollBarOffset, optionPageScrollBarMaxOffset, optionPageDimensions)))
+                        )
                         .onSetTab(() -> {
                             optionPageScrollBarOffset.set(0);
                         })

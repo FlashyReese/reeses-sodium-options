@@ -41,7 +41,7 @@ public class TabFrame extends AbstractFrame {
 
         this.onSetTab = onSetTab;
         if (this.tabSectionCanScroll) {
-            this.tabSectionScrollBar = new ScrollBarComponent(new Dim2i(this.tabSection.getLimitX() - 11, this.tabSection.y(), 10, this.tabSection.height()), ScrollBarComponent.Mode.VERTICAL, tabSectionY, this.dim.height(), offset -> {
+            this.tabSectionScrollBar = new ScrollBarComponent(new Dim2i(this.tabSection.getLimitX() - 11, this.tabSection.y(), 10, this.tabSection.height()), ScrollBarComponent.Mode.VERTICAL, tabSectionY, this.dim.height(), (offset, maxOffset) -> {
                 this.buildFrame();
                 tabSectionScrollBarOffset.set(offset);
             }, this.dim);
