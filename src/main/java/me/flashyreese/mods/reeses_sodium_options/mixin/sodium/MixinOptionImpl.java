@@ -4,18 +4,18 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.jellysquid.mods.sodium.client.gui.options.OptionImpl;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(OptionImpl.class)
 public class MixinOptionImpl implements OptionExtended {
+    @Unique
     private Dim2i parent;
+    @Unique
     private Dim2i dim2i;
+    @Unique
     private boolean highlight;
+    @Unique
     private boolean selected;
-
-    @Override
-    public void setHighlight(boolean highlight) {
-        this.highlight = highlight;
-    }
 
     @Override
     public boolean isHighlight() {
@@ -23,8 +23,8 @@ public class MixinOptionImpl implements OptionExtended {
     }
 
     @Override
-    public void setDim2i(Dim2i dim2i) {
-        this.dim2i = dim2i;
+    public void setHighlight(boolean highlight) {
+        this.highlight = highlight;
     }
 
     @Override
@@ -33,8 +33,8 @@ public class MixinOptionImpl implements OptionExtended {
     }
 
     @Override
-    public void setParentDimension(Dim2i parent) {
-        this.parent = parent;
+    public void setDim2i(Dim2i dim2i) {
+        this.dim2i = dim2i;
     }
 
     @Override
@@ -43,12 +43,17 @@ public class MixinOptionImpl implements OptionExtended {
     }
 
     @Override
-    public void setSelected(boolean selected) {
-        this.selected = selected;
+    public void setParentDimension(Dim2i parent) {
+        this.parent = parent;
     }
 
     @Override
     public boolean getSelected() {
         return this.selected;
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 }

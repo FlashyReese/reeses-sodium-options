@@ -22,8 +22,7 @@ public class ScrollableFrame extends AbstractFrame {
     private ScrollBarComponent verticalScrollBar = null;
     private ScrollBarComponent horizontalScrollBar = null;
 
-    public ScrollableFrame(Dim2i dim, AbstractFrame frame, boolean renderOutline,
-                           AtomicReference<Integer> verticalScrollBarOffset, AtomicReference<Integer> horizontalScrollBarOffset) {
+    public ScrollableFrame(Dim2i dim, AbstractFrame frame, boolean renderOutline, AtomicReference<Integer> verticalScrollBarOffset, AtomicReference<Integer> horizontalScrollBarOffset) {
         super(dim, renderOutline);
         this.frame = frame;
         this.frameOrigin = new Dim2i(frame.dim.x(), frame.dim.y(), 0, 0);

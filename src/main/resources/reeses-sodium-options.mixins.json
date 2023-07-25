@@ -4,12 +4,11 @@
   "package": "me.flashyreese.mods.reeses_sodium_options.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "sodium.MixinOption",
-    "sodium.MixinOptionImpl",
     "sodium.MixinControlElement",
     "sodium.MixinCyclingControlElement",
     "sodium.MixinDim2i",
     "sodium.MixinFlatButtonWidget",
+    "sodium.MixinOptionImpl",
     "sodium.MixinSliderControlElement",
     "sodium.MixinSodiumOptionsGUI"
   ],

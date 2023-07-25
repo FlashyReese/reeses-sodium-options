@@ -35,26 +35,24 @@ public class SearchTextFieldComponent extends AbstractWidget {
     protected final Dim2i dim;
     protected final List<OptionPage> pages;
     private final TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-    protected boolean selecting;
-    protected String text = "";
-    protected int maxLength = 100;
-    protected boolean visible = true;
-    protected boolean editable = true;
     private final Predicate<String> textPredicate = Objects::nonNull;
-    private int firstCharacterIndex;
-    private int selectionStart;
-    private int selectionEnd;
-    private Consumer<String> changedListener;
     private final BiFunction<String, Integer, OrderedText> renderTextProvider = (string, firstCharacterIndex) -> OrderedText.styledForwardsVisitedString(string, Style.EMPTY);
-
     private final AtomicReference<Text> tabFrameSelectedTab;
     private final AtomicReference<Integer> tabFrameScrollBarOffset;
     private final AtomicReference<Integer> optionPageScrollBarOffset;
     private final int tabDimHeight;
     private final SodiumVideoOptionsScreen sodiumVideoOptionsScreen;
-
     private final AtomicReference<String> lastSearch;
     private final AtomicReference<Integer> lastSearchIndex;
+    protected boolean selecting;
+    protected String text = "";
+    protected int maxLength = 100;
+    protected boolean visible = true;
+    protected boolean editable = true;
+    private int firstCharacterIndex;
+    private int selectionStart;
+    private int selectionEnd;
+    private Consumer<String> changedListener;
 
     public SearchTextFieldComponent(Dim2i dim, List<OptionPage> pages, AtomicReference<Text> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen, AtomicReference<String> lastSearch, AtomicReference<Integer> lastSearchIndex) {
         this.dim = dim;
@@ -382,11 +380,11 @@ public class SearchTextFieldComponent extends AbstractWidget {
                 return true;
             } else {
                 switch (keyCode) {
-                    case GLFW.GLFW_KEY_ENTER:
+                    case GLFW.GLFW_KEY_ENTER -> {
                         if (this.editable) {
                             int count = 0;
 
-                            this.pages.stream().forEach(page2 -> page2.getOptions().stream().filter(OptionExtended.class::isInstance).map(OptionExtended.class::cast).forEach(optionExtended -> optionExtended.setSelected(false)));
+                            this.pages.forEach(page2 -> page2.getOptions().stream().filter(OptionExtended.class::isInstance).map(OptionExtended.class::cast).forEach(optionExtended -> optionExtended.setSelected(false)));
                             for (OptionPage page : this.pages) {
                                 for (Option<?> option : page.getOptions()) {
                                     if (option instanceof OptionExtended optionExtended && optionExtended.isHighlight() && optionExtended.getParentDimension() != null) {
@@ -404,6 +402,10 @@ public class SearchTextFieldComponent extends AbstractWidget {
                                             optionExtended.setSelected(true);
                                             this.lastSearchIndex.set(value);
                                             this.tabFrameSelectedTab.set(page.getName());
+                                            // todo: calculate below
+                                            //this.tabFrameScrollBarOffset.set();
+
+
                                             this.optionPageScrollBarOffset.set(offset);
                                             this.setFocused(false);
                                             this.sodiumVideoOptionsScreen.rebuildUI();
@@ -415,51 +417,50 @@ public class SearchTextFieldComponent extends AbstractWidget {
                             }
                         }
                         return true;
-                    case 259:
+                    }
+                    case 259 -> {
                         if (this.editable) {
                             this.selecting = false;
                             this.erase(-1);
                             this.selecting = Screen.hasShiftDown();
                         }
-
                         return true;
-                    case 260:
-                    case 264:
-                    case 265:
-                    case 266:
-                    case 267:
-                    default:
+                    }
+                    default -> {
                         return false;
-                    case 261:
+                    }
+                    case 261 -> {
                         if (this.editable) {
                             this.selecting = false;
                             this.erase(1);
                             this.selecting = Screen.hasShiftDown();
                         }
-
                         return true;
-                    case 262:
+                    }
+                    case 262 -> {
                         if (Screen.hasControlDown()) {
                             this.setCursor(this.getWordSkipPosition(1));
                         } else {
                             this.moveCursor(1);
                         }
-
                         return true;
-                    case 263:
+                    }
+                    case 263 -> {
                         if (Screen.hasControlDown()) {
                             this.setCursor(this.getWordSkipPosition(-1));
                         } else {
                             this.moveCursor(-1);
                         }
-
                         return true;
-                    case 268:
+                    }
+                    case 268 -> {
                         this.setCursorToStart();
                         return true;
-                    case 269:
+                    }
+                    case 269 -> {
                         this.setCursorToEnd();
                         return true;
+                    }
                 }
             }
         }
@@ -476,7 +477,6 @@ public class SearchTextFieldComponent extends AbstractWidget {
     public int getInnerWidth() {
         return this.dim.width() - 12;
     }
-
 
     @Override
     public @Nullable GuiNavigationPath getNavigationPath(GuiNavigation navigation) {
