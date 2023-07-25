@@ -8,6 +8,7 @@
     "sodium.MixinCyclingControlElement",
     "sodium.MixinDim2i",
     "sodium.MixinFlatButtonWidget",
+    "sodium.MixinOptionImpl",
     "sodium.MixinSliderControlElement",
     "sodium.MixinSodiumOptionsGUI"
   ],
