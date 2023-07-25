@@ -53,6 +53,11 @@ public class StringUtils {
                             containsWord = true;
                             break;
                         }
+                        // Starts with match
+                        if (sentenceWord.startsWith(word)) {
+                            containsWord = true;
+                            break;
+                        }
                     }
                     if (!containsWord) {
                         containsAllWords = false;

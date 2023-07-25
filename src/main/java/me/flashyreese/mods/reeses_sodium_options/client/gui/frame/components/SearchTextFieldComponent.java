@@ -68,11 +68,6 @@ public class SearchTextFieldComponent extends AbstractWidget {
         this.lastSearchIndex = lastSearchIndex;
         if (!lastSearch.get().trim().isEmpty()) {
             this.write(lastSearch.get());
-            List<Option<?>> fuzzy = StringUtils.fuzzySearch(this.pages, this.text, 2);
-            fuzzy.stream()
-                    .filter(OptionExtended.class::isInstance)
-                    .map(OptionExtended.class::cast)
-                    .forEach(optionExtended -> optionExtended.setHighlight(true));
         }
     }
 
@@ -81,7 +76,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (!this.isVisible()) {
             return;
         }
-        this.drawRect(context, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0x90000000);
+        this.drawRect(context, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), this.isFocused() ? 0xE0000000 : 0x90000000);
         int j = this.selectionStart - this.firstCharacterIndex;
         int k = this.selectionEnd - this.firstCharacterIndex;
         String string = this.textRenderer.trimToWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
@@ -107,7 +102,11 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (!string.isEmpty() && bl && j < string.length()) {
             context.drawTextWithShadow(this.textRenderer, this.renderTextProvider.apply(string.substring(j), this.selectionStart), n, m, 0xFFFFFFFF);
         }
-        context.fill(RenderLayer.getGuiOverlay(), o, m - 1, o + 1, m + 1 + this.textRenderer.fontHeight, -3092272);
+        // Cursor
+        if (this.isFocused()) {
+            context.fill(RenderLayer.getGuiOverlay(), o, m - 1, o + 1, m + 1 + this.textRenderer.fontHeight, -3092272);
+        }
+        // Highlighted text
         if (k != j) {
             int p = l + this.textRenderer.getWidth(string.substring(0, k));
             this.drawSelectionHighlight(context, o, m - 1, p - 1, m + 1 + this.textRenderer.fontHeight);
