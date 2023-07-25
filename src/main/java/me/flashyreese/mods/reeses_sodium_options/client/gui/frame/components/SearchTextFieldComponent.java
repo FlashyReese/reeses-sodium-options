@@ -15,6 +15,9 @@ import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.navigation.GuiNavigation;
 import net.minecraft.client.gui.navigation.GuiNavigationPath;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
@@ -24,10 +27,11 @@ import org.lwjgl.glfw.GLFW;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class TextFieldComponent extends AbstractWidget {
+public class SearchTextFieldComponent extends AbstractWidget {
     protected final Dim2i dim;
     protected final List<OptionPage> pages;
     private final TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
@@ -41,6 +45,9 @@ public class TextFieldComponent extends AbstractWidget {
     private int selectionStart;
     private int selectionEnd;
     private Consumer<String> changedListener;
+    private BiFunction<String, Integer, OrderedText> renderTextProvider = (string, firstCharacterIndex) -> OrderedText.styledForwardsVisitedString(string, Style.EMPTY);
+
+
     private final AtomicReference<Text> tabFrameSelectedTab;
     private final AtomicReference<Integer> tabFrameScrollBarOffset;
     private final AtomicReference<Integer> optionPageScrollBarOffset;
@@ -50,7 +57,7 @@ public class TextFieldComponent extends AbstractWidget {
     private final AtomicReference<String> lastSearch;
     private final AtomicReference<Integer> lastSearchIndex;
 
-    public TextFieldComponent(Dim2i dim, List<OptionPage> pages, AtomicReference<Text> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen, AtomicReference<String> lastSearch, AtomicReference<Integer> lastSearchIndex) {
+    public SearchTextFieldComponent(Dim2i dim, List<OptionPage> pages, AtomicReference<Text> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen, AtomicReference<String> lastSearch, AtomicReference<Integer> lastSearchIndex) {
         this.dim = dim;
         this.pages = pages;
         this.tabFrameSelectedTab = tabFrameSelectedTab;
@@ -61,19 +68,99 @@ public class TextFieldComponent extends AbstractWidget {
         this.lastSearch = lastSearch;
         this.lastSearchIndex = lastSearchIndex;
         this.text = lastSearch.get();
+        if (!this.text.trim().isEmpty()) {
+            this.setCursorToEnd();
+            this.setFocused(true);
+        }
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        if (!this.isVisible()) {
+            return;
+        }
         this.drawRect(context, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0x90000000);
+        int j = this.selectionStart - this.firstCharacterIndex;
+        int k = this.selectionEnd - this.firstCharacterIndex;
+        String string = this.textRenderer.trimToWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
+        boolean bl = j >= 0 && j <= string.length();
+        int l = this.dim.x() + 6;
+        int m = this.dim.y() + 6;
+        int n = l;
+        if (k > string.length()) {
+            k = string.length();
+        }
+        if (!string.isEmpty()) {
+            String string2 = bl ? string.substring(0, j) : string;
+            n = context.drawTextWithShadow(this.textRenderer, this.renderTextProvider.apply(string2, this.firstCharacterIndex), n, m, 0xFFFFFFFF);
+        }
+        boolean bl3 = this.selectionStart < this.text.length() || this.text.length() >= this.getMaxLength();
+        int o = n;
+        if (!bl) {
+            o = j > 0 ? l + this.dim.width() : l;
+        } else if (bl3) {
+            --o;
+            --n;
+        }
+        if (!string.isEmpty() && bl && j < string.length()) {
+            context.drawTextWithShadow(this.textRenderer, this.renderTextProvider.apply(string.substring(j), this.selectionStart), n, m, 0xFFFFFFFF);
+        }
+        if (bl3) {
+            context.fill(RenderLayer.getGuiOverlay(), o, m - 1, o + 1, m + 1 + this.textRenderer.fontHeight, -3092272);
+        } else {
+            context.drawTextWithShadow(this.textRenderer, "_", o, m, 0xFFFFFFFF);
+        }
+        if (k != j) {
+            int p = l + this.textRenderer.getWidth(string.substring(0, k));
+            this.drawSelectionHighlight(context, o, m - 1, p - 1, m + 1 + this.textRenderer.fontHeight);
+        }
+
+        /*this.drawRect(context, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0x90000000);
         //this.drawBorder(context, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xffffffff);
-        this.drawString(context, this.text, this.dim.x() + 6, this.dim.y() + 6, 0xffffffff);
+        this.drawString(context, this.text, this.dim.x() + 6, this.dim.y() + 6, 0xffffffff);*/
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        int i = MathHelper.floor(mouseX) - this.dim.x() - 6;
+        String string = this.textRenderer.trimToWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
+        this.setCursor(this.textRenderer.trimToWidth(string, i).length() + this.firstCharacterIndex);
+
         this.setFocused(this.dim.containsCursor(mouseX, mouseY));
         return this.isFocused();
+    }
+
+    private void drawSelectionHighlight(DrawContext context, int x1, int y1, int x2, int y2) {
+        int i;
+        if (x1 < x2) {
+            i = x1;
+            x1 = x2;
+            x2 = i;
+        }
+        if (y1 < y2) {
+            i = y1;
+            y1 = y2;
+            y2 = i;
+        }
+        if (x2 > this.dim.x() + this.dim.width()) {
+            x2 = this.dim.x() + this.dim.width();
+        }
+        if (x1 > this.dim.x() + this.dim.width()) {
+            x1 = this.dim.x() + this.dim.width();
+        }
+        context.fill(RenderLayer.getGuiTextHighlight(), x1, y1, x2, y2, -16776961);
+    }
+
+    public void setMaxLength(int maxLength) {
+        this.maxLength = maxLength;
+        if (this.text.length() > maxLength) {
+            this.text = this.text.substring(0, maxLength);
+            this.onChanged(this.text);
+        }
+    }
+
+    private int getMaxLength() {
+        return this.maxLength;
     }
 
     public String getText() {
@@ -289,8 +376,8 @@ public class TextFieldComponent extends AbstractWidget {
         if (!this.isActive()) {
             return false;
         } else {
-            this.lastSearch.set(this.text);
             if (this.editable) {
+                this.lastSearch.set(this.text.trim());
                 this.pages.forEach(page -> page
                         .getOptions()
                         .stream()
@@ -417,7 +504,7 @@ public class TextFieldComponent extends AbstractWidget {
     }
 
     public int getInnerWidth() {
-        return this.dim.width();
+        return this.dim.width() - 12;
     }
 
 

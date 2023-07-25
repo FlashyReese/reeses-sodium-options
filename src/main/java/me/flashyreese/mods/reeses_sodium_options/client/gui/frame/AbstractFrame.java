@@ -94,11 +94,6 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return ParentElement.super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    @Override
     public @Nullable GuiNavigationPath getNavigationPath(GuiNavigation navigation) {
         return ParentElement.super.getNavigationPath(navigation);
     }

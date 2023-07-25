@@ -2,7 +2,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.BasicFrame;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.TextFieldComponent;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.SearchTextFieldComponent;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.Tab;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.TabFrame;
 import me.flashyreese.mods.reeses_sodium_options.compat.IrisCompat;
@@ -46,7 +46,7 @@ public class SodiumVideoOptionsScreen extends Screen {
     private FlatButtonWidget donateButton, hideDonateButton;
     private boolean hasPendingChanges;
 
-    private TextFieldComponent searchTextField;
+    private SearchTextFieldComponent searchTextField;
 
     public SodiumVideoOptionsScreen(Screen prev, List<OptionPage> pages) {
         super(Text.literal("Reese's Sodium Menu"));
@@ -127,7 +127,7 @@ public class SodiumVideoOptionsScreen extends Screen {
             basicFrameBuilder.addChild(dim -> shaderPackButton);
         }
 
-        this.searchTextField = new TextFieldComponent(searchTextFieldDim, this.pages, tabFrameSelectedTab,
+        this.searchTextField = new SearchTextFieldComponent(searchTextFieldDim, this.pages, tabFrameSelectedTab,
                 tabFrameScrollBarOffset, optionPageScrollBarOffset, tabFrameDim.height(), this, lastSearch, lastSearchIndex);
 
         basicFrameBuilder.addChild(dim -> this.searchTextField);
