@@ -56,7 +56,6 @@ public class OptionPageFrame extends AbstractFrame {
         }
 
         ((Dim2iExtended) ((Object) this.dim)).setHeight(y);
-        System.out.println(this.dim.height());
         this.page.getGroups().forEach(group -> group.getOptions().forEach(option -> {
             if (option instanceof OptionExtended optionExtended) {
                 optionExtended.setParentDimension(this.dim);

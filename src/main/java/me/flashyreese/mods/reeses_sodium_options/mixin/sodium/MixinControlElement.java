@@ -34,7 +34,7 @@ public abstract class MixinControlElement<T> extends AbstractWidget {
     public void redirectText(ControlElement<T> instance, DrawContext drawContext, int x1, int y1, int x2, int y2, int color) {
         this.drawRect(drawContext, x1, y1, x2, y2, color);
         if (this.option instanceof OptionExtended optionExtended && optionExtended.isHighlight()) {
-            this.drawBorder(drawContext, x1, y1, x2, y2, 0xFF55FFFF);
+            this.drawBorder(drawContext, x1, y1, x2, y2, optionExtended.getSelected() ? 0xFFFFAA00 : 0xFF55FFFF);
         }
     }
 

@@ -14,4 +14,8 @@ public interface OptionExtended {
     void setParentDimension(Dim2i dim2i);
 
     Dim2i getParentDimension();
+
+    void setSelected(boolean selected);
+
+    boolean getSelected();
 }

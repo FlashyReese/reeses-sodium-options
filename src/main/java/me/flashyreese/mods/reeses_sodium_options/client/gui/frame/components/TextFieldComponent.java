@@ -47,7 +47,10 @@ public class TextFieldComponent extends AbstractWidget {
     private final int tabDimHeight;
     private final SodiumVideoOptionsScreen sodiumVideoOptionsScreen;
 
-    public TextFieldComponent(Dim2i dim, List<OptionPage> pages, AtomicReference<Text> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen) {
+    private final AtomicReference<String> lastSearch;
+    private final AtomicReference<Integer> lastSearchIndex;
+
+    public TextFieldComponent(Dim2i dim, List<OptionPage> pages, AtomicReference<Text> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen, AtomicReference<String> lastSearch, AtomicReference<Integer> lastSearchIndex) {
         this.dim = dim;
         this.pages = pages;
         this.tabFrameSelectedTab = tabFrameSelectedTab;
@@ -55,6 +58,9 @@ public class TextFieldComponent extends AbstractWidget {
         this.optionPageScrollBarOffset = optionPageScrollBarOffset;
         this.tabDimHeight = tabDimHeight;
         this.sodiumVideoOptionsScreen = sodiumVideoOptionsScreen;
+        this.lastSearch = lastSearch;
+        this.lastSearchIndex = lastSearchIndex;
+        this.text = lastSearch.get();
     }
 
     @Override
@@ -271,8 +277,20 @@ public class TextFieldComponent extends AbstractWidget {
         if (SharedConstants.isValidChar(chr)) {
             if (this.editable) {
                 this.write(Character.toString(chr));
+                this.lastSearchIndex.set(0);
+            }
+            return true;
+        }
+        return false;
+    }
 
-
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (!this.isActive()) {
+            return false;
+        } else {
+            this.lastSearch.set(this.text);
+            if (this.editable) {
                 this.pages.forEach(page -> page
                         .getOptions()
                         .stream()
@@ -285,16 +303,6 @@ public class TextFieldComponent extends AbstractWidget {
                         .map(OptionExtended.class::cast)
                         .forEach(optionExtended -> optionExtended.setHighlight(true));
             }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (!this.isActive()) {
-            return false;
-        } else {
             this.selecting = Screen.hasShiftDown();
             if (Screen.isSelectAll(keyCode)) {
                 this.setCursorToEnd();
@@ -320,20 +328,31 @@ public class TextFieldComponent extends AbstractWidget {
                 switch (keyCode) {
                     case GLFW.GLFW_KEY_ENTER:
                         if (this.editable) {
+                            int count = 0;
+
+                            this.pages.stream().forEach(page2 -> page2.getOptions().stream().filter(OptionExtended.class::isInstance).map(OptionExtended.class::cast).forEach(optionExtended -> optionExtended.setSelected(false)));
                             for (OptionPage page : this.pages) {
                                 for (Option<?> option : page.getOptions()) {
                                     if (option instanceof OptionExtended optionExtended && optionExtended.isHighlight() && optionExtended.getParentDimension() != null) {
-                                        Dim2i optionDim = optionExtended.getDim2i();
-                                        Dim2i parentDim = optionExtended.getParentDimension();
-                                        int maxOffset = parentDim.height() - this.tabDimHeight;
-                                        int input = optionDim.y() - parentDim.y();
-                                        int inputOffset = input + optionDim.height() == parentDim.height() ? parentDim.height() : input;
-                                        int offset = inputOffset * maxOffset / parentDim.height();
+                                        if (count == this.lastSearchIndex.get()) {
+                                            Dim2i optionDim = optionExtended.getDim2i();
+                                            Dim2i parentDim = optionExtended.getParentDimension();
+                                            int maxOffset = parentDim.height() - this.tabDimHeight;
+                                            int input = optionDim.y() - parentDim.y();
+                                            int inputOffset = input + optionDim.height() == parentDim.height() ? parentDim.height() : input;
+                                            int offset = inputOffset * maxOffset / parentDim.height();
 
-                                        this.tabFrameSelectedTab.set(page.getName());
-                                        this.optionPageScrollBarOffset.set(offset);
-                                        this.sodiumVideoOptionsScreen.reinit();
-                                        return true;
+
+                                            int total = this.pages.stream().mapToInt(page2 -> Math.toIntExact(page2.getOptions().stream().filter(OptionExtended.class::isInstance).map(OptionExtended.class::cast).filter(OptionExtended::isHighlight).count())).sum();
+                                            int value = total == this.lastSearchIndex.get() + 1 ? 0 : this.lastSearchIndex.get() + 1;
+                                            optionExtended.setSelected(true);
+                                            this.lastSearchIndex.set(value);
+                                            this.tabFrameSelectedTab.set(page.getName());
+                                            this.optionPageScrollBarOffset.set(offset);
+                                            this.sodiumVideoOptionsScreen.rebuildUI();
+                                            return true;
+                                        }
+                                        count++;
                                     }
                                 }
                             }

@@ -53,10 +53,10 @@ public class TabFrame extends AbstractFrame {
             this.selectedTab = this.tabs.stream().filter(tab -> tab.getTitle().getString().equals(this.tabSectionSelectedTab.get().getString())).findAny().get();
         }
 
-        // Let's build each frame
-        // this.tabs.forEach(tab -> tab.getFrameFunction().apply(this.frameSection));
-
         this.buildFrame();
+
+        // Let's build each frame, future note for anyone: do not move this line.
+        this.tabs.forEach(tab -> tab.getFrameFunction().apply(this.frameSection));
     }
 
     public static Builder createBuilder() {

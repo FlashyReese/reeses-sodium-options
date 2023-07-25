@@ -36,6 +36,9 @@ public class SodiumVideoOptionsScreen extends Screen {
     private static final AtomicReference<Integer> tabFrameScrollBarOffset = new AtomicReference<>(0);
     private static final AtomicReference<Integer> optionPageScrollBarOffset = new AtomicReference<>(0);
 
+    private static final AtomicReference<String> lastSearch = new AtomicReference<>("");
+    private static final AtomicReference<Integer> lastSearchIndex = new AtomicReference<>(0);
+
     private final Screen prevScreen;
     private final List<OptionPage> pages = new ArrayList<>();
     private AbstractFrame frame;
@@ -51,7 +54,8 @@ public class SodiumVideoOptionsScreen extends Screen {
         this.pages.addAll(pages);
     }
 
-    public void reinit() {
+    // Hackalicious! Rebuild UI
+    public void rebuildUI() {
         this.remove(this.frame);
         this.init();
     }
@@ -123,7 +127,8 @@ public class SodiumVideoOptionsScreen extends Screen {
             basicFrameBuilder.addChild(dim -> shaderPackButton);
         }
 
-        this.searchTextField = new TextFieldComponent(searchTextFieldDim, this.pages, tabFrameSelectedTab, tabFrameScrollBarOffset, optionPageScrollBarOffset, tabFrameDim.height(), this);
+        this.searchTextField = new TextFieldComponent(searchTextFieldDim, this.pages, tabFrameSelectedTab,
+                tabFrameScrollBarOffset, optionPageScrollBarOffset, tabFrameDim.height(), this, lastSearch, lastSearchIndex);
 
         basicFrameBuilder.addChild(dim -> this.searchTextField);
 
@@ -199,10 +204,8 @@ public class SodiumVideoOptionsScreen extends Screen {
 
         this.setDonationButtonVisibility(false);
 
-        // Hackalicious! Rebuild UI
-        this.remove(this.frame);
-        this.frame = this.parentFrameBuilder().build();
-        this.addDrawableChild(this.frame);
+
+        this.rebuildUI();
     }
 
     private void openDonationPage() {

@@ -10,6 +10,7 @@ public class MixinOptionImpl implements OptionExtended {
     private Dim2i parent;
     private Dim2i dim2i;
     private boolean highlight;
+    private boolean selected;
 
     @Override
     public void setHighlight(boolean highlight) {
@@ -39,5 +40,15 @@ public class MixinOptionImpl implements OptionExtended {
     @Override
     public Dim2i getParentDimension() {
         return this.parent;
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
+    @Override
+    public boolean getSelected() {
+        return this.selected;
     }
 }
