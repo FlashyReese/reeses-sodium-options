@@ -11,6 +11,8 @@ import java.util.function.Consumer;
 
 public class ScrollBarComponent extends AbstractWidget {
 
+    protected static final int SCROLL_OFFSET = 6;
+
     protected final Dim2i dim;
 
     private final Mode mode;
@@ -109,7 +111,7 @@ public class ScrollBarComponent extends AbstractWidget {
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (this.dim.containsCursor(mouseX, mouseY) || this.extendedScrollArea != null && this.extendedScrollArea.containsCursor(mouseX, mouseY)) {
             if (this.offset <= this.maxScrollBarOffset && this.offset >= 0) {
-                int value = (int) (this.offset - amount * 6);
+                int value = (int) (this.offset - amount * SCROLL_OFFSET);
                 this.setOffset(value);
                 return true;
             }
@@ -141,6 +143,11 @@ public class ScrollBarComponent extends AbstractWidget {
         });
     }
 
+    public void setOffsetFromCords(int x, int y) {
+        int offset = x * this.viewPortLength / this.frameLength;
+        this.setOffset(offset);
+    }
+
     @Override
     public ScreenRect getNavigationFocus() {
         return new ScreenRect(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height());
@@ -153,18 +160,18 @@ public class ScrollBarComponent extends AbstractWidget {
 
         if (this.mode == Mode.VERTICAL) {
             if (keyCode == InputUtil.GLFW_KEY_UP) {
-                this.setOffset(this.getOffset() - 6);
+                this.setOffset(this.getOffset() - SCROLL_OFFSET);
                 return true;
             } else if (keyCode == InputUtil.GLFW_KEY_DOWN) {
-                this.setOffset(this.getOffset() + 6);
+                this.setOffset(this.getOffset() + SCROLL_OFFSET);
                 return true;
             }
         } else {
             if (keyCode == InputUtil.GLFW_KEY_LEFT) {
-                this.setOffset(this.getOffset() - 6);
+                this.setOffset(this.getOffset() - SCROLL_OFFSET);
                 return true;
             } else if (keyCode == InputUtil.GLFW_KEY_RIGHT) {
-                this.setOffset(this.getOffset() + 6);
+                this.setOffset(this.getOffset() + SCROLL_OFFSET);
                 return true;
             }
         }
