@@ -70,6 +70,8 @@ public class SodiumVideoOptionsScreen extends Screen {
         this.searchTextField.setFocused(!lastSearch.get().trim().isEmpty());
         if (this.searchTextField.isFocused()) {
             this.setFocused(this.searchTextField);
+        } else {
+            this.setFocused(this.frame);
         }
     }
 
@@ -146,9 +148,6 @@ public class SodiumVideoOptionsScreen extends Screen {
         return BasicFrame.createBuilder()
                 .setDimension(parentBasicFrameDim)
                 .shouldRenderOutline(false)
-                .addChild(dim -> this.undoButton)
-                .addChild(dim -> this.applyButton)
-                .addChild(dim -> this.closeButton)
                 .addChild(dim -> this.donateButton)
                 .addChild(dim -> this.hideDonateButton)
                 .addChild(parentDim -> TabFrame.createBuilder()
@@ -165,7 +164,10 @@ public class SodiumVideoOptionsScreen extends Screen {
                             optionPageScrollBarOffset.set(0);
                         })
                         .build()
-                );
+                )
+                .addChild(dim -> this.undoButton)
+                .addChild(dim -> this.applyButton)
+                .addChild(dim -> this.closeButton);
     }
 
     @Override
