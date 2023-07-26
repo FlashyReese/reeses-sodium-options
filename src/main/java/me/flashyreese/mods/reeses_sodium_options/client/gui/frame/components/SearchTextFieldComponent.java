@@ -76,7 +76,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (!this.isVisible()) {
             return;
         }
-        if (!this.isFocused() && this.text.isEmpty()) {
+        if (!this.isFocused() && this.text.isBlank()) {
             String key = "rso.search_bar_empty";
             Text text = new TranslatableText(key);
             if (text.getString().equals(key))
