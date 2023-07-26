@@ -67,6 +67,8 @@ public class SodiumVideoOptionsScreen extends Screen {
         this.searchTextField.setFocused(!lastSearch.get().trim().isEmpty());
         if (this.searchTextField.isFocused()) {
             this.setFocused(this.searchTextField);
+        } else {
+            this.setFocused(this.frame);
         }
     }
 
@@ -143,9 +145,6 @@ public class SodiumVideoOptionsScreen extends Screen {
         return BasicFrame.createBuilder()
                 .setDimension(parentBasicFrameDim)
                 .shouldRenderOutline(false)
-                .addChild(dim -> this.undoButton)
-                .addChild(dim -> this.applyButton)
-                .addChild(dim -> this.closeButton)
                 .addChild(dim -> this.donateButton)
                 .addChild(dim -> this.hideDonateButton)
                 .addChild(parentDim -> TabFrame.createBuilder()
@@ -162,7 +161,10 @@ public class SodiumVideoOptionsScreen extends Screen {
                             optionPageScrollBarOffset.set(0);
                         })
                         .build()
-                );
+                )
+                .addChild(dim -> this.undoButton)
+                .addChild(dim -> this.applyButton)
+                .addChild(dim -> this.closeButton);
     }
 
     @Override
@@ -260,7 +262,7 @@ public class SodiumVideoOptionsScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_P && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0) {
+        if (keyCode == GLFW.GLFW_KEY_P && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0 && !(this.searchTextField != null && this.searchTextField.isFocused())) {
             MinecraftClient.getInstance().setScreen(new VideoOptionsScreen(this.prevScreen, MinecraftClient.getInstance().options));
 
             return true;
