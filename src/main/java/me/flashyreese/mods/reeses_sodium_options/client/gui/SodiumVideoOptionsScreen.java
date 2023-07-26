@@ -113,7 +113,7 @@ public class SodiumVideoOptionsScreen extends Screen {
         if (SodiumClientMod.options().notifications.hideDonationButton) {
             searchTextFieldDim = new Dim2i(tabFrameDim.getOriginX(), tabFrameDim.getOriginY() - 26, tabFrameDim.getWidth(), 20);
         } else {
-            searchTextFieldDim = new Dim2i(tabFrameDim.getOriginX(), tabFrameDim.getOriginY() - 26, donateButtonDim.getOriginX() - 12, 20);
+            searchTextFieldDim = new Dim2i(tabFrameDim.getOriginX(), tabFrameDim.getOriginY() - 26, tabFrameDim.getWidth() - (tabFrameDim.getLimitX() - donateButtonDim.getOriginX()) - 2, 20);
         }
 
 
@@ -125,11 +125,10 @@ public class SodiumVideoOptionsScreen extends Screen {
             Dim2i shaderPackButtonDim;
             if (!SodiumClientMod.options().notifications.hideDonationButton) {
                 shaderPackButtonDim = new Dim2i(donateButtonDim.getOriginX() - 12 - size, tabFrameDim.getOriginY() - 26, 10 + size, 20);
-                searchTextFieldDim = new Dim2i(tabFrameDim.getOriginX(), tabFrameDim.getOriginY() - 26, donateButtonDim.getOriginX() - 12 - size - 12, 20);
             } else {
                 shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.getOriginY() - 26, 10 + size, 20);
-                searchTextFieldDim = new Dim2i(tabFrameDim.getOriginX(), tabFrameDim.getOriginY() - 26, tabFrameDim.getLimitX() - size - 10 - 12, 20);
             }
+            searchTextFieldDim = new Dim2i(tabFrameDim.getOriginX(), tabFrameDim.getOriginY() - 26, tabFrameDim.getWidth() - (tabFrameDim.getLimitX() - shaderPackButtonDim.getOriginX()) - 2, 20);
 
             //FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, new TranslatableText(IrisApi.getInstance().getMainScreenLanguageKey()), () -> this.client.setScreen((Screen) IrisApi.getInstance().openMainIrisScreenObj(this)));
             FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, new TranslatableText(IrisCompat.getIrisShaderPacksScreenLanguageKey()).getString(), () -> this.client.openScreen(IrisCompat.getIrisShaderPacksScreen(this)));
