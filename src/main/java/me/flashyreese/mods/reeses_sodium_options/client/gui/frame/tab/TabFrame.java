@@ -7,6 +7,7 @@ import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.Validate;
 
@@ -85,8 +86,8 @@ public class TabFrame extends AbstractFrame {
             }
         }
 
-        this.rebuildTabFrame();
         this.rebuildTabs();
+        this.rebuildTabFrame();
 
         if (this.tabSectionCanScroll) {
             this.tabSectionScrollBar.updateThumbPosition();
