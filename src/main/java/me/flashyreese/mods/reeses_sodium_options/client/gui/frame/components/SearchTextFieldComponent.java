@@ -48,6 +48,8 @@ public class SearchTextFieldComponent extends AbstractWidget {
     private int selectionStart;
     private int selectionEnd;
     private boolean focused;
+    private int lastCursorPosition = this.getCursor();
+
     public SearchTextFieldComponent(Dim2i dim, List<OptionPage> pages, AtomicReference<Text> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen, AtomicReference<String> lastSearch, AtomicReference<Integer> lastSearchIndex) {
         this.dim = dim;
         this.pages = pages;
@@ -76,7 +78,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (!this.isVisible()) {
             return;
         }
-        if (!this.isFocused()) {
+        if (!this.isFocused() && this.text.isEmpty()) {
             String key = "rso.search_bar_empty";
             Text text = Text.translatable(key);
             if (text.getString().equals(key))
@@ -462,7 +464,9 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         } else {
                             this.moveCursor(1);
                         }
-                        return true;
+                        boolean state = this.getCursor() != this.lastCursorPosition && this.getCursor() != this.text.length() + 1;
+                        this.lastCursorPosition = this.getCursor();
+                        return state;
                     }
                     case GLFW.GLFW_KEY_LEFT -> {
                         if (Screen.hasControlDown()) {
@@ -470,7 +474,9 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         } else {
                             this.moveCursor(-1);
                         }
-                        return true;
+                        boolean state2 = this.getCursor() != this.lastCursorPosition && this.getCursor() != 0;
+                        this.lastCursorPosition = this.getCursor();
+                        return state2;
                     }
                     case GLFW.GLFW_KEY_HOME -> {
                         this.setCursorToStart();
