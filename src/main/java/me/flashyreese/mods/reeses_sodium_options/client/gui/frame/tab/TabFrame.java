@@ -84,8 +84,8 @@ public class TabFrame extends AbstractFrame {
             }
         }
 
-        this.rebuildTabFrame();
         this.rebuildTabs();
+        this.rebuildTabFrame();
 
         if (this.tabSectionCanScroll) {
             this.tabSectionScrollBar.updateThumbPosition();

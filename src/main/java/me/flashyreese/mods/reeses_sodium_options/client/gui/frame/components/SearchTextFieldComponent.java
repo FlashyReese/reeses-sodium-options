@@ -453,14 +453,14 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         } else {
                             this.moveCursor(1);
                         }
-                        return true;
+                        return this.getCursor() != this.text.length();
                     case GLFW.GLFW_KEY_LEFT:
                         if (Screen.hasControlDown()) {
                             this.setCursor(this.getWordSkipPosition(-1));
                         } else {
                             this.moveCursor(-1);
                         }
-                        return true;
+                        return this.getCursor() != 0;
                     case GLFW.GLFW_KEY_HOME:
                         this.setCursorToStart();
                         return true;
