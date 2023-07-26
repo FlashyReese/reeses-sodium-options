@@ -13,8 +13,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
+import net.minecraft.text.*;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
@@ -47,6 +46,8 @@ public class SearchTextFieldComponent extends AbstractWidget {
     private int selectionStart;
     private int selectionEnd;
     private boolean focused;
+    private int lastCursorPosition = this.getCursor();
+
     public SearchTextFieldComponent(Dim2i dim, List<OptionPage> pages, AtomicReference<String> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen, AtomicReference<String> lastSearch, AtomicReference<Integer> lastSearchIndex) {
         this.dim = dim;
         this.pages = pages;
@@ -75,6 +76,14 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (!this.isVisible()) {
             return;
         }
+        if (!this.isFocused() && this.text.isEmpty()) {
+            String key = "rso.search_bar_empty";
+            Text text = new TranslatableText(key);
+            if (text.getString().equals(key))
+                text = new LiteralText("Search options...");
+            this.textRenderer.draw(matrixStack, text, this.dim.getOriginX() + 6, this.dim.getOriginY() + 6, 0xFFAAAAAA);
+        }
+
         this.drawRect(this.dim.getOriginX(), this.dim.getOriginY(), this.dim.getLimitX(), this.dim.getLimitY(), this.isFocused() ? 0xE0000000 : 0x90000000);
         int j = this.selectionStart - this.firstCharacterIndex;
         int k = this.selectionEnd - this.firstCharacterIndex;
@@ -453,14 +462,18 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         } else {
                             this.moveCursor(1);
                         }
-                        return true;
+                        boolean state = this.getCursor() != this.lastCursorPosition && this.getCursor() != this.text.length() + 1;
+                        this.lastCursorPosition = this.getCursor();
+                        return state;
                     case GLFW.GLFW_KEY_LEFT:
                         if (Screen.hasControlDown()) {
                             this.setCursor(this.getWordSkipPosition(-1));
                         } else {
                             this.moveCursor(-1);
                         }
-                        return true;
+                        boolean state2 = this.getCursor() != this.lastCursorPosition && this.getCursor() != 0;
+                        this.lastCursorPosition = this.getCursor();
+                        return state2;
                     case GLFW.GLFW_KEY_HOME:
                         this.setCursorToStart();
                         return true;
