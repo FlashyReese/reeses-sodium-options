@@ -13,9 +13,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
@@ -76,6 +74,14 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (!this.isVisible()) {
             return;
         }
+        if (!this.isFocused()) {
+            String key = "rso.search_bar_empty";
+            Text text = new TranslatableText(key);
+            if (text.getString().equals(key))
+                text = new LiteralText("Search options...");
+            this.drawString(matrixStack, text, this.dim.x() + 6, this.dim.y() + 6, 0xFFAAAAAA);
+        }
+
         this.drawRect(this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), this.isFocused() ? 0xE0000000 : 0x90000000);
         int j = this.selectionStart - this.firstCharacterIndex;
         int k = this.selectionEnd - this.firstCharacterIndex;
