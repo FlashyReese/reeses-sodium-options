@@ -24,7 +24,12 @@
         "id": "sodium"
       },
       "links": {
-        "modmenu.discord": "https://discord.gg/MPHVG6MH4e"
+        "modmenu.curseforge": "https://curseforge.com/minecraft/mc-mods/reeses-sodium-options",
+        "modmenu.discord": "https://discord.gg/MPHVG6MH4e",
+        "modmenu.donate": "https://ko-fi.com/flashyreese",
+        "modmenu.github_releases": "https://github.com/FlashyReese/reeses-sodium-options/releases",
+        "modmenu.kofi": "https://ko-fi.com/flashyreese",
+        "modmenu.modrinth": "https://modrinth.com/mod/reeses-sodium-options"
       }
     }
   },
