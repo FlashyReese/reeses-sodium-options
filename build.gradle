@@ -9,7 +9,7 @@ sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
-version = "${project.mod_version}+mc${project.minecraft_version}-${getVersionMetadata()}"
+version = "${project.mod_version}${getVersionType(project.version_type, project.revision)}+mc${project.minecraft_version}-${getVersionMetadata()}"
 group = project.maven_group
 
 repositories {
@@ -35,7 +35,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation "me.jellysquid.mods:sodium-fabric:0.5.0+git.2b0f690"
+    modImplementation "me.jellysquid.mods:sodium-fabric:0.5.0-rc1+git.ddd735e"
     //modImplementation "maven.modrinth:sodium:${project.sodium_version}"
     //modImplementation "maven.modrinth:iris:${project.iris_version}"
 
@@ -118,4 +118,13 @@ def getVersionMetadata() {
 
     // No tracking information could be found about the build
     return "unknown"
+}
+
+static def getVersionType(String version_type, String revision) {
+    version_type = version_type.trim().toLowerCase()
+    revision = revision.trim().toLowerCase()
+    if (version_type != "release") {
+        return "-${version_type}${revision}"
+    }
+    return ""
 }
