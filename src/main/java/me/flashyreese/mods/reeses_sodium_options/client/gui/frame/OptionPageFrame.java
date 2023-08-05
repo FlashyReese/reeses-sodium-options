@@ -1,6 +1,7 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
 import me.jellysquid.mods.sodium.client.gui.options.OptionImpact;
@@ -10,7 +11,6 @@ import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -21,17 +21,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OptionPageFrame extends AbstractFrame {
+    protected final Dim2i originalDim;
     protected final OptionPage page;
-    private final int lastDimLimitY;
     private long lastTime = 0;
     private ControlElement<?> lastHoveredElement = null;
 
     public OptionPageFrame(Dim2i dim, boolean renderOutline, OptionPage page) {
         super(dim, renderOutline);
-        this.lastDimLimitY = dim.getLimitY();
+        this.originalDim = new Dim2i(dim.x(), dim.y(), dim.width(), dim.height());
         this.page = page;
         this.setupFrame();
         this.buildFrame();
+    }
+
+    public static Builder createBuilder() {
+        return new Builder();
     }
 
     public void setupFrame() {
@@ -52,6 +56,11 @@ public class OptionPageFrame extends AbstractFrame {
         }
 
         ((Dim2iExtended) ((Object) this.dim)).setHeight(y);
+        this.page.getGroups().forEach(group -> group.getOptions().forEach(option -> {
+            if (option instanceof OptionExtended optionExtended) {
+                optionExtended.setParentDimension(this.dim);
+            }
+        }));
     }
 
     @Override
@@ -84,14 +93,18 @@ public class OptionPageFrame extends AbstractFrame {
     @Override
     public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
         ControlElement<?> hoveredElement = this.controlElements.stream()
+                .filter(controlElement -> ((Dim2iExtended) (Object) controlElement.getDimensions()).overlapWith(this.originalDim))
                 .filter(ControlElement::isHovered)
                 .findFirst()
                 .orElse(this.controlElements.stream()
+                        .filter(controlElement -> ((Dim2iExtended) (Object) controlElement.getDimensions()).overlapWith(this.originalDim))
                         .filter(ControlElement::isFocused)
                         .findFirst()
                         .orElse(null));
         super.render(drawContext, mouseX, mouseY, delta);
-        if (hoveredElement != null && this.lastHoveredElement == hoveredElement && ((hoveredElement.isHovered() && hoveredElement.isMouseOver(mouseX, mouseY)) || hoveredElement.isFocused())) {
+        if (hoveredElement != null && this.lastHoveredElement == hoveredElement &&
+                ((this.originalDim.containsCursor(mouseX, mouseY) && hoveredElement.isHovered() && hoveredElement.isMouseOver(mouseX, mouseY))
+                        || hoveredElement.isFocused())) {
             if (this.lastTime == 0) {
                 this.lastTime = System.currentTimeMillis();
             }
@@ -127,7 +140,7 @@ public class OptionPageFrame extends AbstractFrame {
 
         int boxHeight = (tooltip.size() * 12) + boxPadding;
         int boxYLimit = boxY + boxHeight;
-        int boxYCutoff = this.lastDimLimitY;//this.dim.getLimitY();
+        int boxYCutoff = this.originalDim.getLimitY();
 
         // If the box is going to be cutoff on the Y-axis, move it back up the difference
         if (boxYLimit > boxYCutoff) {
@@ -138,18 +151,15 @@ public class OptionPageFrame extends AbstractFrame {
             boxY = dim.getLimitY();
         }
 
+        drawContext.getMatrices().push();
         drawContext.getMatrices().translate(0, 0, 90);
-        //this.drawRect(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
-        drawContext.fill(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
-        //this.drawRectOutline(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3);
-        drawContext.fill(boxX, boxY, boxX + boxWidth, boxY + 1, 0xFF94E4D3); // top
-        drawContext.fill(boxX, boxY + boxHeight - 1, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3); // bottom
-        drawContext.fill(boxX, boxY, boxX + 1, boxY + boxHeight, 0xFF94E4D3); // left
-        drawContext.fill(boxX + boxWidth - 1, boxY, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3); // right
+        this.drawRect(drawContext, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
+        this.drawBorder(drawContext, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3);
 
         for (int i = 0; i < tooltip.size(); i++) {
             drawContext.drawText(MinecraftClient.getInstance().textRenderer, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
         }
+        drawContext.getMatrices().pop();
     }
 
     public static class Builder {
@@ -174,6 +184,7 @@ public class OptionPageFrame extends AbstractFrame {
 
         public OptionPageFrame build() {
             Validate.notNull(this.dim, "Dimension must be specified");
+            Validate.notNull(this.page, "Option Page must be specified");
 
             return new OptionPageFrame(this.dim, this.renderOutline, this.page);
         }

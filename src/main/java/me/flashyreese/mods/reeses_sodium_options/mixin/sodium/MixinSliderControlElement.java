@@ -74,19 +74,6 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
         this.max = max;
     }
 
-    // Fixme: Reverts keyboard slider control hack but breaks sliders on RSO if removed :>
-    // I will need to add keyboard navigation support soon:tm: but it's not on my priority. Help wanted :>
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.option.isAvailable() && button == 0 && this.sliderBounds.contains((int) mouseX, (int) mouseY)) {
-            this.setValueFromMouse(mouseX);
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     @Inject(method = "renderSlider", at = @At(value = "TAIL"))
     public void rso$renderSlider(DrawContext drawContext, CallbackInfo ci) {
         int sliderX = this.sliderBounds.getX();
@@ -97,7 +84,7 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
         double thumbOffset = MathHelper.clamp((double) (this.getIntValue() - this.min) / (double) this.range * (double) sliderWidth, 0.0, sliderWidth);
         double thumbX = (double) sliderX + thumbOffset - 2.0;
         if (this.isFocused() && this.isEditMode()) {
-            this.drawRect(thumbX - 1, sliderY - 1, thumbX + 5, sliderY + sliderHeight + 1, 0xFFFFFFFF);
+            this.drawRect(drawContext, (int) (thumbX - 1), sliderY - 1, (int) (thumbX + 5), sliderY + sliderHeight + 1, 0xFFFFFFFF);
         }
     }
 

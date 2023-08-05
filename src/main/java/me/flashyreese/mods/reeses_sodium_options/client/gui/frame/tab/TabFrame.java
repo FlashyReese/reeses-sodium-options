@@ -7,6 +7,7 @@ import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.Validate;
 
@@ -34,7 +35,7 @@ public class TabFrame extends AbstractFrame {
         int tabSectionY = this.tabs.size() * 18;
         this.tabSectionCanScroll = tabSectionY > this.dim.height();
 
-        Optional<Integer> result = tabs.stream().map(tab -> this.getStringWidth(tab.title().getString())).max(Integer::compareTo);
+        Optional<Integer> result = tabs.stream().map(tab -> this.getStringWidth(tab.title())).max(Integer::compareTo);
 
         this.tabSection = new Dim2i(this.dim.x(), this.dim.y(), result.map(integer -> integer + (this.tabSectionCanScroll ? 32 : 24)).orElseGet(() -> (int) (this.dim.width() * 0.35D)), this.dim.height());
         this.frameSection = new Dim2i(this.tabSection.getLimitX(), this.dim.y(), this.dim.width() - this.tabSection.width(), this.dim.height());
@@ -54,6 +55,9 @@ public class TabFrame extends AbstractFrame {
         }
 
         this.buildFrame();
+
+        // Let's build each frame, future note for anyone: do not move this line.
+        this.tabs.stream().filter(tab -> this.selectedTab != tab).forEach(tab -> tab.getFrameFunction().apply(this.frameSection));
     }
 
     public static Builder createBuilder() {
@@ -82,14 +86,42 @@ public class TabFrame extends AbstractFrame {
             }
         }
 
-        this.rebuildTabFrame();
         this.rebuildTabs();
+        this.rebuildTabFrame();
 
         if (this.tabSectionCanScroll) {
             this.tabSectionScrollBar.updateThumbPosition();
         }
 
         super.buildFrame();
+    }
+
+    private void rebuildTabs() {
+        int offsetY = 0;
+        for (Tab<?> tab : this.tabs) {
+            int x = this.tabSection.x();
+            int y = this.tabSection.y() + offsetY - (this.tabSectionCanScroll ? this.tabSectionScrollBar.getOffset() : 0);
+            int width = this.tabSection.width() - (this.tabSectionCanScroll ? 12 : 4);
+            int height = 18;
+            Dim2i tabDim = new Dim2i(x, y, width, height);
+
+            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(tab));
+            button.setSelected(this.selectedTab == tab);
+            ((FlatButtonWidgetExtended) button).setLeftAligned(true);
+            this.children.add(button);
+
+            offsetY += 18;
+        }
+    }
+
+    private void rebuildTabFrame() {
+        if (this.selectedTab == null) return;
+        AbstractFrame frame = this.selectedTab.getFrameFunction().apply(this.frameSection);
+        if (frame != null) {
+            this.selectedFrame = frame;
+            frame.buildFrame();
+            this.children.add(frame);
+        }
     }
 
     @Override
@@ -125,34 +157,6 @@ public class TabFrame extends AbstractFrame {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         return super.mouseScrolled(mouseX, mouseY, amount) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseScrolled(mouseX, mouseY, amount));
-    }
-
-    private void rebuildTabs() {
-        int offsetY = 0;
-        for (Tab<?> tab : this.tabs) {
-            int x = this.tabSection.x();
-            int y = this.tabSection.y() + offsetY - (this.tabSectionCanScroll ? this.tabSectionScrollBar.getOffset() : 0);
-            int width = this.tabSection.width() - (this.tabSectionCanScroll ? 12 : 4);
-            int height = 18;
-            Dim2i tabDim = new Dim2i(x, y, width, height);
-
-            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(tab));
-            button.setSelected(this.selectedTab == tab);
-            ((FlatButtonWidgetExtended) button).setLeftAligned(true);
-            this.children.add(button);
-
-            offsetY += 18;
-        }
-    }
-
-    private void rebuildTabFrame() {
-        if (this.selectedTab == null) return;
-        AbstractFrame frame = this.selectedTab.getFrameFunction().apply(this.frameSection);
-        if (frame != null) {
-            this.selectedFrame = frame;
-            frame.buildFrame();
-            this.children.add(frame);
-        }
     }
 
     public static class Builder {
