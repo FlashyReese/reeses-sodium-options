@@ -138,6 +138,12 @@ public class SearchTextFieldComponent extends AbstractWidget {
         return this.isFocused();
     }
 
+    // fixme: this is here because of 0.5.1's https://github.com/CaffeineMC/sodium-fabric/commit/20006a85fb7a64889f507eb13521e55693ae0d7e
+    @Override
+    public void setFocused(boolean focused) {
+        this.focused = focused;
+    }
+
     private void drawSelectionHighlight(DrawContext context, int x1, int y1, int x2, int y2) {
         int i;
         if (x1 < x2) {
