@@ -118,9 +118,9 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (this.option.isAvailable() && this.sliderBounds.contains((int) mouseX, (int) mouseY) && Screen.hasShiftDown()) {
-            this.setValueFromMouseScroll(amount);
+            this.setValueFromMouseScroll(verticalAmount); // todo: horizontal separation
 
             return true;
         }
