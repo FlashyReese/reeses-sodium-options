@@ -109,10 +109,10 @@ public class ScrollBarComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (this.dim.containsCursor(mouseX, mouseY) || this.extendedScrollArea != null && this.extendedScrollArea.containsCursor(mouseX, mouseY)) {
             if (this.offset <= this.maxScrollBarOffset && this.offset >= 0) {
-                int value = (int) (this.offset - amount * SCROLL_OFFSET);
+                int value = (int) (this.offset - verticalAmount * SCROLL_OFFSET); // todo: horizontal separation
                 this.setOffset(value);
                 return true;
             }
