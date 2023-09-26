@@ -71,14 +71,16 @@ public class ScrollableFrame extends AbstractFrame {
 
         if (this.canScrollHorizontal) {
             this.horizontalScrollBar = new ScrollBarComponent(new Dim2i(this.viewPortDimension.x(), this.viewPortDimension.getLimitY() + 1, this.viewPortDimension.width(), 10), ScrollBarComponent.Mode.HORIZONTAL, this.frame.dim.width(), this.viewPortDimension.width(), offset -> {
-                this.buildFrame();
+                //this.buildFrame();
+                ((Dim2iExtended) ((Object) this.frame.dim)).setX(this.frameOrigin.x() - this.horizontalScrollBar.getOffset());
                 horizontalScrollBarOffset.set(offset);
             });
             this.horizontalScrollBar.setOffset(horizontalScrollBarOffset.get());
         }
         if (this.canScrollVertical) {
             this.verticalScrollBar = new ScrollBarComponent(new Dim2i(this.viewPortDimension.getLimitX() + 1, this.viewPortDimension.y(), 10, this.viewPortDimension.height()), ScrollBarComponent.Mode.VERTICAL, this.frame.dim.height(), this.viewPortDimension.height(), offset -> {
-                this.buildFrame();
+                //this.buildFrame();
+                ((Dim2iExtended) ((Object) this.frame.dim)).setY(this.frameOrigin.y() - this.verticalScrollBar.getOffset());
                 verticalScrollBarOffset.set(offset);
             }, this.viewPortDimension);
             this.verticalScrollBar.setOffset(verticalScrollBarOffset.get());
@@ -112,6 +114,22 @@ public class ScrollableFrame extends AbstractFrame {
         this.frame.buildFrame();
         this.children.add(this.frame);
         super.buildFrame();
+
+        // fixme: Ridiculous hack to snap to focused element
+        // for the meanwhile this works until a proper solution is implemented.
+        // this shouldn't be hardcoded into scrollable frame
+        this.frame.registerFocusListener(element -> {
+            if (element instanceof ControlElement<?> controlElement && this.canScrollVertical) {
+                Dim2i dim = controlElement.getDimensions();
+                int inputOffset = this.verticalScrollBar.getOffset();
+                if (dim.y() <= this.viewPortDimension.y()) {
+                    inputOffset += dim.y() - this.viewPortDimension.y();
+                } else if (dim.getLimitY() >= this.viewPortDimension.getLimitY()) {
+                    inputOffset += dim.getLimitY() - this.viewPortDimension.getLimitY();
+                }
+                this.verticalScrollBar.setOffset(inputOffset);
+            }
+        });
     }
 
     @Override
@@ -131,26 +149,6 @@ public class ScrollableFrame extends AbstractFrame {
 
         if (this.canScrollVertical) {
             this.verticalScrollBar.render(drawContext, mouseX, mouseY, delta);
-        }
-    }
-
-    // fixme: Ridiculous hack to snap to focused element, it also unfocuses the element for some unknown reason :>
-    // for the meanwhile this works until a proper solution is implemented.
-    // this shouldn't be hardcoded into scrollable frame
-    private void snapFocusedInViewport() {
-        if (this.frame.getFocused() instanceof ControlElement controlElement) {
-            Dim2i dim = controlElement.getDimensions();
-            if (this.canScrollVertical && !(dim.y() >= viewPortDimension.y() && dim.getLimitY() <= viewPortDimension.getLimitY())) {
-                int newOffset = this.verticalScrollBar.getOffset();
-                if (dim.y() < this.viewPortDimension.y()) {
-                    newOffset -= 23;
-                } else if (dim.getLimitY() > this.viewPortDimension.getLimitY()) {
-                    newOffset += 23; // widget size of 18 and 4 gap for groups
-                }
-
-                this.verticalScrollBar.setOffset(newOffset);
-                controlElement.setFocused(true);
-            }
         }
     }
 

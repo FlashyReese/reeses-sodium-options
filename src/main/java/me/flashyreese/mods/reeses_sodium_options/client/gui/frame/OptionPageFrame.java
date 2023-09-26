@@ -2,6 +2,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2i;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
 import me.jellysquid.mods.sodium.client.gui.options.OptionImpact;
@@ -76,7 +77,9 @@ public class OptionPageFrame extends AbstractFrame {
             // Add each option's control element
             for (Option<?> option : group.getOptions()) {
                 Control<?> control = option.getControl();
-                ControlElement<?> element = control.createElement(new Dim2i(this.dim.x(), this.dim.y() + y, this.dim.width(), 18));
+                Dim2i dim = new Dim2i(0, y, this.dim.width(), 18);
+                ((Dim2iExtended) (Object) dim).setPoint2i(((Point2i) (Object) this.dim));
+                ControlElement<?> element = control.createElement(dim);
                 this.children.add(element);
 
                 // Move down to the next option
