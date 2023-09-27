@@ -41,10 +41,6 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
 
     @Shadow
     @Final
-    private Rect2i sliderBounds;
-
-    @Shadow
-    @Final
     private int range;
 
     public MixinSliderControlElement(Option<Integer> option, Dim2i dim) {
@@ -65,12 +61,7 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
     public abstract double getThumbPositionForValue(int value);
 
     @Shadow
-    protected abstract void setValueFromMouse(double d);
-
-    @Shadow
     public abstract int getIntValue();
-
-    @Shadow @Final private ControlValueFormatter formatter;
 
     @Shadow public abstract void setValue(double d);
 

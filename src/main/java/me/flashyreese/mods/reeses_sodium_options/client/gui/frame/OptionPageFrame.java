@@ -12,11 +12,14 @@ import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.navigation.GuiNavigation;
+import net.minecraft.client.gui.navigation.GuiNavigationPath;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Language;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,6 +166,11 @@ public class OptionPageFrame extends AbstractFrame {
             drawContext.drawText(MinecraftClient.getInstance().textRenderer, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
         }
         drawContext.getMatrices().pop();
+    }
+
+    @Override
+    public @Nullable GuiNavigationPath getNavigationPath(GuiNavigation navigation) {
+        return super.getNavigationPath(navigation);
     }
 
     public static class Builder {

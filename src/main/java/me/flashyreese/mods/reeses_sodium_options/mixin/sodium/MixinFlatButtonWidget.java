@@ -42,6 +42,11 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     }
 
     @Override
+    public Dim2i getDimensions() {
+        return this.dim;
+    }
+
+    @Override
     public boolean isLeftAligned() {
         return this.leftAligned;
     }

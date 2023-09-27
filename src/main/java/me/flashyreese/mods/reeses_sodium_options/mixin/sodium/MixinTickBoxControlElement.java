@@ -15,12 +15,12 @@ public abstract class MixinTickBoxControlElement extends ControlElement<Boolean>
     }
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/Rect2i;getX()I"))
-    public int rso$getX(Rect2i instance) {
+    public int rso$renderSliderBoundsGetX(Rect2i instance) {
         return this.dim.getLimitX() - 16;
     }
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/Rect2i;getY()I"))
-    public int rso$getY(Rect2i instance) {
+    public int rso$renderSliderBoundsGetY(Rect2i instance) {
         return this.dim.getCenterY() - 5;
     }
 }
