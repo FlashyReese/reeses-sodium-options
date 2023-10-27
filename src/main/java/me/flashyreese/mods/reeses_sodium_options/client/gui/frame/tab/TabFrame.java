@@ -1,13 +1,15 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab;
 
+import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2i;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
+import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.Validate;
 
@@ -43,8 +45,9 @@ public class TabFrame extends AbstractFrame {
         this.onSetTab = onSetTab;
         if (this.tabSectionCanScroll) {
             this.tabSectionScrollBar = new ScrollBarComponent(new Dim2i(this.tabSection.getLimitX() - 11, this.tabSection.y(), 10, this.tabSection.height()), ScrollBarComponent.Mode.VERTICAL, tabSectionY, this.dim.height(), offset -> {
-                this.buildFrame();
+                //this.buildFrame();
                 tabSectionScrollBarOffset.set(offset);
+                ((Dim2iExtended) ((Object) this.tabSection)).setY(this.dim.y() - this.tabSectionScrollBar.getOffset());
             }, this.dim);
             this.tabSectionScrollBar.setOffset(tabSectionScrollBarOffset.get());
         }
@@ -91,19 +94,34 @@ public class TabFrame extends AbstractFrame {
 
         if (this.tabSectionCanScroll) {
             this.tabSectionScrollBar.updateThumbPosition();
+            this.children.add(this.tabSectionScrollBar);
         }
 
         super.buildFrame();
+        this.registerFocusListener(element -> {
+            if (element instanceof FlatButtonWidgetExtended flatButtonWidget && this.tabSectionCanScroll) {
+                Dim2i dim = flatButtonWidget.getDimensions();
+                int inputOffset = this.tabSectionScrollBar.getOffset();
+                if (dim.y() <= this.dim.y()) {
+                    inputOffset += dim.y() - this.dim.y();
+                } else if (dim.getLimitY() >= this.dim.getLimitY()) {
+                    inputOffset += dim.getLimitY() - this.dim.getLimitY();
+                }
+                this.tabSectionScrollBar.setOffset(inputOffset);
+            }
+        });
     }
 
     private void rebuildTabs() {
         int offsetY = 0;
         for (Tab<?> tab : this.tabs) {
             int x = this.tabSection.x();
-            int y = this.tabSection.y() + offsetY - (this.tabSectionCanScroll ? this.tabSectionScrollBar.getOffset() : 0);
+            int y = this.tabSection.y();
+            //int yOffset = offsetY - (this.tabSectionCanScroll ? this.tabSectionScrollBar.getOffset() : 0);
             int width = this.tabSection.width() - (this.tabSectionCanScroll ? 12 : 4);
             int height = 18;
-            Dim2i tabDim = new Dim2i(x, y, width, height);
+            Dim2i tabDim = new Dim2i(0, offsetY, width, height);
+            ((Dim2iExtended)(Object) tabDim).setPoint2i(((Point2i)(Object) this.tabSection));
 
             FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(tab));
             button.setSelected(this.selectedTab == tab);

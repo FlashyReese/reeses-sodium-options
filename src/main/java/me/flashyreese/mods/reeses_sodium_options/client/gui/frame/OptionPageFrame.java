@@ -2,6 +2,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2i;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
 import me.jellysquid.mods.sodium.client.gui.options.OptionImpact;
@@ -11,11 +12,14 @@ import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.navigation.GuiNavigation;
+import net.minecraft.client.gui.navigation.GuiNavigationPath;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Language;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +80,9 @@ public class OptionPageFrame extends AbstractFrame {
             // Add each option's control element
             for (Option<?> option : group.getOptions()) {
                 Control<?> control = option.getControl();
-                ControlElement<?> element = control.createElement(new Dim2i(this.dim.x(), this.dim.y() + y, this.dim.width(), 18));
+                Dim2i dim = new Dim2i(0, y, this.dim.width(), 18);
+                ((Dim2iExtended) (Object) dim).setPoint2i(((Point2i) (Object) this.dim));
+                ControlElement<?> element = control.createElement(dim);
                 this.children.add(element);
 
                 // Move down to the next option
@@ -160,6 +166,11 @@ public class OptionPageFrame extends AbstractFrame {
             drawContext.drawText(MinecraftClient.getInstance().textRenderer, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
         }
         drawContext.getMatrices().pop();
+    }
+
+    @Override
+    public @Nullable GuiNavigationPath getNavigationPath(GuiNavigation navigation) {
+        return super.getNavigationPath(navigation);
     }
 
     public static class Builder {

@@ -10,7 +10,8 @@
     "sodium.MixinFlatButtonWidget",
     "sodium.MixinOptionImpl",
     "sodium.MixinSliderControlElement",
-    "sodium.MixinSodiumOptionsGUI"
+    "sodium.MixinSodiumOptionsGUI",
+    "sodium.MixinTickBoxControlElement"
   ],
   "injectors": {
     "defaultRequire": 1

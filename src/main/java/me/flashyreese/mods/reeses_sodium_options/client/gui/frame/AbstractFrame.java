@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class AbstractFrame extends AbstractWidget implements ParentElement {
     protected final Dim2i dim;
@@ -21,6 +22,7 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
     protected boolean renderOutline;
     private Element focused;
     private boolean dragging;
+    private Consumer<Element> focusListener;
 
     public AbstractFrame(Dim2i dim, boolean renderOutline) {
         this.dim = dim;
@@ -59,6 +61,10 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
         RenderSystem.disableScissor();
     }
 
+    public void registerFocusListener(Consumer<Element> focusListener) {
+        this.focusListener = focusListener;
+    }
+
     @Override
     public boolean isDragging() {
         return this.dragging;
@@ -78,6 +84,9 @@ public abstract class AbstractFrame extends AbstractWidget implements ParentElem
     @Override
     public void setFocused(@Nullable Element focused) {
         this.focused = focused;
+        if (this.focusListener != null) {
+            this.focusListener.accept(focused);
+        }
     }
 
     @Override

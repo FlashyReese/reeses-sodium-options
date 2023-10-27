@@ -34,12 +34,12 @@
     }
   },
   "depends": {
-    "minecraft": "1.20.x",
+    "minecraft": ">=1.20.2",
     "sodium": "*"
   },
   "breaks": {
     "iris": "<1.1.4",
-    "sodium-extra": "<0.4.1",
+    "sodium-extra": "<0.5.3",
     "sodium": "<0.5.0"
   },
   "recommends": {
