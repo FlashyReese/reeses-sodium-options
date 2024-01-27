@@ -40,7 +40,7 @@
   "breaks": {
     "iris": "<1.1.4",
     "sodium-extra": "<0.5.3",
-    "sodium": "<0.5.0"
+    "sodium": "<0.5.6"
   },
   "recommends": {
     "sodium-extra": ">=0.4.2"
