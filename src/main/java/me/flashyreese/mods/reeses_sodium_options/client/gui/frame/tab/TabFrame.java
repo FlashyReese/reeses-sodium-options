@@ -5,7 +5,6 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExte
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2i;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
-import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
@@ -173,8 +172,8 @@ public class TabFrame extends AbstractFrame {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount));
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        return super.mouseScrolled(mouseX, mouseY, amount) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseScrolled(mouseX, mouseY, amount));
     }
 
     public static class Builder {
