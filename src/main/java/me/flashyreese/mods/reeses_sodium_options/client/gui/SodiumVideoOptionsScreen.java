@@ -333,14 +333,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
             return this.prompt.mouseClicked(mouseX, mouseY, button);
         }
 
-        boolean clicked = super.mouseClicked(mouseX, mouseY, button);
-
-        if (!clicked) {
-            this.setFocused(null);
-            return true;
-        }
-
-        return clicked;
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
