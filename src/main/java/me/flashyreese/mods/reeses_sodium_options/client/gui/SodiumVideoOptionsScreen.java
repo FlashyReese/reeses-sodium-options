@@ -7,22 +7,30 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.Tab;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.TabFrame;
 import me.flashyreese.mods.reeses_sodium_options.compat.IrisCompat;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.data.fingerprint.HashedFingerprint;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
 import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
+import me.jellysquid.mods.sodium.client.gui.prompt.ScreenPrompt;
+import me.jellysquid.mods.sodium.client.gui.prompt.ScreenPromptable;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.VideoOptionsScreen;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -30,7 +38,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-public class SodiumVideoOptionsScreen extends Screen {
+public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable {
 
     private static final AtomicReference<Text> tabFrameSelectedTab = new AtomicReference<>(null);
     private static final AtomicReference<Integer> tabFrameScrollBarOffset = new AtomicReference<>(0);
@@ -48,10 +56,67 @@ public class SodiumVideoOptionsScreen extends Screen {
 
     private SearchTextFieldComponent searchTextField;
 
+    private @Nullable ScreenPrompt prompt;
+
     public SodiumVideoOptionsScreen(Screen prev, List<OptionPage> pages) {
         super(Text.literal("Reese's Sodium Menu"));
         this.prevScreen = prev;
         this.pages.addAll(pages);
+
+        this.checkPromptTimers();
+    }
+
+    private void checkPromptTimers() {
+        // Never show the prompt in developer workspaces.
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            return;
+        }
+
+        var options = SodiumClientMod.options();
+
+        // If the user has disabled the nags forcefully (by config), or has already seen the prompt, don't show it again.
+        if (options.notifications.forceDisableDonationPrompts || options.notifications.hasSeenDonationPrompt) {
+            return;
+        }
+
+        HashedFingerprint fingerprint = null;
+
+        try {
+            fingerprint = HashedFingerprint.loadFromDisk();
+        } catch (Throwable t) {
+            SodiumClientMod.logger()
+                    .error("Failed to read the fingerprint from disk", t);
+        }
+
+        // If the fingerprint doesn't exist, or failed to be loaded, abort.
+        if (fingerprint == null) {
+            return;
+        }
+
+        // The fingerprint records the installation time. If it's been a while since installation, show the user
+        // a prompt asking for them to consider donating.
+        var now = Instant.now();
+        var threshold = Instant.ofEpochSecond(fingerprint.timestamp())
+                .plus(3, ChronoUnit.DAYS);
+
+        if (now.isAfter(threshold)) {
+            this.openDonationPrompt(options);
+        }
+    }
+
+    private void openDonationPrompt(SodiumGameOptions options) {
+        var prompt = new ScreenPrompt(this, DONATION_PROMPT_MESSAGE, 320, 190,
+                new ScreenPrompt.Action(Text.literal("Buy us a coffee"), this::openDonationPage));
+        prompt.setFocused(true);
+
+        options.notifications.hasSeenDonationPrompt = true;
+
+        try {
+            SodiumGameOptions.writeToDisk(options);
+        } catch (IOException e) {
+            SodiumClientMod.logger()
+                    .error("Failed to update config file", e);
+        }
     }
 
     // Hackalicious! Rebuild UI
@@ -101,13 +166,13 @@ public class SodiumVideoOptionsScreen extends Screen {
         this.donateButton = new FlatButtonWidget(donateButtonDim, donationText, this::openDonationPage);
         this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, Text.literal("x"), this::hideDonationButton);
 
-        if (SodiumClientMod.options().notifications.hideDonationButton) {
+        if (SodiumClientMod.options().notifications.hasClearedDonationButton || SodiumClientMod.options().notifications.forceDisableDonationPrompts) {
             this.setDonationButtonVisibility(false);
         }
 
 
         Dim2i searchTextFieldDim;
-        if (SodiumClientMod.options().notifications.hideDonationButton) {
+        if (SodiumClientMod.options().notifications.hasClearedDonationButton || SodiumClientMod.options().notifications.forceDisableDonationPrompts) {
             searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width(), 20);
         } else {
             searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width() - (tabFrameDim.getLimitX() - donateButtonDim.x()) - 2, 20);
@@ -120,7 +185,7 @@ public class SodiumVideoOptionsScreen extends Screen {
             //int size = this.client.textRenderer.getWidth(Text.translatable(IrisApi.getInstance().getMainScreenLanguageKey()));
             int size = this.client.textRenderer.getWidth(Text.translatable(IrisCompat.getIrisShaderPacksScreenLanguageKey()));
             Dim2i shaderPackButtonDim;
-            if (!SodiumClientMod.options().notifications.hideDonationButton) {
+            if (!(SodiumClientMod.options().notifications.hasClearedDonationButton || SodiumClientMod.options().notifications.forceDisableDonationPrompts)) {
                 shaderPackButtonDim = new Dim2i(donateButtonDim.x() - 12 - size, tabFrameDim.y() - 26, 10 + size, 20);
             } else {
                 shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.y() - 26, 10 + size, 20);
@@ -170,7 +235,10 @@ public class SodiumVideoOptionsScreen extends Screen {
     public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
         super.renderBackground(drawContext, mouseX, mouseY, delta);
         this.updateControls();
-        this.frame.render(drawContext, mouseX, mouseY, delta);
+        this.frame.render(drawContext, this.prompt != null ? -1 : mouseX, this.prompt != null ? -1 : mouseY, delta);
+        if (this.prompt != null) {
+            this.prompt.render(drawContext, mouseX, mouseY, delta);
+        }
     }
 
     private void updateControls() {
@@ -199,10 +267,10 @@ public class SodiumVideoOptionsScreen extends Screen {
 
     private void hideDonationButton() {
         SodiumGameOptions options = SodiumClientMod.options();
-        options.notifications.hideDonationButton = true;
+        options.notifications.hasClearedDonationButton = true;
 
         try {
-            options.writeChanges();
+            SodiumGameOptions.writeToDisk(options);
         } catch (IOException e) {
             throw new RuntimeException("Failed to save configuration", e);
         }
@@ -260,7 +328,27 @@ public class SodiumVideoOptionsScreen extends Screen {
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (this.prompt != null) {
+            return this.prompt.mouseClicked(mouseX, mouseY, button);
+        }
+
+        boolean clicked = super.mouseClicked(mouseX, mouseY, button);
+
+        if (!clicked) {
+            this.setFocused(null);
+            return true;
+        }
+
+        return clicked;
+    }
+
+    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (this.prompt != null) {
+            return this.prompt.keyPressed(keyCode, scanCode, modifiers);
+        }
+
         if (keyCode == GLFW.GLFW_KEY_P && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0 && !(this.searchTextField != null && this.searchTextField.isFocused())) {
             MinecraftClient.getInstance().setScreen(new VideoOptionsScreen(this.prevScreen, MinecraftClient.getInstance().options));
 
@@ -280,5 +368,33 @@ public class SodiumVideoOptionsScreen extends Screen {
         lastSearch.set("");
         lastSearchIndex.set(0);
         this.client.setScreen(this.prevScreen);
+    }
+
+    @Override
+    public void setPrompt(@Nullable ScreenPrompt prompt) {
+        this.prompt = prompt;
+    }
+
+    @Override
+    public @Nullable ScreenPrompt getPrompt() {
+        return this.prompt;
+    }
+
+    @Override
+    public Dim2i getDimensions() {
+        return new Dim2i(0, 0, this.width, this.height);
+    }
+
+
+    private static final List<StringVisitable> DONATION_PROMPT_MESSAGE;
+
+    static {
+        DONATION_PROMPT_MESSAGE = List.of(
+                StringVisitable.concat(Text.literal("Hello!")),
+                StringVisitable.concat(Text.literal("It seems that you've been enjoying "), Text.literal("Sodium").withColor(0x27eb92), Text.literal(", the free and open-source optimization mod for Minecraft.")),
+                StringVisitable.concat(Text.literal("Mods like these are complex. They require "), Text.literal("thousands of hours").withColor(0xff6e00), Text.literal(" of development, debugging, and tuning to create the experience that players have come to expect.")),
+                StringVisitable.concat(Text.literal("If you'd like to show your token of appreciation, and support the development of our mod in the process, then consider "), Text.literal("buying us a coffee").withColor(0xed49ce), Text.literal(".")),
+                StringVisitable.concat(Text.literal("And thanks again for using our mod! We hope it helps you (and your computer.)"))
+        );
     }
 }

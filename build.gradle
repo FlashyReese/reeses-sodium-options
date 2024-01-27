@@ -1,6 +1,6 @@
 plugins {
     id 'org.ajoberstar.grgit' version '5.2.1'
-    id 'fabric-loom' version '1.4-SNAPSHOT'
+    id 'fabric-loom' version '1.5-SNAPSHOT'
     id 'maven-publish'
     id 'signing'
 }
@@ -35,8 +35,8 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    //modImplementation "me.jellysquid.mods:sodium-fabric:0.5.0-rc1+git.ddd735e"
-    modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    modImplementation "me.jellysquid.mods:sodium-fabric:0.5.6-snapshot+mc1.20.3-build.1"
+    //modImplementation "maven.modrinth:sodium:${project.sodium_version}"
     //modImplementation "maven.modrinth:iris:${project.iris_version}"
 
     //modRuntimeOnly "maven.modrinth:lazydfu:0.1.3"
