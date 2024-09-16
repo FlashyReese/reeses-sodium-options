@@ -59,7 +59,11 @@ public class StringUtils {
             if (j == -1) {
                 return i + 1;
             }
-            k += skip[text.charAt(k)];
+            int index = text.charAt(k);
+            if (index >= skip.length) {
+                break;
+            }
+            k += skip[index];
         }
         return -1;
     }
