@@ -1,6 +1,5 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
 import me.flashyreese.mods.reeses_sodium_options.util.StringUtils;
@@ -54,7 +53,9 @@ public class SearchTextFieldComponent extends AbstractWidget {
     private int selectionEnd;
     private int lastCursorPosition = this.getCursor();
 
-    private long lastCursorUpdate;
+    // Cursor properties
+    private static final long CURSOR_ANIMATION_DURATION = 750;
+    private long nextCursorUpdate;
     private boolean currentCursorState;
     private float currentCursorAlpha;
 
@@ -115,9 +116,8 @@ public class SearchTextFieldComponent extends AbstractWidget {
         }
         // Cursor
         if (this.isFocused()) {
-            RenderSystem.setShaderColor(1f, 1f, 1f, currentCursorAlpha);
-            guiGraphics.fill(RenderType.guiOverlay(), cursorX, textStartY - 1, cursorX + 1, textStartY + 1 + this.font.lineHeight, -3092272);
-            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+            int color = ((int) (this.currentCursorAlpha * 255) << 24) | 0x00D0D0D0;
+            guiGraphics.fill(RenderType.guiOverlay(), cursorX, textStartY - 1, cursorX + 1, textStartY + 1 + this.font.lineHeight, color);
         }
         // Highlighted text
         if (selectionEndOffset != selectionStartOffset) {
@@ -193,7 +193,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         String beforeSelectionText = (new StringBuilder(this.text)).replace(selectionStartIndex, selectionEndIndex, filteredText).toString();
         if (this.textPredicate.test(beforeSelectionText)) {
             this.currentCursorState = true;
-            this.lastCursorUpdate = System.currentTimeMillis();
+            this.nextCursorUpdate = System.currentTimeMillis() + CURSOR_ANIMATION_DURATION;
 
             this.text = beforeSelectionText;
             this.setSelectionStart(selectionStartIndex + filteredTextLength);
@@ -502,28 +502,25 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     private void updateCursorAlpha() {
-        final float animationDuration = 750f;
-        long l = System.currentTimeMillis();
-        if (l - lastCursorUpdate > animationDuration) {
-            lastCursorUpdate = l;
-            currentCursorState = !currentCursorState;
+        long currentTimeMillis = System.currentTimeMillis();
+        if (currentTimeMillis >= this.nextCursorUpdate) {
+            this.currentCursorState = !this.currentCursorState;
+            this.nextCursorUpdate = currentTimeMillis + CURSOR_ANIMATION_DURATION;
         }
 
-        float cursorAlpha = (System.currentTimeMillis() - lastCursorUpdate) / animationDuration;
+        float cursorAlpha = (float) (this.nextCursorUpdate - currentTimeMillis) / CURSOR_ANIMATION_DURATION;
 
-        if (cursorAlpha <= 0.25) {
-            cursorAlpha *= 4;
-        } else if (cursorAlpha >= 0.75) {
+        if (cursorAlpha <= 0.25f) {
+            cursorAlpha *= 4f;
+        } else if (cursorAlpha >= 0.75f) {
             cursorAlpha = (1 - cursorAlpha) * 4f;
         } else {
-            cursorAlpha = 1;
+            cursorAlpha = 1f;
         }
 
         cursorAlpha = Math.clamp(cursorAlpha, 0f, 1f);
 
-        cursorAlpha = currentCursorState ? 1 : 1 - cursorAlpha;
-
-        this.currentCursorAlpha = cursorAlpha;
+        this.currentCursorAlpha = this.currentCursorState ? 1 : 1 - cursorAlpha;
     }
 
     public boolean isVisible() {
