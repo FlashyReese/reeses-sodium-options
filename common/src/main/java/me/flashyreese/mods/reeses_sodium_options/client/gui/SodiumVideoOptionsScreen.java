@@ -174,15 +174,19 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         }
 
 
+        basicFrameBuilder = this.parentBasicFrameBuilder(basicFrameDim, tabFrameDim);
+
+
         Dim2i searchTextFieldDim;
         if (SodiumClientMod.options().notifications.hasClearedDonationButton) {
             searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width(), 20);
         } else {
             searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width() - (tabFrameDim.getLimitX() - donateButtonDim.x()) - 2, 20);
+
+            basicFrameBuilder
+                    .addChild(dim -> this.donateButton)
+                    .addChild(dim -> this.hideDonateButton);
         }
-
-
-        basicFrameBuilder = this.parentBasicFrameBuilder(basicFrameDim, tabFrameDim);
 
         if (IrisCompat.isIrisPresent()) { // FabricLoader.getInstance().isModLoaded("iris")) {
             //int size = this.client.textRenderer.getWidth(Text.translatable(IrisApi.getInstance().getMainScreenLanguageKey()));
@@ -212,8 +216,6 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         return BasicFrame.builder()
                 .withDimension(parentBasicFrameDim)
                 .withRenderOutline(false)
-                .addChild(dim -> this.donateButton)
-                .addChild(dim -> this.hideDonateButton)
                 .addChild(parentDim -> TabFrame.createBuilder()
                         .setDimension(tabFrameDim)
                         .shouldRenderOutline(false)
