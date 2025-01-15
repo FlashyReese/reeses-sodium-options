@@ -39,8 +39,8 @@
     }
   },
   "depends": {
-    "minecraft": ">=1.21.4",
-    "sodium": ">=0.6.2"
+    "minecraft": ">=1.21",
+    "sodium": ">=0.6.5"
   },
   "breaks": {
     "iris": "<1.1.4",

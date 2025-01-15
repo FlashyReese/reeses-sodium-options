@@ -19,14 +19,14 @@ Replaces Sodium's Options Screen
 [[dependencies.reeses_sodium_options]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.4,)"
+versionRange = "[1.21,)"
 ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.reeses_sodium_options]]
 modId = "sodium"
 type = "required"
-versionRange = "[0.6.2,)"
+versionRange = "[0.6.5,)"
 ordering = "NONE"
 side = "CLIENT"
 
