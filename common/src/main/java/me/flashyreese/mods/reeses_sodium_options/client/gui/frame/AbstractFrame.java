@@ -79,6 +79,9 @@ public abstract class AbstractFrame extends AbstractWidget implements ContainerE
 
     @Override
     public void setFocused(@Nullable GuiEventListener focused) {
+        if (this.focused != null) {
+            this.focused.setFocused(false);
+        }
         this.focused = focused;
         if (this.focusListener != null) {
             this.focusListener.accept(focused);

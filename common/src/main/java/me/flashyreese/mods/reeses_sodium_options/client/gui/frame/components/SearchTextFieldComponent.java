@@ -15,7 +15,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
@@ -102,7 +102,8 @@ public class SearchTextFieldComponent extends AbstractWidget {
         }
         if (!displayedText.isEmpty()) {
             String preCursorText = isCursorWithinDisplayedText ? displayedText.substring(0, selectionStartOffset) : displayedText;
-            textEndX = guiGraphics.drawString(this.font, this.renderTextProvider.apply(preCursorText, this.firstCharacterIndex), textEndX, textStartY, 0xFFFFFFFF);
+            guiGraphics.drawString(this.font, this.renderTextProvider.apply(preCursorText, this.firstCharacterIndex), textEndX, textStartY, 0xFFFFFFFF);
+            textEndX = textEndX + this.font.width(this.renderTextProvider.apply(preCursorText, this.firstCharacterIndex));
         }
         boolean isCursorAtEnd = this.selectionStart < this.text.length() || this.text.length() >= this.getMaxLength();
         int cursorX = textEndX;
@@ -118,7 +119,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         // Cursor
         if (this.isFocused()) {
             int color = ((int) (this.currentCursorAlpha * 255) << 24) | 0x00D0D0D0;
-            guiGraphics.fill(RenderType.guiOverlay(), cursorX, textStartY - 1, cursorX + 1, textStartY + 1 + this.font.lineHeight, color);
+            guiGraphics.fill(RenderPipelines.GUI, cursorX, textStartY - 1, cursorX + 1, textStartY + 1 + this.font.lineHeight, color);
         }
         // Highlighted text
         if (selectionEndOffset != selectionStartOffset) {
@@ -172,7 +173,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (startX > this.dim.x() + this.dim.width()) {
             startX = this.dim.x() + this.dim.width();
         }
-        guiGraphics.fill(RenderType.guiTextHighlight(), startX, startY, endX, endY, -16776961);
+        guiGraphics.fill(RenderPipelines.GUI_TEXT_HIGHLIGHT, startX, startY, endX, endY, -16776961);
     }
 
     private int getMaxLength() {
