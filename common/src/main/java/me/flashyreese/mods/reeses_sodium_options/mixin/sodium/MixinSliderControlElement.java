@@ -4,13 +4,12 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.SliderControlElement
 import net.caffeinemc.mods.sodium.client.gui.options.Option;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.navigation.CommonInputs;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -73,20 +72,20 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (!isFocused()) return false;
 
-        if (CommonInputs.selected(keyCode)) {
+        if (event.isSelection()) {
             this.setEditMode(!this.isEditMode());
             return true;
         }
 
         if (this.isEditMode()) {
-            if (keyCode == GLFW.GLFW_KEY_LEFT) {
-                this.option.setValue(Mth.clamp(this.option.getValue() - interval, min, max));
+            if (event.isLeft()) {
+                this.option.setValue(Mth.clamp(this.option.getValue() - this.interval, this.min, this.max));
                 return true;
-            } else if (keyCode == GLFW.GLFW_KEY_RIGHT) {
-                this.option.setValue(Mth.clamp(this.option.getValue() + interval, min, max));
+            } else if (event.isRight()) {
+                this.option.setValue(Mth.clamp(this.option.getValue() + this.interval, this.min, this.max));
                 return true;
             }
         }
@@ -104,7 +103,7 @@ public abstract class MixinSliderControlElement extends ControlElement<Integer> 
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (this.option.isAvailable() && this.sliderBounds.contains((int) mouseX, (int) mouseY) && Screen.hasShiftDown()) {
+        if (this.option.isAvailable() && this.sliderBounds.contains((int) mouseX, (int) mouseY) && Minecraft.getInstance().hasShiftDown()) {
             this.setValueFromMouseScroll(verticalAmount); // todo: horizontal separation
 
             return true;
