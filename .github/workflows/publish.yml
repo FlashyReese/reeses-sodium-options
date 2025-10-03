@@ -51,29 +51,29 @@ jobs:
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
             fabric/build/libs/*-@(dev|sources|javadoc|dev-shadow).jar
-      - name: Publish NeoForge to Modrinth, CurseForge & GitHub
-        uses: Kir-Antipov/mc-publish@v3.3.0
-        with:
-          modrinth-id: Bh37bMuy
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-
-          curseforge-id: 511319
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-          name: '[NeoForge] ${{ github.event.release.name }}'
-          version: '${{ github.event.release.tag_name }}+neoforge'
-          version-type: release
-
-          loaders: neoforge
-
-          dependencies: |
-            sodium
-            sodium-extra(optional)
-            irisshaders(optional)
-            iris(optional)
-
-          files: |
-            neoforge/build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
-            neoforge/build/libs/*-@(dev|sources|javadoc|dev-shadow).jar
+#      - name: Publish NeoForge to Modrinth, CurseForge & GitHub
+#        uses: Kir-Antipov/mc-publish@v3.3.0
+#        with:
+#          modrinth-id: Bh37bMuy
+#          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+#
+#          curseforge-id: 511319
+#          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+#
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#
+#          name: '[NeoForge] ${{ github.event.release.name }}'
+#          version: '${{ github.event.release.tag_name }}+neoforge'
+#          version-type: release
+#
+#          loaders: neoforge
+#
+#          dependencies: |
+#            sodium
+#            sodium-extra(optional)
+#            irisshaders(optional)
+#            iris(optional)
+#
+#          files: |
+#            neoforge/build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
+#            neoforge/build/libs/*-@(dev|sources|javadoc|dev-shadow).jar
