@@ -42,6 +42,10 @@ dependencies {
 
 }
 
+tasks.test {
+    failOnNoDiscoveredTests = false
+}
+
 loom {
     @Suppress("UnstableApiUsage")
     mixin { defaultRefmapName.set("${rootProject.name}.refmap.json") }
