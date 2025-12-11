@@ -1,12 +1,15 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
+import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
+import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,10 +27,10 @@ public class ScrollableFrame extends AbstractFrame {
     private ScrollBarComponent verticalScrollBar = null;
     private ScrollBarComponent horizontalScrollBar = null;
 
-    public ScrollableFrame(Dim2i dim, AbstractFrame frame, boolean renderOutline, AtomicReference<Integer> verticalScrollBarOffset, AtomicReference<Integer> horizontalScrollBarOffset) {
-        super(dim, renderOutline);
+    public ScrollableFrame(Dim2i dim, Screen screen, ModOptions modOptions, AbstractFrame frame, boolean renderOutline, AtomicReference<Integer> verticalScrollBarOffset, AtomicReference<Integer> horizontalScrollBarOffset) {
+        super(dim, screen, renderOutline, modOptions);
         this.frame = frame;
-        this.frameOrigin = new Dim2i(frame.dim.x(), frame.dim.y(), 0, 0);
+        this.frameOrigin = new Dim2i(((AbstractWidgetExtended) frame).getDim().x(), ((AbstractWidgetExtended) frame).getDim().y(), 0, 0);
         this.setupFrame(verticalScrollBarOffset, horizontalScrollBarOffset);
         this.buildFrame();
     }
@@ -39,15 +42,15 @@ public class ScrollableFrame extends AbstractFrame {
     public void setupFrame(AtomicReference<Integer> verticalScrollBarOffset, AtomicReference<Integer> horizontalScrollBarOffset) {
         int maxWidth = 0;
         int maxHeight = 0;
-        if (!((Dim2iExtended) ((Object) this.dim)).canFitDimension(this.frame.dim)) {
-            if (this.dim.getLimitX() < this.frame.dim.getLimitX()) {
-                int value = this.frame.dim.x() - this.dim.x() + this.frame.dim.width();
+        if (!((Dim2iExtended) ((Object) ((AbstractWidgetExtended) this).getDim())).canFitDimension(((AbstractWidgetExtended) this.frame).getDim())) {
+            if (((AbstractWidgetExtended) this).getDim().getLimitX() < ((AbstractWidgetExtended) this.frame).getDim().getLimitX()) {
+                int value = ((AbstractWidgetExtended) this.frame).getDim().x() - ((AbstractWidgetExtended) this).getDim().x() + ((AbstractWidgetExtended) this.frame).getDim().width();
                 if (maxWidth < value) {
                     maxWidth = value;
                 }
             }
-            if (this.dim.getLimitY() < this.frame.dim.getLimitY()) {
-                int value = this.frame.dim.y() - this.dim.y() + this.frame.dim.height();
+            if (((AbstractWidgetExtended) this).getDim().getLimitY() < ((AbstractWidgetExtended) this.frame).getDim().getLimitY()) {
+                int value = ((AbstractWidgetExtended) this.frame).getDim().y() - ((AbstractWidgetExtended) this).getDim().y() + ((AbstractWidgetExtended) this.frame).getDim().height();
                 if (maxHeight < value) {
                     maxHeight = value;
                 }
@@ -62,27 +65,27 @@ public class ScrollableFrame extends AbstractFrame {
         }
 
         if (this.canScrollHorizontal && this.canScrollVertical) {
-            this.viewPortDimension = new Dim2i(this.dim.x(), this.dim.y(), this.dim.width() - 11, this.dim.height() - 11);
+            this.viewPortDimension = new Dim2i(((AbstractWidgetExtended) this).getDim().x(), ((AbstractWidgetExtended) this).getDim().y(), ((AbstractWidgetExtended) this).getDim().width() - 11, ((AbstractWidgetExtended) this).getDim().height() - 11);
         } else if (this.canScrollHorizontal) {
-            this.viewPortDimension = new Dim2i(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height() - 11);
-            ((Dim2iExtended) ((Object) this.frame.dim)).setHeight(this.frame.dim.height() - 11); // fixme: don't mutate rather
+            this.viewPortDimension = new Dim2i(((AbstractWidgetExtended) this).getDim().x(), ((AbstractWidgetExtended) this).getDim().y(), ((AbstractWidgetExtended) this).getDim().width(), ((AbstractWidgetExtended) this).getDim().height() - 11);
+            ((Dim2iExtended) ((Object) ((AbstractWidgetExtended) this.frame).getDim())).setHeight(((AbstractWidgetExtended) this.frame).getDim().height() - 11); // fixme: don't mutate rather
         } else if (this.canScrollVertical) {
-            this.viewPortDimension = new Dim2i(this.dim.x(), this.dim.y(), this.dim.width() - 11, this.dim.height());
-            ((Dim2iExtended) ((Object) this.frame.dim)).setWidth(this.frame.dim.width() - 11); // fixme: don't mutate rather
+            this.viewPortDimension = new Dim2i(((AbstractWidgetExtended) this).getDim().x(), ((AbstractWidgetExtended) this).getDim().y(), ((AbstractWidgetExtended) this).getDim().width() - 11, ((AbstractWidgetExtended) this).getDim().height());
+            ((Dim2iExtended) ((Object) ((AbstractWidgetExtended) this.frame).getDim())).setWidth(((AbstractWidgetExtended) this.frame).getDim().width() - 11); // fixme: don't mutate rather
         }
 
         if (this.canScrollHorizontal) {
-            this.horizontalScrollBar = new ScrollBarComponent(new Dim2i(this.viewPortDimension.x(), this.viewPortDimension.getLimitY() + 1, this.viewPortDimension.width(), 10), ScrollBarComponent.ScrollDirection.HORIZONTAL, this.frame.dim.width(), this.viewPortDimension.width(), offset -> {
+            this.horizontalScrollBar = new ScrollBarComponent(new Dim2i(this.viewPortDimension.x(), this.viewPortDimension.getLimitY() + 1, this.viewPortDimension.width(), 10), ScrollBarComponent.ScrollDirection.HORIZONTAL, ((AbstractWidgetExtended) this.frame).getDim().width(), this.viewPortDimension.width(), offset -> {
                 //this.buildFrame();
-                ((Dim2iExtended) ((Object) this.frame.dim)).setX(this.frameOrigin.x() - this.horizontalScrollBar.getOffset());
+                ((Dim2iExtended) ((Object) ((AbstractWidgetExtended) this.frame).getDim())).setX(this.frameOrigin.x() - this.horizontalScrollBar.getOffset());
                 horizontalScrollBarOffset.set(offset);
             });
             this.horizontalScrollBar.setOffset(horizontalScrollBarOffset.get());
         }
         if (this.canScrollVertical) {
-            this.verticalScrollBar = new ScrollBarComponent(new Dim2i(this.viewPortDimension.getLimitX() + 1, this.viewPortDimension.y(), 10, this.viewPortDimension.height()), ScrollBarComponent.ScrollDirection.VERTICAL, this.frame.dim.height(), this.viewPortDimension.height(), offset -> {
+            this.verticalScrollBar = new ScrollBarComponent(new Dim2i(this.viewPortDimension.getLimitX() + 1, this.viewPortDimension.y(), 10, this.viewPortDimension.height()), ScrollBarComponent.ScrollDirection.VERTICAL, ((AbstractWidgetExtended) this.frame).getDim().height(), this.viewPortDimension.height(), offset -> {
                 //this.buildFrame();
-                ((Dim2iExtended) ((Object) this.frame.dim)).setY(this.frameOrigin.y() - this.verticalScrollBar.getOffset());
+                ((Dim2iExtended) ((Object) ((AbstractWidgetExtended) this.frame).getDim())).setY(this.frameOrigin.y() - this.verticalScrollBar.getOffset());
                 verticalScrollBarOffset.set(offset);
             }, this.viewPortDimension);
             this.verticalScrollBar.setOffset(verticalScrollBarOffset.get());
@@ -103,12 +106,12 @@ public class ScrollableFrame extends AbstractFrame {
         }
 
         if (this.canScrollHorizontal) {
-            ((Dim2iExtended) ((Object) this.frame.dim)).setX(this.frameOrigin.x() - this.horizontalScrollBar.getOffset());
+            ((Dim2iExtended) ((Object) ((AbstractWidgetExtended) this.frame).getDim())).setX(this.frameOrigin.x() - this.horizontalScrollBar.getOffset());
             this.children.add(this.horizontalScrollBar);
         }
 
         if (this.canScrollVertical) {
-            ((Dim2iExtended) ((Object) this.frame.dim)).setY(this.frameOrigin.y() - this.verticalScrollBar.getOffset());
+            ((Dim2iExtended) ((Object) ((AbstractWidgetExtended) this.frame).getDim())).setY(this.frameOrigin.y() - this.verticalScrollBar.getOffset());
             this.children.add(this.verticalScrollBar);
         }
 
@@ -120,8 +123,8 @@ public class ScrollableFrame extends AbstractFrame {
         // for the meanwhile this works until a proper solution is implemented.
         // this shouldn't be hardcoded into scrollable frame
         this.frame.registerFocusListener(element -> {
-            if (element instanceof ControlElement<?> controlElement && this.canScrollVertical) {
-                Dim2i dim = controlElement.getDimensions();
+            if (element instanceof ControlElement controlElement && this.canScrollVertical) {
+                Dim2i dim = ((AbstractWidgetExtended) controlElement).getDim();
                 int inputOffset = this.verticalScrollBar.getOffset();
                 if (dim.y() <= this.viewPortDimension.y()) {
                     inputOffset += dim.y() - this.viewPortDimension.y();
@@ -137,7 +140,7 @@ public class ScrollableFrame extends AbstractFrame {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         if (this.canScrollHorizontal || this.canScrollVertical) {
             if (this.renderOutline) {
-                this.drawBorder(guiGraphics, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
+                this.drawBorder(guiGraphics, ((AbstractWidgetExtended) this).getDim().x(), ((AbstractWidgetExtended) this).getDim().y(), ((AbstractWidgetExtended) this).getDim().getLimitX(), ((AbstractWidgetExtended) this).getDim().getLimitY(), 0xFFAAAAAA);
             }
             this.applyScissor(guiGraphics, this.viewPortDimension.x(), this.viewPortDimension.y(), this.viewPortDimension.width(), this.viewPortDimension.height(), () -> super.render(guiGraphics, mouseX, mouseY, delta));
         } else {
@@ -173,6 +176,7 @@ public class ScrollableFrame extends AbstractFrame {
     public boolean mouseReleased(MouseButtonEvent event) {
         return super.mouseReleased(event) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseReleased(event)) || (this.canScrollVertical && this.verticalScrollBar.mouseReleased(event));
     }
+
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) || (this.canScrollVertical && this.verticalScrollBar.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount));
     }
@@ -183,6 +187,8 @@ public class ScrollableFrame extends AbstractFrame {
         private AbstractFrame frame = null;
         private AtomicReference<Integer> verticalScrollBarOffset = new AtomicReference<>(0);
         private AtomicReference<Integer> horizontalScrollBarOffset = new AtomicReference<>(0);
+        private Screen screen;
+        private ModOptions modOptions;
 
         public Builder withDimension(Dim2i dim) {
             this.dim = dim;
@@ -209,8 +215,18 @@ public class ScrollableFrame extends AbstractFrame {
             return this;
         }
 
+        public Builder withScreen(Screen screen) {
+            this.screen = screen;
+            return this;
+        }
+
+        public Builder withModOptions(ModOptions modConfig) {
+            this.modOptions = modConfig;
+            return this;
+        }
+
         public ScrollableFrame build() {
-            return new ScrollableFrame(this.dim, this.frame, this.renderOutline, this.verticalScrollBarOffset, this.horizontalScrollBarOffset);
+            return new ScrollableFrame(this.dim, this.screen, this.modOptions, this.frame, this.renderOutline, this.verticalScrollBarOffset, this.horizontalScrollBarOffset);
         }
     }
 }

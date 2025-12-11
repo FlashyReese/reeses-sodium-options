@@ -1,8 +1,11 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
+import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
+import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,8 +17,8 @@ public class BasicFrame extends AbstractFrame {
 
     protected List<Function<Dim2i, AbstractWidget>> functions;
 
-    public BasicFrame(Dim2i dim, boolean renderOutline, List<Function<Dim2i, AbstractWidget>> functions) {
-        super(dim, renderOutline);
+    public BasicFrame(Dim2i dim, Screen screen, boolean renderOutline, List<Function<Dim2i, AbstractWidget>> functions, ModOptions modOptions) {
+        super(dim, screen, renderOutline, modOptions);
         this.functions = functions;
         this.buildFrame();
     }
@@ -29,7 +32,7 @@ public class BasicFrame extends AbstractFrame {
         this.children.clear();
         this.controlElements.clear();
 
-        this.functions.forEach(function -> this.children.add(function.apply(dim)));
+        this.functions.forEach(function -> this.children.add(function.apply(((AbstractWidgetExtended) this).getDim())));
 
         super.buildFrame();
     }
@@ -43,6 +46,8 @@ public class BasicFrame extends AbstractFrame {
         private final List<Function<Dim2i, AbstractWidget>> functions = new ArrayList<>();
         private Dim2i dim;
         private boolean renderOutline;
+        private Screen screen;
+        private ModOptions modOptions;
 
         public Builder withDimension(Dim2i dim) {
             this.dim = dim;
@@ -54,6 +59,16 @@ public class BasicFrame extends AbstractFrame {
             return this;
         }
 
+        public Builder withScreen(Screen screen) {
+            this.screen = screen;
+            return this;
+        }
+
+        public Builder withModOptions(ModOptions modOptions) {
+            this.modOptions = modOptions;
+            return this;
+        }
+
         public Builder addChild(Function<Dim2i, AbstractWidget> function) {
             this.functions.add(function);
             return this;
@@ -61,8 +76,9 @@ public class BasicFrame extends AbstractFrame {
 
         public BasicFrame build() {
             Validate.notNull(this.dim, "Dimension must be specified");
+            Validate.notNull(this.screen, "Screen must be specified");
 
-            return new BasicFrame(this.dim, this.renderOutline, this.functions);
+            return new BasicFrame(this.dim, this.screen, this.renderOutline, this.functions, this.modOptions);
         }
     }
 }

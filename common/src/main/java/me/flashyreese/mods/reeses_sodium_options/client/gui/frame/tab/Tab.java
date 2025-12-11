@@ -1,10 +1,12 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.OptionPageFrame;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.PageFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.ScrollableFrame;
-import net.caffeinemc.mods.sodium.client.gui.options.OptionPage;
+import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
+import net.caffeinemc.mods.sodium.client.config.structure.Page;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,14 +44,18 @@ public record Tab<T extends AbstractFrame>(Component title, Function<Dim2i, T> f
             return new Tab<T>(this.title, this.frameFunction);
         }
 
-        public Tab<ScrollableFrame> from(OptionPage page, AtomicReference<Integer> verticalScrollBarOffset) {
-            return new Tab<>(page.getName(), dim2i -> ScrollableFrame
+        public Tab<ScrollableFrame> from(Screen screen, ModOptions modOptions, Page page, AtomicReference<Integer> verticalScrollBarOffset) {
+            return new Tab<>(page.name(), dim2i -> ScrollableFrame
                     .builder()
                     .withDimension(dim2i)
-                    .withFrame(OptionPageFrame
+                    .withModOptions(modOptions)
+                    .withScreen(screen)
+                    .withFrame(PageFrame
                             .builder()
                             .withDimension(new Dim2i(dim2i.x(), dim2i.y(), dim2i.width(), dim2i.height()))
-                            .withOptionPage(page)
+                            .withModOptions(modOptions)
+                            .withPage(page)
+                            .withScreen(screen)
                             .build())
                     .withVerticalScrollBarOffset(verticalScrollBarOffset)
                     .build());

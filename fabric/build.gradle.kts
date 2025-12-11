@@ -1,7 +1,7 @@
 plugins {
     id("java")
     id("idea")
-    id("fabric-loom") version ("1.11-SNAPSHOT")
+    id("fabric-loom") version ("1.14-SNAPSHOT")
 }
 
 val MINECRAFT_VERSION: String by rootProject.extra
@@ -34,11 +34,11 @@ dependencies {
     // Fabric API modules
     addEmbeddedFabricModule("fabric-api-base")
     addEmbeddedFabricModule("fabric-block-view-api-v2")
-    addEmbeddedFabricModule("fabric-renderer-api-v1")
+    //addEmbeddedFabricModule("fabric-renderer-api-v1")
     addEmbeddedFabricModule("fabric-rendering-fluids-v1")
     addEmbeddedFabricModule("fabric-resource-loader-v0")
     compileOnly(project(":common"))
-    modImplementation("maven.modrinth:sodium:$SODIUM_VERSION-fabric")
+    modImplementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
 
 }
 

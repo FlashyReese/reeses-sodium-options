@@ -97,16 +97,6 @@ public abstract class MixinDim2i implements Dim2iExtended, Point2i {
     }
 
     @Override
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    @Override
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    @Override
     public void setWidth(int width) {
         this.width = width;
     }
@@ -122,8 +112,18 @@ public abstract class MixinDim2i implements Dim2iExtended, Point2i {
     }
 
     @Override
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    @Override
     public int getY() {
         return this.y();
+    }
+
+    @Override
+    public void setY(int y) {
+        this.y = y;
     }
 
     @Override

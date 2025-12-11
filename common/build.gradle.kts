@@ -3,7 +3,7 @@ import net.fabricmc.loom.task.AbstractRemapJarTask
 plugins {
     id("java")
     id("idea")
-    id("fabric-loom") version "1.11-SNAPSHOT"
+    id("fabric-loom") version "1.14-SNAPSHOT"
 }
 
 val MINECRAFT_VERSION: String by rootProject.extra
@@ -37,9 +37,9 @@ dependencies {
 
     addDependentFabricModule("fabric-api-base")
     addDependentFabricModule("fabric-block-view-api-v2")
-    addDependentFabricModule("fabric-renderer-api-v1")
+    //addDependentFabricModule("fabric-renderer-api-v1")
 
-    modImplementation("maven.modrinth:sodium:$SODIUM_VERSION-fabric")
+    modImplementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
 }
 
 tasks.withType<AbstractRemapJarTask>().forEach {

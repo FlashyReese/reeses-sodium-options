@@ -5,11 +5,12 @@
   "refmap": "reeses-sodium-options.refmap.json",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "sodium.MixinAbstractWidget",
     "sodium.MixinControlElement",
     "sodium.MixinCyclingControlElement",
     "sodium.MixinDim2i",
     "sodium.MixinFlatButtonWidget",
-    "sodium.MixinOptionImpl",
+    "sodium.MixinOption",
     "sodium.MixinSliderControlElement",
     "sodium.MixinSodiumOptionsGUI",
     "sodium.MixinTickBoxControlElement"

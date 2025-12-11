@@ -1,12 +1,14 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
+import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2i;
-import net.caffeinemc.mods.sodium.client.gui.options.Option;
-import net.caffeinemc.mods.sodium.client.gui.options.OptionGroup;
-import net.caffeinemc.mods.sodium.client.gui.options.OptionImpact;
-import net.caffeinemc.mods.sodium.client.gui.options.OptionPage;
+import net.caffeinemc.mods.sodium.api.config.option.OptionImpact;
+import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
+import net.caffeinemc.mods.sodium.client.config.structure.Option;
+import net.caffeinemc.mods.sodium.client.config.structure.OptionGroup;
+import net.caffeinemc.mods.sodium.client.config.structure.Page;
 import net.caffeinemc.mods.sodium.client.gui.options.control.Control;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
@@ -15,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -25,14 +28,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OptionPageFrame extends AbstractFrame {
+public class PageFrame extends AbstractFrame {
     protected final Dim2i originalDim;
-    protected final OptionPage page;
+    protected final Page page;
     private long lastTime = 0;
-    private ControlElement<?> lastHoveredElement = null;
+    private ControlElement lastHoveredElement = null;
 
-    public OptionPageFrame(Dim2i dim, boolean renderOutline, OptionPage page) {
-        super(dim, renderOutline);
+    public PageFrame(Screen screen, Dim2i dim, boolean renderOutline, Page page, ModOptions modOptions) {
+        super(dim, screen, renderOutline, modOptions);
         this.originalDim = new Dim2i(dim.x(), dim.y(), dim.width(), dim.height());
         this.page = page;
         this.setupFrame();
@@ -48,21 +51,21 @@ public class OptionPageFrame extends AbstractFrame {
         this.controlElements.clear();
 
         int y = 0;
-        if (!this.page.getGroups().isEmpty()) {
-            OptionGroup lastGroup = this.page.getGroups().get(this.page.getGroups().size() - 1);
+        if (!this.page.groups().isEmpty()) {
+            OptionGroup lastGroup = this.page.groups().get(this.page.groups().size() - 1);
 
-            for (OptionGroup group : this.page.getGroups()) {
-                y += group.getOptions().size() * 18;
+            for (OptionGroup group : this.page.groups()) {
+                y += group.options().size() * 18;
                 if (group != lastGroup) {
                     y += 4;
                 }
             }
         }
 
-        ((Dim2iExtended) ((Object) this.dim)).setHeight(y);
-        this.page.getGroups().forEach(group -> group.getOptions().forEach(option -> {
+        ((Dim2iExtended) ((Object) ((AbstractWidgetExtended) this).getDim())).setHeight(y);
+        this.page.groups().forEach(group -> group.options().forEach(option -> {
             if (option instanceof OptionExtended optionExtended) {
-                optionExtended.setParentDimension(this.dim);
+                optionExtended.setParentDimension(((AbstractWidgetExtended) this).getDim());
             }
         }));
     }
@@ -75,13 +78,14 @@ public class OptionPageFrame extends AbstractFrame {
         this.controlElements.clear();
 
         int y = 0;
-        for (OptionGroup group : this.page.getGroups()) {
+        for (OptionGroup group : this.page.groups()) {
             // Add each option's control element
-            for (Option<?> option : group.getOptions()) {
-                Control<?> control = option.getControl();
-                Dim2i dim = new Dim2i(0, y, this.dim.width(), 18);
-                ((Dim2iExtended) (Object) dim).setPoint2i(((Point2i) (Object) this.dim));
-                ControlElement<?> element = control.createElement(dim);
+            for (Option option : group.options()) {
+                Control control = option.getControl();
+                Dim2i dim = new Dim2i(0, y, this.getWidth(), 18);
+                ((Dim2iExtended) (Object) dim).setPoint2i(((Point2i) (Object) ((AbstractWidgetExtended) this).getDim()));
+                ControlElement element = control.createElement(this.screen, this, dim, this.modOptions.theme());
+                ((OptionExtended) element.getOption()).setDim2i(dim);
                 this.children.add(element);
 
                 // Move down to the next option
@@ -97,12 +101,12 @@ public class OptionPageFrame extends AbstractFrame {
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        ControlElement<?> hoveredElement = this.controlElements.stream()
-                .filter(controlElement -> ((Dim2iExtended) (Object) controlElement.getDimensions()).overlapWith(this.originalDim))
+        ControlElement hoveredElement = this.controlElements.stream()
+                .filter(controlElement -> ((Dim2iExtended) (Object) ((AbstractWidgetExtended) controlElement).getDim()).overlapWith(this.originalDim))
                 .filter(ControlElement::isHovered)
                 .findFirst()
                 .orElse(this.controlElements.stream()
-                        .filter(controlElement -> ((Dim2iExtended) (Object) controlElement.getDimensions()).overlapWith(this.originalDim))
+                        .filter(controlElement -> ((Dim2iExtended) (Object) ((AbstractWidgetExtended) controlElement).getDim()).overlapWith(this.originalDim))
                         .filter(ControlElement::isFocused)
                         .findFirst()
                         .orElse(null));
@@ -120,10 +124,10 @@ public class OptionPageFrame extends AbstractFrame {
         }
     }
 
-    private void renderOptionTooltip(GuiGraphics guiGraphics, ControlElement<?> element) {
+    private void renderOptionTooltip(GuiGraphics guiGraphics, ControlElement element) {
         if (this.lastTime + 500 > System.currentTimeMillis()) return;
 
-        Dim2i dim = element.getDimensions();
+        Dim2i dim = ((AbstractWidgetExtended) element).getDim();
 
         int textPadding = 3;
         int boxPadding = 3;
@@ -134,13 +138,13 @@ public class OptionPageFrame extends AbstractFrame {
         int boxY = dim.getLimitY();
         int boxX = dim.x();
 
-        Option<?> option = element.getOption();
+        Option option = element.getOption();
         List<FormattedCharSequence> tooltip = new ArrayList<>(Minecraft.getInstance().font.split(option.getTooltip(), boxWidth - (textPadding * 2)));
 
         OptionImpact impact = option.getImpact();
 
         if (impact != null) {
-            tooltip.add(Language.getInstance().getVisualOrder(Component.translatable("sodium.options.performance_impact_string", impact.getLocalizedName()).withStyle(ChatFormatting.GRAY)));
+            tooltip.add(Language.getInstance().getVisualOrder(Component.translatable("sodium.options.performance_impact_string", impact.getName()).withStyle(ChatFormatting.GRAY)));
         }
 
         int boxHeight = (tooltip.size() * 12) + boxPadding;
@@ -172,7 +176,9 @@ public class OptionPageFrame extends AbstractFrame {
     public static class Builder {
         private Dim2i dim;
         private boolean renderOutline;
-        private OptionPage page;
+        private Page page;
+        private Screen screen;
+        private ModOptions modOptions;
 
         public Builder withDimension(Dim2i dim) {
             this.dim = dim;
@@ -184,16 +190,28 @@ public class OptionPageFrame extends AbstractFrame {
             return this;
         }
 
-        public Builder withOptionPage(OptionPage page) {
+        public Builder withPage(Page page) {
             this.page = page;
             return this;
         }
 
-        public OptionPageFrame build() {
+        public Builder withScreen(Screen screen) {
+            this.screen = screen;
+            return this;
+        }
+
+        public Builder withModOptions(ModOptions modConfig) {
+            this.modOptions = modConfig;
+            return this;
+        }
+
+        public PageFrame build() {
             Validate.notNull(this.dim, "Dimension must be specified");
             Validate.notNull(this.page, "Option Page must be specified");
+            Validate.notNull(this.screen, "Screen must be specified");
+            Validate.notNull(this.modOptions, "Mod Options must be specified");
 
-            return new OptionPageFrame(this.dim, this.renderOutline, this.page);
+            return new PageFrame(this.screen, this.dim, this.renderOutline, this.page, this.modOptions);
         }
     }
 }

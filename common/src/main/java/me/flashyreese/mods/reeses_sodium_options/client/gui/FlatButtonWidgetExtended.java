@@ -1,11 +1,7 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui;
 
-import net.caffeinemc.mods.sodium.client.util.Dim2i;
-
 public interface FlatButtonWidgetExtended {
-    boolean isLeftAligned();
+    boolean isLeftAlign();
 
-    void setLeftAligned(boolean leftAligned);
-
-    Dim2i getDimensions();
+    void setLeftAlign(boolean leftAligned);
 }

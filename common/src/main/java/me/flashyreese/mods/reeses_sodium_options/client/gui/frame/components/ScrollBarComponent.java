@@ -16,26 +16,23 @@ public class ScrollBarComponent extends AbstractWidget {
 
     protected static final int SCROLL_STEP = 6;
 
-    protected final Dim2i scrollBarArea;
     private final ScrollDirection mode;
     private final int contentLength;
     private final int visibleAreaLength;
     private final int maxContentOffset;
     private final Consumer<Integer> offsetChangeListener;
+    private final Dim2i extraScrollArea;
     private int offset = 0;
     private boolean isDragging;
-
     private Dim2i scrollThumb = null;
     private int scrollThumbClickOffset;
-
-    private final Dim2i extraScrollArea;
 
     public ScrollBarComponent(Dim2i trackArea, ScrollDirection scrollDirection, int contentLength, int visibleAreaLength, Consumer<Integer> offsetChangeListener) {
         this(trackArea, scrollDirection, contentLength, visibleAreaLength, offsetChangeListener, null);
     }
 
     public ScrollBarComponent(Dim2i scrollBarArea, ScrollDirection scrollDirection, int contentLength, int visibleAreaLength, Consumer<Integer> offsetChangeListener, Dim2i extraScrollArea) {
-        this.scrollBarArea = scrollBarArea;
+        super(scrollBarArea);
         this.mode = scrollDirection;
         this.contentLength = contentLength;
         this.visibleAreaLength = visibleAreaLength;
@@ -46,37 +43,37 @@ public class ScrollBarComponent extends AbstractWidget {
     }
 
     public void updateThumbLocation() {
-        int trackSize = (this.mode == ScrollDirection.VERTICAL ? this.scrollBarArea.height() : this.scrollBarArea.width() - 6);
+        int trackSize = (this.mode == ScrollDirection.VERTICAL ? this.getHeight() : this.getWidth() - 6);
         int scrollThumbLength = (this.visibleAreaLength * trackSize) / this.contentLength;
         int maximumScrollThumbOffset = this.visibleAreaLength - scrollThumbLength;
         int scrollThumbOffset = (this.offset * maximumScrollThumbOffset) / this.maxContentOffset;
         this.scrollThumb = new Dim2i(
-                this.scrollBarArea.x() + 2 + (this.mode == ScrollDirection.HORIZONTAL ? scrollThumbOffset : 0),
-                this.scrollBarArea.y() + 2 + (this.mode == ScrollDirection.VERTICAL ? scrollThumbOffset : 0),
-                (this.mode == ScrollDirection.VERTICAL ? this.scrollBarArea.width() : scrollThumbLength) - 4,
-                (this.mode == ScrollDirection.VERTICAL ? scrollThumbLength : this.scrollBarArea.height()) - 4
+                this.getX() + 2 + (this.mode == ScrollDirection.HORIZONTAL ? scrollThumbOffset : 0),
+                this.getY() + 2 + (this.mode == ScrollDirection.VERTICAL ? scrollThumbOffset : 0),
+                (this.mode == ScrollDirection.VERTICAL ? this.getWidth() : scrollThumbLength) - 4,
+                (this.mode == ScrollDirection.VERTICAL ? scrollThumbLength : this.getHeight()) - 4
         );
     }
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        this.drawBorder(guiGraphics, this.scrollBarArea.x(), this.scrollBarArea.y(), this.scrollBarArea.getLimitX(), this.scrollBarArea.getLimitY(), 0xFFAAAAAA);
+        this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), 0xFFAAAAAA);
         this.drawRect(guiGraphics, this.scrollThumb.x(), this.scrollThumb.y(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
         if (this.isFocused()) {
-            this.drawBorder(guiGraphics, this.scrollBarArea.x(), this.scrollBarArea.y(), this.scrollBarArea.getLimitX(), this.scrollBarArea.getLimitY(), -1);
+            this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), -1);
         }
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        if (this.scrollBarArea.containsCursor(event.x(), event.y())) {
+        if (this.isMouseOver(event.x(), event.y())) {
             if (this.scrollThumb.containsCursor(event.x(), event.y())) {
                 this.scrollThumbClickOffset = (int) (this.mode == ScrollDirection.VERTICAL ? event.y() - this.scrollThumb.getCenterY() : event.x() - this.scrollThumb.getCenterX());
                 this.isDragging = true;
             } else {
                 int thumbLength = this.mode == ScrollDirection.VERTICAL ? this.scrollThumb.height() : this.scrollThumb.width();
-                int trackLength = this.mode == ScrollDirection.VERTICAL ? this.scrollBarArea.height() : this.scrollBarArea.width();
-                int value = (int) (((this.mode == ScrollDirection.VERTICAL ? event.y() - this.scrollBarArea.y() : event.x() - this.scrollBarArea.x()) - thumbLength / 2.0) * this.maxContentOffset / (trackLength - thumbLength));
+                int trackLength = this.mode == ScrollDirection.VERTICAL ? this.getHeight() : this.getWidth();
+                int value = (int) (((this.mode == ScrollDirection.VERTICAL ? event.y() - this.getY() : event.x() - this.getX()) - thumbLength / 2.0) * this.maxContentOffset / (trackLength - thumbLength));
                 this.setOffset(value);
                 this.isDragging = false;
             }
@@ -98,8 +95,8 @@ public class ScrollBarComponent extends AbstractWidget {
     public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         if (this.isDragging) {
             int thumbLength = this.mode == ScrollDirection.VERTICAL ? this.scrollThumb.height() : this.scrollThumb.width();
-            int trackLength = this.mode == ScrollDirection.VERTICAL ? this.scrollBarArea.height() : this.scrollBarArea.width();
-            int value = (int) (((this.mode == ScrollDirection.VERTICAL ? event.y() : event.x()) - this.scrollThumbClickOffset - (this.mode == ScrollDirection.VERTICAL ? this.scrollBarArea.y() : this.scrollBarArea.x()) - thumbLength / 2.0) * this.maxContentOffset / (trackLength - thumbLength));
+            int trackLength = this.mode == ScrollDirection.VERTICAL ? this.getHeight() : this.getWidth();
+            int value = (int) (((this.mode == ScrollDirection.VERTICAL ? event.y() : event.x()) - this.scrollThumbClickOffset - (this.mode == ScrollDirection.VERTICAL ? this.getY() : this.getX()) - thumbLength / 2.0) * this.maxContentOffset / (trackLength - thumbLength));
             this.setOffset(value);
             return true;
         }
@@ -108,7 +105,7 @@ public class ScrollBarComponent extends AbstractWidget {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (this.scrollBarArea.containsCursor(mouseX, mouseY) || this.extraScrollArea != null && this.extraScrollArea.containsCursor(mouseX, mouseY)) {
+        if (this.isMouseOver(mouseX, mouseY) || this.extraScrollArea != null && this.extraScrollArea.containsCursor(mouseX, mouseY)) {
             this.setOffset(this.offset - (int) verticalAmount * SCROLL_STEP);
             return true;
         }
@@ -127,7 +124,7 @@ public class ScrollBarComponent extends AbstractWidget {
 
     @Override
     public @NotNull ScreenRectangle getRectangle() {
-        return new ScreenRectangle(this.scrollBarArea.x(), this.scrollBarArea.y(), this.scrollBarArea.width(), this.scrollBarArea.height());
+        return new ScreenRectangle(this.getX(), this.getY(), this.getWidth(), this.getHeight());
     }
 
     @Override
@@ -139,8 +136,10 @@ public class ScrollBarComponent extends AbstractWidget {
         int newOffset = switch (event.key()) {
             case GLFW.GLFW_KEY_UP -> this.getOffset() - SCROLL_STEP;
             case GLFW.GLFW_KEY_DOWN -> this.getOffset() + SCROLL_STEP;
-            case GLFW.GLFW_KEY_LEFT -> this.mode == ScrollDirection.HORIZONTAL ? this.getOffset() - SCROLL_STEP : this.getOffset();
-            case GLFW.GLFW_KEY_RIGHT -> this.mode == ScrollDirection.HORIZONTAL ? this.getOffset() + SCROLL_STEP : this.getOffset();
+            case GLFW.GLFW_KEY_LEFT ->
+                    this.mode == ScrollDirection.HORIZONTAL ? this.getOffset() - SCROLL_STEP : this.getOffset();
+            case GLFW.GLFW_KEY_RIGHT ->
+                    this.mode == ScrollDirection.HORIZONTAL ? this.getOffset() + SCROLL_STEP : this.getOffset();
             default -> this.getOffset();
         };
 
@@ -150,11 +149,6 @@ public class ScrollBarComponent extends AbstractWidget {
         }
 
         return false;
-    }
-
-    @Override
-    public boolean isMouseOver(double x, double y) {
-        return this.scrollBarArea.containsCursor(x, y);
     }
 
     public enum ScrollDirection {

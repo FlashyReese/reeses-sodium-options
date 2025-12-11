@@ -1,13 +1,13 @@
 package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
-import net.caffeinemc.mods.sodium.client.gui.options.OptionImpl;
+import net.caffeinemc.mods.sodium.client.config.structure.Option;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(OptionImpl.class)
-public class MixinOptionImpl implements OptionExtended {
+@Mixin(Option.class)
+public class MixinOption implements OptionExtended {
     @Unique
     private Dim2i parent;
     @Unique

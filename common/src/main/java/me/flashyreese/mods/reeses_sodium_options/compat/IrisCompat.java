@@ -20,7 +20,8 @@ public class IrisCompat {
             handleScreen = MethodHandles.lookup().findVirtual(api, "openMainIrisScreenObj", MethodType.methodType(Object.class, Object.class));
             handleTranslationKey = MethodHandles.lookup().findVirtual(api, "getMainScreenLanguageKey", MethodType.methodType(String.class));
             irisPresent = true;
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                 InvocationTargetException e) {
             irisPresent = false;
         }
     }

@@ -1,19 +1,19 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components;
 
+import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
 import me.flashyreese.mods.reeses_sodium_options.util.StringUtils;
-import net.caffeinemc.mods.sodium.client.gui.options.Option;
-import net.caffeinemc.mods.sodium.client.gui.options.OptionPage;
+import net.caffeinemc.mods.sodium.client.config.structure.Option;
+import net.caffeinemc.mods.sodium.client.config.structure.OptionGroup;
+import net.caffeinemc.mods.sodium.client.config.structure.Page;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -23,6 +23,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -34,8 +35,9 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 public class SearchTextFieldComponent extends AbstractWidget {
-    protected final Dim2i dim;
-    protected final List<OptionPage> pages;
+    // Cursor properties
+    private static final long CURSOR_ANIMATION_DURATION = 750;
+    protected final List<Page> pages;
     private final Font font = Minecraft.getInstance().font;
     private final Predicate<String> textPredicate = Objects::nonNull;
     private final BiFunction<String, Integer, FormattedCharSequence> renderTextProvider = (string, firstCharacterIndex) -> FormattedCharSequence.forward(string, Style.EMPTY);
@@ -55,15 +57,12 @@ public class SearchTextFieldComponent extends AbstractWidget {
     private int selectionStart;
     private int selectionEnd;
     private int lastCursorPosition = this.getCursor();
-
-    // Cursor properties
-    private static final long CURSOR_ANIMATION_DURATION = 750;
     private long nextCursorUpdate;
     private boolean currentCursorState;
     private float currentCursorAlpha;
 
-    public SearchTextFieldComponent(Dim2i dim, List<OptionPage> pages, AtomicReference<Component> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen, AtomicReference<String> lastSearch, AtomicReference<Integer> lastSearchIndex) {
-        this.dim = dim;
+    public SearchTextFieldComponent(Dim2i dim, List<Page> pages, AtomicReference<Component> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen, AtomicReference<String> lastSearch, AtomicReference<Integer> lastSearchIndex) {
+        super(dim);
         this.pages = pages;
         this.tabFrameSelectedTab = tabFrameSelectedTab;
         this.tabFrameScrollBarOffset = tabFrameScrollBarOffset;
@@ -88,16 +87,16 @@ public class SearchTextFieldComponent extends AbstractWidget {
             Component emptyText = Component.translatable(key);
             if (emptyText.getString().equals(key))
                 emptyText = Component.literal("Search options...");
-            this.drawString(guiGraphics, emptyText, this.dim.x() + 6, this.dim.y() + 6, 0xFFAAAAAA);
+            this.drawString(guiGraphics, emptyText, this.getX() + 6, ((AbstractWidgetExtended) this).getDim().y() + 6, 0xFFAAAAAA);
         }
 
-        this.drawRect(guiGraphics, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), this.isFocused() ? 0xE0000000 : 0x90000000);
+        this.drawRect(guiGraphics, this.getX(), ((AbstractWidgetExtended) this).getDim().y(), ((AbstractWidgetExtended) this).getDim().getLimitX(), ((AbstractWidgetExtended) this).getDim().getLimitY(), this.isFocused() ? 0xE0000000 : 0x90000000);
         int selectionStartOffset = this.selectionStart - this.firstCharacterIndex;
         int selectionEndOffset = this.selectionEnd - this.firstCharacterIndex;
         String displayedText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
         boolean isCursorWithinDisplayedText = selectionStartOffset >= 0 && selectionStartOffset <= displayedText.length();
-        int textStartX = this.dim.x() + 6;
-        int textStartY = this.dim.y() + 6;
+        int textStartX = this.getX() + 6;
+        int textStartY = this.getY() + 6;
         int textEndX = textStartX;
         if (selectionEndOffset > displayedText.length()) {
             selectionEndOffset = displayedText.length();
@@ -110,7 +109,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         boolean isCursorAtEnd = this.selectionStart < this.text.length() || this.text.length() >= this.getMaxLength();
         int cursorX = textEndX;
         if (!isCursorWithinDisplayedText) {
-            cursorX = selectionStartOffset > 0 ? textStartX + this.dim.width() - 12 : textStartX;
+            cursorX = selectionStartOffset > 0 ? textStartX + this.getWidth() - 12 : textStartX;
         } else if (isCursorAtEnd) {
             --cursorX;
             --textEndX;
@@ -132,13 +131,16 @@ public class SearchTextFieldComponent extends AbstractWidget {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean repeated) {
-        int clickX = Mth.floor(event.x()) - this.dim.x() - 6;
+        int clickX = Mth.floor(event.x()) - this.getX() - 6;
         String displayedText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
         this.setCursor(this.font.plainSubstrByWidth(displayedText, clickX).length() + this.firstCharacterIndex);
 
-        this.setFocused(this.dim.containsCursor(event.x(), event.y()));
+        this.setFocused(this.isMouseOver(event.x(), event.y()));
         this.pages.forEach(page -> page
-                .getOptions()
+                .groups()
+                .stream()
+                .flatMap(optionGroup -> optionGroup.options().stream())
+                .toList()
                 .stream()
                 .filter(OptionExtended.class::isInstance)
                 .map(OptionExtended.class::cast)
@@ -150,11 +152,6 @@ public class SearchTextFieldComponent extends AbstractWidget {
     @Override
     public void setFocused(boolean focused) {
         this.focused = focused;
-    }
-
-    @Override
-    public boolean isMouseOver(double x, double y) {
-        return this.dim.containsCursor(x, y);
     }
 
     private void drawSelectionHighlight(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY) {
@@ -169,11 +166,11 @@ public class SearchTextFieldComponent extends AbstractWidget {
             startY = endY;
             endY = temp;
         }
-        if (endX > this.dim.x() + this.dim.width()) {
-            endX = this.dim.x() + this.dim.width();
+        if (endX > this.getX() + this.getWidth()) {
+            endX = this.getX() + this.getWidth();
         }
-        if (startX > this.dim.x() + this.dim.width()) {
-            startX = this.dim.x() + this.dim.width();
+        if (startX > this.getX() + this.getWidth()) {
+            startX = this.getX() + this.getWidth();
         }
         guiGraphics.fill(RenderPipelines.GUI_TEXT_HIGHLIGHT, startX, startY, endX, endY, -16776961);
     }
@@ -212,7 +209,11 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     private void onChanged(String query) {
-        this.pages.forEach(page -> page.getOptions()
+        this.pages.forEach(page -> page
+                .groups()
+                .stream()
+                .flatMap(optionGroup -> optionGroup.options().stream())
+                .toList()
                 .stream()
                 .filter(OptionExtended.class::isInstance)
                 .map(OptionExtended.class::cast)
@@ -222,8 +223,13 @@ public class SearchTextFieldComponent extends AbstractWidget {
         this.lastSearch.set(query.trim());
         if (this.editable) {
             if (!query.trim().isEmpty()) {
-                List<Option<?>> searchResults = StringUtils.searchElements(
-                        () -> this.pages.stream().flatMap(p -> p.getOptions().stream()).iterator(),
+                List<Option> searchResults = StringUtils.searchElements(
+                        () -> this.pages.stream().flatMap(p -> p
+                                .groups()
+                                .stream()
+                                .flatMap(optionGroup -> optionGroup.options().stream())
+                                .toList()
+                                .stream()).iterator(),
                         query,
                         o -> String.format("%s %s", o.getName().getString(), o.getTooltip().getString())
                 );
@@ -390,7 +396,11 @@ public class SearchTextFieldComponent extends AbstractWidget {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        this.pages.forEach(page -> page.getOptions()
+        this.pages.forEach(page -> page
+                .groups()
+                .stream()
+                .flatMap(optionGroup -> optionGroup.options().stream())
+                .toList()
                 .stream()
                 .filter(OptionExtended.class::isInstance)
                 .map(OptionExtended.class::cast)
@@ -425,32 +435,34 @@ public class SearchTextFieldComponent extends AbstractWidget {
                     case GLFW.GLFW_KEY_ENTER -> {
                         if (this.editable) {
                             int count = 0;
-                            for (OptionPage page : this.pages) {
-                                for (Option<?> option : page.getOptions()) {
-                                    if (option instanceof OptionExtended optionExtended && optionExtended.isHighlight() && optionExtended.getParentDimension() != null) {
-                                        if (count == this.lastSearchIndex.get()) {
-                                            Dim2i optionDim = optionExtended.getDim2i();
-                                            Dim2i parentDim = optionExtended.getParentDimension();
-                                            int maxOffset = parentDim.height() - this.tabDimHeight;
-                                            int input = optionDim.y() - parentDim.y();
-                                            int inputOffset = input + optionDim.height() == parentDim.height() ? parentDim.height() : input;
-                                            int offset = inputOffset * maxOffset / parentDim.height();
+                            for (Page page : this.pages) {
+                                for (OptionGroup group : page.groups()) {
+                                    for (Option option : group.options()) {
+                                        if (option instanceof OptionExtended optionExtended && optionExtended.isHighlight() && optionExtended.getParentDimension() != null) {
+                                            if (count == this.lastSearchIndex.get()) {
+                                                Dim2i optionDim = optionExtended.getDim2i();
+                                                Dim2i parentDim = optionExtended.getParentDimension();
+                                                int maxOffset = parentDim.height() - this.tabDimHeight;
+                                                int input = optionDim.y() - parentDim.y();
+                                                int inputOffset = input + optionDim.height() == parentDim.height() ? parentDim.height() : input;
+                                                int offset = inputOffset * maxOffset / parentDim.height();
 
-                                            int total = this.pages.stream().mapToInt(page2 -> Math.toIntExact(page2.getOptions().stream().filter(OptionExtended.class::isInstance).map(OptionExtended.class::cast).filter(OptionExtended::isHighlight).count())).sum();
+                                                int total = this.pages.stream().mapToInt(page2 -> Math.toIntExact(page2.groups().stream().flatMap(group2 -> group2.options().stream()).toList().stream().filter(OptionExtended.class::isInstance).map(OptionExtended.class::cast).filter(OptionExtended::isHighlight).count())).sum();
 
-                                            int value = total == this.lastSearchIndex.get() + 1 ? 0 : this.lastSearchIndex.get() + 1;
-                                            optionExtended.setSelected(true);
-                                            this.lastSearchIndex.set(value);
-                                            this.tabFrameSelectedTab.set(page.getName());
-                                            // todo: calculate tab frame scroll bar offset
-                                            this.tabFrameScrollBarOffset.set(0);
+                                                int value = total == this.lastSearchIndex.get() + 1 ? 0 : this.lastSearchIndex.get() + 1;
+                                                optionExtended.setSelected(true);
+                                                this.lastSearchIndex.set(value);
+                                                this.tabFrameSelectedTab.set(page.name());
+                                                // todo: calculate tab frame scroll bar offset
+                                                this.tabFrameScrollBarOffset.set(0);
 
-                                            this.optionPageScrollBarOffset.set(offset);
-                                            this.setFocused(false);
-                                            this.sodiumVideoOptionsScreen.rebuildUI();
-                                            return true;
+                                                this.optionPageScrollBarOffset.set(offset);
+                                                this.setFocused(false);
+                                                this.sodiumVideoOptionsScreen.rebuildUI();
+                                                return true;
+                                            }
+                                            count++;
                                         }
-                                        count++;
                                     }
                                 }
                             }
@@ -540,7 +552,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     public int getInnerWidth() {
-        return this.dim.width() - 12;
+        return this.getWidth() - 12;
     }
 
     @Override
@@ -548,10 +560,5 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (!this.visible)
             return null;
         return super.nextFocusPath(navigation);
-    }
-
-    @Override
-    public @NotNull ScreenRectangle getRectangle() {
-        return new ScreenRectangle(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height());
     }
 }
