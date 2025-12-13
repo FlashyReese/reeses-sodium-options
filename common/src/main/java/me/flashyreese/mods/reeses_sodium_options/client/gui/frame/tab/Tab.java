@@ -12,7 +12,16 @@ import net.minecraft.network.chat.Component;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-public record Tab<T extends AbstractFrame>(Component title, Function<Dim2i, T> frameFunction) {
+public class Tab<T extends AbstractFrame> {
+    private final ModOptions modOptions;
+    private final Component title;
+    private final Function<Dim2i, T> frameFunction;
+
+    public Tab(ModOptions modOptions, Component title, Function<Dim2i, T> frameFunction) {
+        this.modOptions = modOptions;
+        this.title = title;
+        this.frameFunction = frameFunction;
+    }
 
     public static Tab.Builder<?> builder() {
         return new Tab.Builder<>();
@@ -27,6 +36,7 @@ public record Tab<T extends AbstractFrame>(Component title, Function<Dim2i, T> f
     }
 
     public static class Builder<T extends AbstractFrame> {
+        private ModOptions modOptions;
         private Component title;
         private Function<Dim2i, T> frameFunction;
 
@@ -40,12 +50,17 @@ public record Tab<T extends AbstractFrame>(Component title, Function<Dim2i, T> f
             return this;
         }
 
+        public Builder<T> withModOptions(ModOptions modOptions) {
+            this.modOptions = modOptions;
+            return this;
+        }
+
         public Tab<T> build() {
-            return new Tab<T>(this.title, this.frameFunction);
+            return new Tab<T>(this.modOptions, this.title, this.frameFunction);
         }
 
         public Tab<ScrollableFrame> from(Screen screen, ModOptions modOptions, Page page, AtomicReference<Integer> verticalScrollBarOffset) {
-            return new Tab<>(page.name(), dim2i -> ScrollableFrame
+            return new Tab<>(modOptions, page.name(), dim2i -> ScrollableFrame
                     .builder()
                     .withDimension(dim2i)
                     .withModOptions(modOptions)

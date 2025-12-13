@@ -4,6 +4,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtend
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2i;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.LabelComponent;
 import net.caffeinemc.mods.sodium.api.config.option.OptionImpact;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
@@ -55,6 +56,10 @@ public class PageFrame extends AbstractFrame {
             OptionGroup lastGroup = this.page.groups().get(this.page.groups().size() - 1);
 
             for (OptionGroup group : this.page.groups()) {
+                if (group.name() != null && !group.name().getString().isEmpty()) {
+                    y += 18;
+                }
+
                 y += group.options().size() * 18;
                 if (group != lastGroup) {
                     y += 4;
@@ -79,6 +84,14 @@ public class PageFrame extends AbstractFrame {
 
         int y = 0;
         for (OptionGroup group : this.page.groups()) {
+            if (group.name() != null && !group.name().getString().isEmpty()) {
+                Dim2i dim = new Dim2i(0, y + 4, this.getWidth(), 18);
+                ((Dim2iExtended) (Object) dim).setPoint2i(((Point2i) (Object) ((AbstractWidgetExtended) this).getDim()));
+                this.children.add(new LabelComponent(dim, group.name(), 0xFFFFFFFF));
+
+                y += 18;
+            }
+
             // Add each option's control element
             for (Option option : group.options()) {
                 Control control = option.getControl();
@@ -159,6 +172,9 @@ public class PageFrame extends AbstractFrame {
         if (boxY < 0) {
             boxY = dim.getLimitY();
         }
+
+        if (tooltip.isEmpty())
+            return;
 
         this.drawRect(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
         this.drawBorder(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3);
