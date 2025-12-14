@@ -27,6 +27,10 @@ public class Tab<T extends AbstractFrame> {
         return new Tab.Builder<>();
     }
 
+    public ModOptions getModOptions() {
+        return modOptions;
+    }
+
     public Component getTitle() {
         return title;
     }

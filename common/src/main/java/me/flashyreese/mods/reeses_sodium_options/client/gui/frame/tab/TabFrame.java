@@ -6,6 +6,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExte
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2i;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.TabHeaderComponent;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
@@ -25,6 +26,11 @@ import java.util.function.Consumer;
 
 public class TabFrame extends AbstractFrame {
 
+    public static final int TAB_HEIGHT = 18;
+    public static final int TAB_HEADER_HEIGHT = 22;
+    public static final int TAB_HEADER_PADDING = 4;
+    public static final float TEXT_WIDTH_MULTIPLIER = 1.25F;
+
     private final boolean tabSectionCanScroll;
     private final Dim2i tabSection;
     private final Dim2i frameSection;
@@ -38,10 +44,11 @@ public class TabFrame extends AbstractFrame {
     public TabFrame(Dim2i dim, Screen screen, ModOptions modOptions, boolean renderOutline, List<Tab<?>> tabs, Runnable onSetTab, AtomicReference<Component> tabSectionSelectedTab, AtomicReference<Integer> tabSectionScrollBarOffset) {
         super(dim, screen, renderOutline, modOptions);
         this.tabs.addAll(tabs);
-        int tabSectionY = this.tabs.size() * 18;
+        int uniqueGroups = Math.toIntExact(this.tabs.stream().map(tab -> tab.getModOptions().name()).distinct().count());
+        int tabSectionY = this.tabs.size() * TAB_HEIGHT + uniqueGroups * (TAB_HEADER_HEIGHT + TAB_HEADER_PADDING);
         this.tabSectionCanScroll = tabSectionY > ((AbstractWidgetExtended) this).getDim().height();
 
-        Optional<Integer> result = tabs.stream().map(tab -> this.getStringWidth(tab.getTitle())).max(Integer::compareTo);
+        Optional<Integer> result = tabs.stream().map(tab -> (int) (this.getStringWidth(tab.getTitle()) * TEXT_WIDTH_MULTIPLIER)).max(Integer::compareTo);
 
         this.tabSection = new Dim2i(((AbstractWidgetExtended) this).getDim().x(), ((AbstractWidgetExtended) this).getDim().y(), result.map(integer -> integer + (this.tabSectionCanScroll ? 32 : 24)).orElseGet(() -> (int) (((AbstractWidgetExtended) this).getDim().width() * 0.35D)), ((AbstractWidgetExtended) this).getDim().height());
         this.frameSection = new Dim2i(this.tabSection.getLimitX(), ((AbstractWidgetExtended) this).getDim().y(), ((AbstractWidgetExtended) this).getDim().width() - this.tabSection.width(), ((AbstractWidgetExtended) this).getDim().height());
@@ -117,17 +124,31 @@ public class TabFrame extends AbstractFrame {
 
     private void rebuildTabs() {
         int offsetY = 0;
+        String lastMod = "";
         for (Tab<?> tab : this.tabs) {
             int width = this.tabSection.width() - (this.tabSectionCanScroll ? 12 : 4);
-            int height = 18;
-            Dim2i tabDim = new Dim2i(0, offsetY, width, height);
+
+            /*
+             * fixme: In theory, this should be fine and the list should be sorted by mod by default; this should never fail; but can happen.
+             */
+            if (!lastMod.equals(tab.getModOptions().name())) {
+
+                Dim2i tabHeaderDim = new Dim2i(0, offsetY, width, TAB_HEADER_HEIGHT + TAB_HEADER_PADDING);
+                ((Dim2iExtended) (Object) tabHeaderDim).setPoint2i(((Point2i) (Object) this.tabSection));
+                this.children.add(new TabHeaderComponent(tabHeaderDim, tab.getModOptions(), TAB_HEADER_PADDING));
+
+                lastMod = tab.getModOptions().name();
+                offsetY += TAB_HEADER_HEIGHT + TAB_HEADER_PADDING;
+            }
+
+            Dim2i tabDim = new Dim2i(0, offsetY, width, TAB_HEIGHT);
             ((Dim2iExtended) (Object) tabDim).setPoint2i(((Point2i) (Object) this.tabSection));
 
             FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(Optional.of(tab)), true, true, FlatButtonWidget.DEFAULT_THEME);
             button.setSelected(this.selectedTab.isPresent() && this.selectedTab.get() == tab);
             this.children.add(button);
 
-            offsetY += 18;
+            offsetY += TAB_HEIGHT;
         }
     }
 
