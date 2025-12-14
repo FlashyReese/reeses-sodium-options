@@ -1,6 +1,6 @@
 plugins {
     id("idea")
-    id("net.neoforged.moddev") version "2.0.110"
+    id("net.neoforged.moddev") version "2.0.124"
     id("java-library")
 }
 
@@ -83,9 +83,14 @@ tasks.named("compileTestJava").configure {
     enabled = false
 }
 
+tasks.test {
+    failOnNoDiscoveredTests = false
+}
+
+
 dependencies {
     compileOnly(project(":common"))
-    implementation("net.caffeinemc:sodium-neoforge:$SODIUM_VERSION")
+    implementation("net.caffeinemc:sodium-neoforge-mod:$SODIUM_VERSION")
 }
 
 // NeoGradle compiles the game, but we don't want to add our common code to the game's code
