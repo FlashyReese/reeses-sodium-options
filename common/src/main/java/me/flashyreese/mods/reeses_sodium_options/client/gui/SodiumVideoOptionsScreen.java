@@ -199,24 +199,6 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
                     .addChild(dim -> this.hideDonateButton);
         }
 
-        /*
-        // No longer necessary with API
-        if (IrisCompat.isIrisPresent()) { // FabricLoader.getInstance().isModLoaded("iris")) {
-            //int size = this.client.textRenderer.getWidth(Text.translatable(IrisApi.getInstance().getMainScreenLanguageKey()));
-            int size = this.minecraft.font.width(Component.translatable(Objects.requireNonNull(IrisCompat.getIrisShaderPacksScreenLanguageKey())));
-            Dim2i shaderPackButtonDim;
-            if (!(SodiumClientMod.options().notifications.hasClearedDonationButton)) {
-                shaderPackButtonDim = new Dim2i(donateButtonDim.x() - 12 - size, tabFrameDim.y() - 26, 10 + size, 20);
-            } else {
-                shaderPackButtonDim = new Dim2i(tabFrameDim.getLimitX() - size - 10, tabFrameDim.y() - 26, 10 + size, 20);
-            }
-            searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width() - (tabFrameDim.getLimitX() - shaderPackButtonDim.x()) - 2, 20);
-
-            //FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, Text.translatable(IrisApi.getInstance().getMainScreenLanguageKey()), () -> this.client.setScreen((Screen) IrisApi.getInstance().openMainIrisScreenObj(this)));
-            FlatButtonWidget shaderPackButton = new FlatButtonWidget(shaderPackButtonDim, Component.translatable(IrisCompat.getIrisShaderPacksScreenLanguageKey()), () -> this.minecraft.setScreen(IrisCompat.getIrisShaderPacksScreen(this)));
-            basicFrameBuilder.addChild(dim -> shaderPackButton);
-        }*/
-
         this.searchTextField = new SearchTextFieldComponent(searchTextFieldDim, ConfigManager.CONFIG.getModOptions().stream().flatMap(modOptions -> modOptions.pages().stream()).toList(), tabFrameSelectedTab,
                 tabFrameScrollBarOffset, optionPageScrollBarOffset, tabFrameDim.height(), this, lastSearch, lastSearchIndex);
 
@@ -232,13 +214,13 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
                 .withScreen(this)
                 .addChild(parentDim -> TabFrame.createBuilder()
                         .setDimension(tabFrameDim)
+                        .withScreen(this)
                         .shouldRenderOutline(false)
                         .setTabSectionScrollBarOffset(tabFrameScrollBarOffset)
                         .setTabSectionSelectedTab(tabFrameSelectedTab)
                         .addTabs(tabs -> ConfigManager.CONFIG
                                 .getModOptions()
-                                .forEach(config -> config.pages().stream()
-                                        .filter(page -> !page.groups().isEmpty())
+                                .forEach(config -> config.pages()
                                         .forEach(page -> tabs.add(Tab.builder().from(this, config, page, optionPageScrollBarOffset))))
                         )
                         .onSetTab(() -> {

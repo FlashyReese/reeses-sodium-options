@@ -21,12 +21,10 @@ public class TabHeaderComponent extends AbstractWidget {
     private static final long DWELL_MS = 1000;
 
     private final ModOptions modOptions;
-    private final int tabHeaderPadding;
 
-    public TabHeaderComponent(Dim2i dim, ModOptions modOptions, int tabHeaderPadding) {
+    public TabHeaderComponent(Dim2i dim, ModOptions modOptions) {
         super(dim);
         this.modOptions = modOptions;
-        this.tabHeaderPadding = tabHeaderPadding;
     }
 
     public static int renderIconWithSpacing(GuiGraphics graphics, Identifier icon, int color, int x, int y, int size, int margin) {
@@ -38,16 +36,6 @@ public class TabHeaderComponent extends AbstractWidget {
         y = y + size / 2 - iconSize / 2;
         graphics.blit(RenderPipelines.GUI_TEXTURED, icon, x, y, 0.0F, 0.0F, iconSize, iconSize, w, h, w, h, color);
         return margin * 2 + iconSize;
-    }
-
-    @Override
-    public int getY() {
-        return super.getY() + this.tabHeaderPadding;
-    }
-
-    @Override
-    public int getHeight() {
-        return super.getHeight() - this.tabHeaderPadding;
     }
 
     public void applyScissor(GuiGraphics guiGraphics, int x, int y, int width, int height, Runnable action) {
@@ -106,7 +94,8 @@ public class TabHeaderComponent extends AbstractWidget {
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
         this.applyScissor(guiGraphics, this.getX(), this.getY(), this.getWidth(), this.getHeight(), () -> {
-            this.drawRect(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), ColorARGB.pack(0, 0, 0, 240));
+            this.drawRect(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), ColorARGB.pack(0, 0, 0, 245));
+            this.drawRect(guiGraphics, this.getX(), this.getLimitY() - 1, this.getLimitX(), this.getLimitY(), ColorARGB.pack(245, 245, 245, 150));
             int xOffset;
             if (this.modOptions.icon() == null) {
                 xOffset = 2;
