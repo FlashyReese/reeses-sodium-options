@@ -39,6 +39,7 @@ jobs:
           name: '[NeoForge] ${{ github.event.release.name }}'
           version: '${{ github.event.release.tag_name }}+neoforge'
           version-type: release
+          game-versions: '1.21.11'
 
           loaders: neoforge
 
