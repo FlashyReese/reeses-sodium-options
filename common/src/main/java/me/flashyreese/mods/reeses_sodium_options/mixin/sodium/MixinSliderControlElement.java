@@ -76,10 +76,10 @@ public abstract class MixinSliderControlElement extends ControlElement implement
 
         if (this.isEditMode()) {
             if (event.isLeft()) {
-                this.option.modifyValue(Mth.clamp(this.option.getValidatedValue() - this.option.getRange().step(), this.option.getRange().min(), this.option.getRange().max()));
+                this.option.modifyValue(Mth.clamp(this.option.getValidatedValue() - this.option.getSteppedValidator().step(), this.option.getSteppedValidator().min(), this.option.getSteppedValidator().max()));
                 return true;
             } else if (event.isRight()) {
-                this.option.modifyValue(Mth.clamp(this.option.getValidatedValue() + this.option.getRange().step(), this.option.getRange().min(), this.option.getRange().max()));
+                this.option.modifyValue(Mth.clamp(this.option.getValidatedValue() + this.option.getSteppedValidator().step(), this.option.getSteppedValidator().min(), this.option.getSteppedValidator().max()));
                 return true;
             }
         }
@@ -89,8 +89,8 @@ public abstract class MixinSliderControlElement extends ControlElement implement
 
     @Unique
     private void setValueFromMouseScroll(double amount) {
-        int newValue = this.option.getValidatedValue() + this.option.getRange().step() * (int) amount;
-        if (newValue <= this.option.getRange().max() && newValue >= this.option.getRange().min()) {
+        int newValue = this.option.getValidatedValue() + this.option.getSteppedValidator().step() * (int) amount;
+        if (newValue <= this.option.getSteppedValidator().max() && newValue >= this.option.getSteppedValidator().min()) {
             this.option.modifyValue(newValue);
             this.thumbPosition = this.getThumbPositionForValue(this.option.getValidatedValue());
         }

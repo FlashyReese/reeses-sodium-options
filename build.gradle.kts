@@ -4,7 +4,7 @@ plugins {
 }
 
 val MINECRAFT_VERSION by extra { "1.21.11" }
-val NEOFORGE_VERSION by extra { "21.11.0-beta" }
+val NEOFORGE_VERSION by extra { "21.11.10-beta" }
 val FABRIC_LOADER_VERSION by extra { "0.18.2" }
 val FABRIC_API_VERSION by extra { "0.139.4+1.21.11" }
 
@@ -14,8 +14,8 @@ val PARCHMENT_VERSION by extra { null }
 // https://semver.org/
 val MAVEN_GROUP by extra { "me.flashyreese.mods" }
 val ARCHIVE_NAME by extra { "reeses-sodium-options" }
-val MOD_VERSION by extra { "2.0.1" }
-val SODIUM_VERSION by extra { "0.8.0+mc1.21.11" }
+val MOD_VERSION by extra { "2.0.2" }
+val SODIUM_VERSION by extra { "0.8.1+mc1.21.11" }
 
 allprojects {
     apply(plugin = "java")
