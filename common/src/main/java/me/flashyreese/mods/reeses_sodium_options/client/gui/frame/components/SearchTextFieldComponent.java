@@ -3,7 +3,8 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
-import me.flashyreese.mods.reeses_sodium_options.util.StringUtils;
+import me.flashyreese.mods.reeses_sodium_options.client.search.SearchIndex;
+import me.flashyreese.mods.reeses_sodium_options.client.search.SearchResult;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
 import net.caffeinemc.mods.sodium.client.config.structure.OptionGroup;
 import net.caffeinemc.mods.sodium.client.config.structure.Page;
@@ -53,6 +54,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
     protected int maxLength = 100;
     protected boolean visible = true;
     protected boolean editable = true;
+    private final SearchIndex<Option> searchIndex;
     private int firstCharacterIndex;
     private int selectionStart;
     private int selectionEnd;
@@ -71,6 +73,19 @@ public class SearchTextFieldComponent extends AbstractWidget {
         this.sodiumVideoOptionsScreen = sodiumVideoOptionsScreen;
         this.lastSearch = lastSearch;
         this.lastSearchIndex = lastSearchIndex;
+        List<Option> options = this.pages.stream()
+                .flatMap(page -> page.groups().stream())
+                .flatMap(optionGroup -> optionGroup.options().stream())
+                .toList();
+        this.searchIndex = SearchIndex.builder((Option option) -> String.format("%s %s", option.getName().getString(), option.getTooltip().getString()))
+                .addAll(options)
+                .foldDiacritics(true)
+                .maxResults(10)
+                .minScore(0.15)
+                .rerankWithEditDistance(true)
+                .rerankLimit(50)
+                .rerankWeight(0.1)
+                .build();
         if (!lastSearch.get().trim().isEmpty()) {
             this.write(lastSearch.get());
         }
@@ -223,16 +238,11 @@ public class SearchTextFieldComponent extends AbstractWidget {
         this.lastSearch.set(query.trim());
         if (this.editable) {
             if (!query.trim().isEmpty()) {
-                List<Option> searchResults = StringUtils.searchElements(
-                        () -> this.pages.stream().flatMap(p -> p
-                                .groups()
-                                .stream()
-                                .flatMap(optionGroup -> optionGroup.options().stream())
-                                .toList()
-                                .stream()).iterator(),
-                        query,
-                        o -> String.format("%s %s", o.getName().getString(), o.getTooltip().getString())
-                );
+                List<Option> searchResults = this.searchIndex.newSession(query)
+                        .results()
+                        .stream()
+                        .map(SearchResult::item)
+                        .toList();
                 searchResults.stream()
                         .filter(OptionExtended.class::isInstance)
                         .map(OptionExtended.class::cast)

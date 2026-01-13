@@ -152,7 +152,12 @@ public class PageFrame extends AbstractFrame {
         int boxX = dim.x();
 
         Option option = element.getOption();
-        List<FormattedCharSequence> tooltip = new ArrayList<>(Minecraft.getInstance().font.split(option.getTooltip(), boxWidth - (textPadding * 2)));
+        List<FormattedCharSequence> tooltip = new ArrayList<>();
+
+        tooltip.add(Language.getInstance().getVisualOrder(Component.literal(((OptionExtended) option).getId().toString()).withStyle(ChatFormatting.GRAY)));
+        tooltip.add(Language.getInstance().getVisualOrder(Component.literal("")));
+
+        tooltip.addAll(Minecraft.getInstance().font.split(option.getTooltip(), boxWidth - (textPadding * 2)));
 
         OptionImpact impact = option.getImpact();
 

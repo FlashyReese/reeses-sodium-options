@@ -1,8 +1,11 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui;
 
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
+import net.minecraft.resources.Identifier;
 
 public interface OptionExtended {
+    Identifier getId();
+
     boolean isHighlight();
 
     void setHighlight(boolean highlight);
