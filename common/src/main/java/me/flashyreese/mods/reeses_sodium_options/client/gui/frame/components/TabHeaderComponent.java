@@ -95,20 +95,20 @@ public class TabHeaderComponent extends AbstractWidget {
     public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
         this.applyScissor(guiGraphics, this.getX(), this.getY(), this.getWidth(), this.getHeight(), () -> {
             this.drawRect(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), ColorARGB.pack(0, 0, 0, 245));
-            this.drawRect(guiGraphics, this.getX(), this.getLimitY() - 1, this.getLimitX(), this.getLimitY(), ColorARGB.pack(245, 245, 245, 150));
+            this.drawRect(guiGraphics, this.getX(), this.getLimitY() - 1, this.getLimitX(), this.getLimitY(), modOptions.theme().themeLighter);
             int xOffset;
             if (this.modOptions.icon() == null) {
                 xOffset = 2;
             } else {
-                renderIconWithSpacing(guiGraphics, this.modOptions.icon(), 0xffffffff, this.getX(), this.getY(), this.getHeight(), 2);
+                renderIconWithSpacing(guiGraphics, this.modOptions.icon(), modOptions.theme().themeLighter, this.getX(), this.getY(), this.getHeight(), 2);
                 xOffset = this.getHeight() + 2;
             }
 
             int textX = this.getX() + xOffset;
             int available = (this.getX() + this.getWidth()) - textX - TEXT_PADDING_RIGHT;
 
-            drawScrollingString(guiGraphics, this.modOptions.name(), textX, this.getY() + 2, 0xFFFFFFFF, available);
-            drawScrollingString(guiGraphics, this.modOptions.version(), textX, this.getY() + 12, 0xFFFFFFFF, available);
+            drawScrollingString(guiGraphics, this.modOptions.name(), textX, this.getY() + 2, modOptions.theme().themeLighter, available);
+            drawScrollingString(guiGraphics, this.modOptions.version(), textX, this.getY() + 12, modOptions.theme().themeDarker, available);
         });
     }
 }

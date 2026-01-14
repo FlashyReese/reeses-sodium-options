@@ -156,6 +156,25 @@ public class TabFrame extends AbstractFrame {
             button.setSelected(this.selectedTab.isPresent() && this.selectedTab.get() == tab && !(tab.getPage() instanceof ExternalPage));
             this.children.add(button);
 
+            if (this.selectedTab.isPresent() && this.selectedTab.get() == tab && !(tab.getPage() instanceof ExternalPage)) {
+
+                Dim2i indicatorDim = new Dim2i(0, offsetY, 2, TAB_HEIGHT);
+                ((Dim2iExtended) (Object) indicatorDim).setPoint2i(((Point2i) (Object) this.tabSection));
+
+                this.children.add(new AbstractWidget(indicatorDim) {
+                    @Override
+                    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+
+                        int x = this.getX();
+                        int y = this.getY();
+                        int height = this.getHeight();
+                        int color = tab.getModOptions().theme().theme;
+
+                        guiGraphics.fill(x, y, indicatorDim.getLimitX(), y + height, color);
+                    }
+                });
+            }
+
             offsetY += TAB_HEIGHT;
         }
     }
