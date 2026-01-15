@@ -2,6 +2,7 @@ package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExtended;
+import net.caffeinemc.mods.sodium.client.gui.ButtonTheme;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
@@ -17,6 +18,19 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     @Shadow
     @Final
     private boolean leftAlign;
+
+    @Shadow
+    @Final
+    private ButtonTheme theme;
+
+    @Shadow
+    private boolean selected;
+
+    @Overwrite
+    protected int getTextColor() {
+        return this.selected ? this.theme.themeLighter : this.hovered ? this.theme.theme : this.theme.themeDarker;
+    }
+
 
     protected MixinFlatButtonWidget(Dim2i dim) {
         super(dim);

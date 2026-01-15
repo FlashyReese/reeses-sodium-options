@@ -9,6 +9,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.Scr
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.TabHeaderComponent;
 import net.caffeinemc.mods.sodium.client.config.structure.ExternalPage;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
+import net.caffeinemc.mods.sodium.client.gui.ButtonTheme;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
@@ -152,11 +153,18 @@ public class TabFrame extends AbstractFrame {
             Dim2i tabDim = new Dim2i(0, offsetY, width, TAB_HEIGHT);
             ((Dim2iExtended) (Object) tabDim).setPoint2i(((Point2i) (Object) this.tabSection));
 
-            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(Optional.of(tab)), true, true, FlatButtonWidget.DEFAULT_THEME);
-            button.setSelected(this.selectedTab.isPresent() && this.selectedTab.get() == tab && !(tab.getPage() instanceof ExternalPage));
+            ButtonTheme buttonTheme = new ButtonTheme(
+                    tab.getModOptions().theme(),
+                    FlatButtonWidget.DEFAULT_THEME.bgHighlight,
+                    FlatButtonWidget.DEFAULT_THEME.bgDefault,
+                    FlatButtonWidget.DEFAULT_THEME.bgInactive
+            );
+
+            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(Optional.of(tab)), true, true, buttonTheme);
+            button.setSelected(isSelected(tab));
             this.children.add(button);
 
-            if (this.selectedTab.isPresent() && this.selectedTab.get() == tab && !(tab.getPage() instanceof ExternalPage)) {
+            if (isSelected(tab)) {
 
                 Dim2i indicatorDim = new Dim2i(0, offsetY, 2, TAB_HEIGHT);
                 ((Dim2iExtended) (Object) indicatorDim).setPoint2i(((Point2i) (Object) this.tabSection));
@@ -177,6 +185,10 @@ public class TabFrame extends AbstractFrame {
 
             offsetY += TAB_HEIGHT;
         }
+    }
+
+    private boolean isSelected(Tab<?> tab) {
+        return this.selectedTab.isPresent() && this.selectedTab.get() == tab && !(tab.getPage() instanceof ExternalPage);
     }
 
     private void rebuildTabFrame() {
