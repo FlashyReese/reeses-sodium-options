@@ -26,9 +26,13 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     @Shadow
     private boolean selected;
 
+    @Shadow
+    private boolean enabled;
+
+
     @Overwrite
     protected int getTextColor() {
-        return this.selected ? this.theme.themeLighter : this.hovered ? this.theme.theme : this.theme.themeDarker;
+        return this.enabled ? (this.selected ? this.theme.themeLighter : this.hovered ? this.theme.theme : this.theme.themeDarker) : this.theme.themeDarker;
     }
 
 
