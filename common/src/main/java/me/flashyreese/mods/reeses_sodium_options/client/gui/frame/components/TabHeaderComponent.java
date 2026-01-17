@@ -3,13 +3,11 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
+import net.caffeinemc.mods.sodium.client.gui.VideoSettingsScreen;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,17 +23,6 @@ public class TabHeaderComponent extends AbstractWidget {
     public TabHeaderComponent(Dim2i dim, ModOptions modOptions) {
         super(dim);
         this.modOptions = modOptions;
-    }
-
-    public static int renderIconWithSpacing(GuiGraphics graphics, Identifier icon, int color, int x, int y, int size, int margin) {
-        int iconSize = size - margin * 2;
-        AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(icon);
-        int w = texture.getTexture().getWidth(0);
-        int h = texture.getTexture().getHeight(0);
-        x += margin;
-        y = y + size / 2 - iconSize / 2;
-        graphics.blit(RenderPipelines.GUI_TEXTURED, icon, x, y, 0.0F, 0.0F, iconSize, iconSize, w, h, w, h, color);
-        return margin * 2 + iconSize;
     }
 
     public void applyScissor(GuiGraphics guiGraphics, int x, int y, int width, int height, Runnable action) {
@@ -100,7 +87,7 @@ public class TabHeaderComponent extends AbstractWidget {
             if (this.modOptions.icon() == null) {
                 xOffset = 2;
             } else {
-                renderIconWithSpacing(guiGraphics, this.modOptions.icon(), modOptions.theme().themeLighter, this.getX(), this.getY(), this.getHeight(), 2);
+                VideoSettingsScreen.renderIconWithSpacing(guiGraphics, this.modOptions.icon(), modOptions.theme().themeLighter, this.getX(), this.getY(), this.getHeight(), 2);
                 xOffset = this.getHeight() + 2;
             }
 

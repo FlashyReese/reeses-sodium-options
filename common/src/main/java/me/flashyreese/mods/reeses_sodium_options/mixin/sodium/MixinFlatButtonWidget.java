@@ -86,5 +86,4 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     public void setTab(boolean tab) {
         this.isTab = tab;
     }
-
 }
