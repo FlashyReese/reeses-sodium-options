@@ -161,37 +161,14 @@ public class TabFrame extends AbstractFrame {
             );
 
             FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(Optional.of(tab)), true, true, buttonTheme);
-            button.setSelected(isSelected(tab));
+            button.setSelected(this.selectedTab.isPresent() && this.selectedTab.get() == tab && !(tab.getPage() instanceof ExternalPage));
             if (button instanceof FlatButtonWidgetExtended buttonExtended) {
                 buttonExtended.setTab(true);
             }
             this.children.add(button);
 
-            if (isSelected(tab)) {
-
-                Dim2i indicatorDim = new Dim2i(0, offsetY, 2, TAB_HEIGHT);
-                ((Dim2iExtended) (Object) indicatorDim).setPoint2i(((Point2i) (Object) this.tabSection));
-
-                this.children.add(new AbstractWidget(indicatorDim) {
-                    @Override
-                    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-
-                        int x = this.getX();
-                        int y = this.getY();
-                        int height = this.getHeight();
-                        int color = tab.getModOptions().theme().theme;
-
-                        guiGraphics.fill(x, y, indicatorDim.getLimitX(), y + height, color);
-                    }
-                });
-            }
-
             offsetY += TAB_HEIGHT;
         }
-    }
-
-    private boolean isSelected(Tab<?> tab) {
-        return this.selectedTab.isPresent() && this.selectedTab.get() == tab && !(tab.getPage() instanceof ExternalPage);
     }
 
     private void rebuildTabFrame() {

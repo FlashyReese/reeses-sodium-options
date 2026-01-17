@@ -62,7 +62,8 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
         if (this.leftAlign) {
             //this.drawRect(guiGraphics, x1, this.dim.y(), x1 + 1, y2, color);
             args.set(2, this.getDim().y());
-            args.set(3, (int) args.get(1) + 1);
+            args.set(3, (int) args.get(1) + 2);
+            args.set(5, this.theme.theme);
         }
     }
 
