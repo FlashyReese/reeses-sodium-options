@@ -162,6 +162,9 @@ public class TabFrame extends AbstractFrame {
 
             FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(Optional.of(tab)), true, true, buttonTheme);
             button.setSelected(isSelected(tab));
+            if (button instanceof FlatButtonWidgetExtended buttonExtended) {
+                buttonExtended.setTab(true);
+            }
             this.children.add(button);
 
             if (isSelected(tab)) {

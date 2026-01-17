@@ -8,7 +8,9 @@ import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(FlatButtonWidget.class)
@@ -18,6 +20,11 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     @Shadow
     @Final
     private boolean leftAlign;
+
+    @Mutable
+    @Unique
+    @Final
+    private boolean isTab = false;
 
     @Shadow
     @Final
@@ -30,11 +37,13 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     private boolean enabled;
 
 
-    @Overwrite
-    protected int getTextColor() {
-        return this.enabled ? (this.selected ? this.theme.themeLighter : this.hovered ? this.theme.theme : this.theme.themeDarker) : this.theme.themeDarker;
+    @Inject(method = "getTextColor", at = @At("HEAD"), cancellable = true)
+    private void modifyGetTextColor(CallbackInfoReturnable<Integer> cir) {
+        if (this.isTab()) {
+            int color = this.enabled ? (this.selected ? this.theme.themeLighter : this.hovered ? this.theme.theme : this.theme.themeDarker) : this.theme.themeDarker;
+            cir.setReturnValue(color);
+        }
     }
-
 
     protected MixinFlatButtonWidget(Dim2i dim) {
         super(dim);
@@ -66,4 +75,15 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     public void setLeftAlign(boolean leftAlign) {
         this.leftAlign = leftAlign;
     }
+
+    @Override
+    public boolean isTab() {
+        return this.isTab;
+    }
+
+    @Override
+    public void setTab(boolean tab) {
+        this.isTab = tab;
+    }
+
 }

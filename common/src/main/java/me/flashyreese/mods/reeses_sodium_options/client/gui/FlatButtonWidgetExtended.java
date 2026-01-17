@@ -4,4 +4,8 @@ public interface FlatButtonWidgetExtended {
     boolean isLeftAlign();
 
     void setLeftAlign(boolean leftAligned);
+
+    boolean isTab();
+
+    void setTab(boolean tab);
 }
