@@ -182,7 +182,7 @@ public class PageFrame extends AbstractFrame {
             return;
 
         this.drawRect(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
-        this.drawBorder(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xFF94E4D3);
+        this.drawBorder(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, modOptions.theme().theme);
 
         for (int i = 0; i < tooltip.size(); i++) {
             guiGraphics.drawString(Minecraft.getInstance().font, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
