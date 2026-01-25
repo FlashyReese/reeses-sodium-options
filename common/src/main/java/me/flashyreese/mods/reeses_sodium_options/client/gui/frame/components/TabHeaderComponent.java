@@ -87,7 +87,7 @@ public class TabHeaderComponent extends AbstractWidget {
             if (this.modOptions.icon() == null) {
                 xOffset = 2;
             } else {
-                VideoSettingsScreen.renderIconWithSpacing(guiGraphics, this.modOptions.icon(), modOptions.theme().themeLighter, this.getX(), this.getY(), this.getHeight(), 2);
+                VideoSettingsScreen.renderIconWithSpacing(guiGraphics, this.modOptions.icon(), modOptions.theme().themeLighter, modOptions.iconMonochrome(), this.getX(), this.getY(), this.getHeight(), 2);
                 xOffset = this.getHeight() + 2;
             }
 
