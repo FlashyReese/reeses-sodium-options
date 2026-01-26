@@ -1,14 +1,15 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iAccess;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExtended;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2i;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2iAccess;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.TabHeaderComponent;
 import net.caffeinemc.mods.sodium.client.config.structure.ExternalPage;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
+import net.caffeinemc.mods.sodium.client.gui.ButtonTheme;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
@@ -47,20 +48,21 @@ public class TabFrame extends AbstractFrame {
         this.tabs.addAll(tabs);
         int uniqueGroups = Math.toIntExact(this.tabs.stream().map(tab -> tab.getModOptions().name()).distinct().count());
         int tabSectionY = this.tabs.size() * TAB_HEIGHT + uniqueGroups * TAB_HEADER_HEIGHT + (uniqueGroups - 1) * TAB_HEADER_PADDING;
-        this.tabSectionCanScroll = tabSectionY > ((AbstractWidgetExtended) this).getDim().height();
+        Dim2i frameDim = this.getFrameDim();
+        this.tabSectionCanScroll = tabSectionY > frameDim.height();
 
         Optional<Integer> result = tabs.stream().map(tab -> (int) (this.getStringWidth(tab.getTitle()) * TEXT_WIDTH_MULTIPLIER)).max(Integer::compareTo);
 
-        this.tabSection = new Dim2i(((AbstractWidgetExtended) this).getDim().x(), ((AbstractWidgetExtended) this).getDim().y(), result.map(integer -> integer + (this.tabSectionCanScroll ? 32 : 24)).orElseGet(() -> (int) (((AbstractWidgetExtended) this).getDim().width() * 0.35D)), ((AbstractWidgetExtended) this).getDim().height());
-        this.frameSection = new Dim2i(this.tabSection.getLimitX(), ((AbstractWidgetExtended) this).getDim().y(), ((AbstractWidgetExtended) this).getDim().width() - this.tabSection.width(), ((AbstractWidgetExtended) this).getDim().height());
+        this.tabSection = new Dim2i(frameDim.x(), frameDim.y(), result.map(integer -> integer + (this.tabSectionCanScroll ? 32 : 24)).orElseGet(() -> (int) (frameDim.width() * 0.35D)), frameDim.height());
+        this.frameSection = new Dim2i(this.tabSection.getLimitX(), frameDim.y(), frameDim.width() - this.tabSection.width(), frameDim.height());
 
         this.onSetTab = onSetTab;
         if (this.tabSectionCanScroll) {
-            this.tabSectionScrollBar = new ScrollBarComponent(new Dim2i(this.tabSection.getLimitX() - 11, this.tabSection.y(), 10, this.tabSection.height()), ScrollBarComponent.ScrollDirection.VERTICAL, tabSectionY, ((AbstractWidgetExtended) this).getDim().height(), offset -> {
+            this.tabSectionScrollBar = new ScrollBarComponent(new Dim2i(this.tabSection.getLimitX() - 11, this.tabSection.y(), 10, this.tabSection.height()), ScrollBarComponent.ScrollDirection.VERTICAL, tabSectionY, frameDim.height(), offset -> {
                 //this.buildFrame();
                 tabSectionScrollBarOffset.set(offset);
-                ((Dim2iExtended) ((Object) this.tabSection)).setY(((AbstractWidgetExtended) this).getDim().y() - this.tabSectionScrollBar.getOffset());
-            }, ((AbstractWidgetExtended) this).getDim());
+                ((Dim2iAccess) ((Object) this.tabSection)).setY(frameDim.y() - this.tabSectionScrollBar.getOffset());
+            }, frameDim);
             this.tabSectionScrollBar.setOffset(tabSectionScrollBarOffset.get());
         }
         this.tabSectionSelectedTab = tabSectionSelectedTab;
@@ -115,14 +117,15 @@ public class TabFrame extends AbstractFrame {
         }
 
         super.buildFrame();
+        Dim2i focusFrameDim = this.getFrameDim();
         this.registerFocusListener(element -> {
             if (element instanceof FlatButtonWidgetExtended flatButtonWidget && this.tabSectionCanScroll) {
                 Dim2i dim = ((AbstractWidgetExtended) flatButtonWidget).getDim();
                 int inputOffset = this.tabSectionScrollBar.getOffset();
-                if (dim.y() <= ((AbstractWidgetExtended) this).getDim().y()) {
-                    inputOffset += dim.y() - ((AbstractWidgetExtended) this).getDim().y();
-                } else if (dim.getLimitY() >= ((AbstractWidgetExtended) this).getDim().getLimitY()) {
-                    inputOffset += dim.getLimitY() - ((AbstractWidgetExtended) this).getDim().getLimitY();
+                if (dim.y() <= focusFrameDim.y()) {
+                    inputOffset += dim.y() - focusFrameDim.y();
+                } else if (dim.getLimitY() >= focusFrameDim.getLimitY()) {
+                    inputOffset += dim.getLimitY() - focusFrameDim.getLimitY();
                 }
                 this.tabSectionScrollBar.setOffset(inputOffset);
             }
@@ -141,7 +144,7 @@ public class TabFrame extends AbstractFrame {
              */
             if (!lastMod.equals(tab.getModOptions().name())) {
                 Dim2i tabHeaderDim = new Dim2i(0, offsetY + (firstMod ? 0 : TAB_HEADER_PADDING), width, TAB_HEADER_HEIGHT);
-                ((Dim2iExtended) (Object) tabHeaderDim).setPoint2i(((Point2i) (Object) this.tabSection));
+                setDimPoint(tabHeaderDim, (Point2iAccess) (Object) this.tabSection);
                 this.children.add(new TabHeaderComponent(tabHeaderDim, tab.getModOptions()));
 
                 lastMod = tab.getModOptions().name();
@@ -150,10 +153,20 @@ public class TabFrame extends AbstractFrame {
             }
 
             Dim2i tabDim = new Dim2i(0, offsetY, width, TAB_HEIGHT);
-            ((Dim2iExtended) (Object) tabDim).setPoint2i(((Point2i) (Object) this.tabSection));
+            setDimPoint(tabDim, (Point2iAccess) (Object) this.tabSection);
 
-            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(Optional.of(tab)), true, true, FlatButtonWidget.DEFAULT_THEME);
+            ButtonTheme buttonTheme = new ButtonTheme(
+                    tab.getModOptions().theme(),
+                    FlatButtonWidget.DEFAULT_THEME.bgHighlight,
+                    FlatButtonWidget.DEFAULT_THEME.bgDefault,
+                    FlatButtonWidget.DEFAULT_THEME.bgInactive
+            );
+
+            FlatButtonWidget button = new FlatButtonWidget(tabDim, tab.getTitle(), () -> this.setTab(Optional.of(tab)), true, true, buttonTheme);
             button.setSelected(this.selectedTab.isPresent() && this.selectedTab.get() == tab && !(tab.getPage() instanceof ExternalPage));
+            if (button instanceof FlatButtonWidgetExtended buttonExtended) {
+                buttonExtended.setTab(true);
+            }
             this.children.add(button);
 
             offsetY += TAB_HEIGHT;
@@ -172,7 +185,8 @@ public class TabFrame extends AbstractFrame {
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        this.applyScissor(guiGraphics, ((AbstractWidgetExtended) this).getDim().x(), ((AbstractWidgetExtended) this).getDim().y(), ((AbstractWidgetExtended) this).getDim().width(), ((AbstractWidgetExtended) this).getDim().height(), () -> {
+        Dim2i frameDim = this.getFrameDim();
+        this.applyScissor(guiGraphics, frameDim.x(), frameDim.y(), frameDim.width(), frameDim.height(), () -> {
             for (AbstractWidget widget : this.children) {
                 if (widget != this.selectedFrame) {
                     widget.render(guiGraphics, mouseX, mouseY, delta);
@@ -187,7 +201,7 @@ public class TabFrame extends AbstractFrame {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        return (((AbstractWidgetExtended) this).getDim().containsCursor(event.x(), event.y()) && super.mouseClicked(event, bl)) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseClicked(event, bl));
+        return (this.getFrameDim().containsCursor(event.x(), event.y()) && super.mouseClicked(event, bl)) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseClicked(event, bl));
     }
 
     @Override

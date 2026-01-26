@@ -1,6 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui;
 
-public interface Point2i {
+public interface Point2iAccess {
     int getX();
 
     void setX(int x);

@@ -3,7 +3,8 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
-import me.flashyreese.mods.reeses_sodium_options.util.StringUtils;
+import me.flashyreese.mods.reeses_sodium_options.client.search.SearchIndex;
+import me.flashyreese.mods.reeses_sodium_options.client.search.SearchResult;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
 import net.caffeinemc.mods.sodium.client.config.structure.OptionGroup;
 import net.caffeinemc.mods.sodium.client.config.structure.Page;
@@ -20,6 +21,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
@@ -30,7 +32,6 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -41,18 +42,15 @@ public class SearchTextFieldComponent extends AbstractWidget {
     private final Font font = Minecraft.getInstance().font;
     private final Predicate<String> textPredicate = Objects::nonNull;
     private final BiFunction<String, Integer, FormattedCharSequence> renderTextProvider = (string, firstCharacterIndex) -> FormattedCharSequence.forward(string, Style.EMPTY);
-    private final AtomicReference<Component> tabFrameSelectedTab;
-    private final AtomicReference<Integer> tabFrameScrollBarOffset;
-    private final AtomicReference<Integer> optionPageScrollBarOffset;
+    private final SodiumVideoOptionsScreen.UiState uiState;
     private final int tabDimHeight;
     private final SodiumVideoOptionsScreen sodiumVideoOptionsScreen;
-    private final AtomicReference<String> lastSearch;
-    private final AtomicReference<Integer> lastSearchIndex;
     protected boolean selecting;
     protected String text = "";
     protected int maxLength = 100;
     protected boolean visible = true;
     protected boolean editable = true;
+    private final SearchIndex<Option> searchIndex;
     private int firstCharacterIndex;
     private int selectionStart;
     private int selectionEnd;
@@ -61,18 +59,27 @@ public class SearchTextFieldComponent extends AbstractWidget {
     private boolean currentCursorState;
     private float currentCursorAlpha;
 
-    public SearchTextFieldComponent(Dim2i dim, List<Page> pages, AtomicReference<Component> tabFrameSelectedTab, AtomicReference<Integer> tabFrameScrollBarOffset, AtomicReference<Integer> optionPageScrollBarOffset, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen, AtomicReference<String> lastSearch, AtomicReference<Integer> lastSearchIndex) {
+    public SearchTextFieldComponent(Dim2i dim, List<Page> pages, SodiumVideoOptionsScreen.UiState uiState, int tabDimHeight, SodiumVideoOptionsScreen sodiumVideoOptionsScreen) {
         super(dim);
         this.pages = pages;
-        this.tabFrameSelectedTab = tabFrameSelectedTab;
-        this.tabFrameScrollBarOffset = tabFrameScrollBarOffset;
-        this.optionPageScrollBarOffset = optionPageScrollBarOffset;
+        this.uiState = uiState;
         this.tabDimHeight = tabDimHeight;
         this.sodiumVideoOptionsScreen = sodiumVideoOptionsScreen;
-        this.lastSearch = lastSearch;
-        this.lastSearchIndex = lastSearchIndex;
-        if (!lastSearch.get().trim().isEmpty()) {
-            this.write(lastSearch.get());
+        List<Option> options = this.pages.stream()
+                .flatMap(page -> page.groups().stream())
+                .flatMap(optionGroup -> optionGroup.options().stream())
+                .toList();
+        this.searchIndex = SearchIndex.builder((Option option) -> String.format("%s %s", option.getName().getString(), option.getTooltip().getString()))
+                .addAll(options)
+                .foldDiacritics(true)
+                .maxResults(10)
+                .minScore(0.15)
+                .rerankWithEditDistance(true)
+                .rerankLimit(50)
+                .rerankWeight(0.1)
+                .build();
+        if (!this.uiState.lastSearch().get().trim().isEmpty()) {
+            this.write(this.uiState.lastSearch().get());
         }
     }
 
@@ -220,24 +227,26 @@ public class SearchTextFieldComponent extends AbstractWidget {
                 .forEach(optionExtended -> optionExtended.setHighlight(false))
         );
 
-        this.lastSearch.set(query.trim());
-        if (this.editable) {
-            if (!query.trim().isEmpty()) {
-                List<Option> searchResults = StringUtils.searchElements(
-                        () -> this.pages.stream().flatMap(p -> p
-                                .groups()
-                                .stream()
-                                .flatMap(optionGroup -> optionGroup.options().stream())
-                                .toList()
-                                .stream()).iterator(),
-                        query,
-                        o -> String.format("%s %s", o.getName().getString(), o.getTooltip().getString())
-                );
-                searchResults.stream()
-                        .filter(OptionExtended.class::isInstance)
-                        .map(OptionExtended.class::cast)
-                        .forEach(optionExtended -> optionExtended.setHighlight(true));
-            }
+        this.uiState.lastSearch().set(query.trim());
+        List<Identifier> resultIds = List.of();
+        if (this.editable && !query.trim().isEmpty()) {
+            List<Option> searchResults = this.searchIndex.newSession(query)
+                    .results()
+                    .stream()
+                    .map(SearchResult::item)
+                    .toList();
+            searchResults.stream()
+                    .filter(OptionExtended.class::isInstance)
+                    .map(OptionExtended.class::cast)
+                    .forEach(optionExtended -> optionExtended.setHighlight(true));
+            resultIds = searchResults.stream()
+                    .filter(OptionExtended.class::isInstance)
+                    .map(OptionExtended.class::cast)
+                    .map(OptionExtended::getId)
+                    .toList();
+        }
+        if (this.uiState.updateSearchResults(resultIds)) {
+            this.sodiumVideoOptionsScreen.rebuildUI();
         }
     }
 
@@ -384,10 +393,9 @@ public class SearchTextFieldComponent extends AbstractWidget {
         }
         if (characterEvent.isAllowedChatCharacter()) {
             if (this.editable) {
-                this.lastSearch.set(this.text.trim());
+                this.uiState.lastSearch().set(this.text.trim());
                 this.write(characterEvent.codepointAsString());
-                this.lastSearchIndex.set(0);
-            }
+                this.uiState.lastSearchIndex().set(0);            }
             return true;
         }
         return false;
@@ -439,7 +447,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                                 for (OptionGroup group : page.groups()) {
                                     for (Option option : group.options()) {
                                         if (option instanceof OptionExtended optionExtended && optionExtended.isHighlight() && optionExtended.getParentDimension() != null) {
-                                            if (count == this.lastSearchIndex.get()) {
+                                            if (count == this.uiState.lastSearchIndex().get()) {
                                                 Dim2i optionDim = optionExtended.getDim2i();
                                                 Dim2i parentDim = optionExtended.getParentDimension();
                                                 int maxOffset = parentDim.height() - this.tabDimHeight;
@@ -449,15 +457,14 @@ public class SearchTextFieldComponent extends AbstractWidget {
 
                                                 int total = this.pages.stream().mapToInt(page2 -> Math.toIntExact(page2.groups().stream().flatMap(group2 -> group2.options().stream()).toList().stream().filter(OptionExtended.class::isInstance).map(OptionExtended.class::cast).filter(OptionExtended::isHighlight).count())).sum();
 
-                                                int value = total == this.lastSearchIndex.get() + 1 ? 0 : this.lastSearchIndex.get() + 1;
+                                                int value = total == this.uiState.lastSearchIndex().get() + 1 ? 0 : this.uiState.lastSearchIndex().get() + 1;
                                                 optionExtended.setSelected(true);
-                                                this.lastSearchIndex.set(value);
-                                                this.tabFrameSelectedTab.set(page.name());
+                                                this.uiState.lastSearchIndex().set(value);
+                                                this.uiState.tabFrameSelectedTab().set(page.name());
                                                 // todo: calculate tab frame scroll bar offset
-                                                this.tabFrameScrollBarOffset.set(0);
+                                                this.uiState.tabFrameScrollBarOffset().set(0);
 
-                                                this.optionPageScrollBarOffset.set(offset);
-                                                this.setFocused(false);
+                                                this.uiState.optionPageScrollBarOffset().set(offset);
                                                 this.sodiumVideoOptionsScreen.rebuildUI();
                                                 return true;
                                             }
