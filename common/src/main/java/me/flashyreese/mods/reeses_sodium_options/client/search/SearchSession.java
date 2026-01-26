@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 public final class SearchSession<T> {
-    private final SearchIndex<T> index;
+    private final SearchIndexContext<T> index;
     private final String query;
 
-    SearchSession(SearchIndex<T> index, String query) {
+    SearchSession(SearchIndexContext<T> index, String query) {
         this.index = index;
         this.query = query == null ? "" : query;
     }

@@ -1,7 +1,7 @@
 package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
-import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2i;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iAccess;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2iAccess;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -9,10 +9,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = Dim2i.class, remap = false)
-public abstract class MixinDim2i implements Dim2iExtended, Point2i {
+public abstract class MixinDim2i implements Dim2iAccess, Point2iAccess {
 
     @Unique
-    private Point2i point2i;
+    private Point2iAccess point2i;
 
     @Shadow
     @Final
@@ -53,7 +53,7 @@ public abstract class MixinDim2i implements Dim2iExtended, Point2i {
     public abstract int y();
 
     @Override
-    public void setPoint2i(Point2i point2i) {
+    public void setPoint2i(Point2iAccess point2i) {
         this.point2i = point2i;
     }
 

@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
-public final class SearchIndex<T> {
+public final class SearchIndex<T> implements SearchIndexContext<T> {
     private final List<T> items;
     private final List<String> normalizedTexts;
     private final List<Map<String, Integer>> documentTermCounts;
@@ -49,56 +49,68 @@ public final class SearchIndex<T> {
         return new SearchSession<>(this, query);
     }
 
-    public int size() {
-        return this.items.size();
-    }
-
-    List<T> items() {
+    @Override
+    public List<T> items() {
         return this.items;
     }
 
-    List<String> normalizedTexts() {
+    @Override
+    public List<String> normalizedTexts() {
         return this.normalizedTexts;
     }
 
-    List<Map<String, Integer>> documentTermCounts() {
+    @Override
+    public List<Map<String, Integer>> documentTermCounts() {
         return this.documentTermCounts;
     }
 
-    Map<String, IntArrayList> invertedIndex() {
+    @Override
+    public Map<String, IntArrayList> invertedIndex() {
         return this.invertedIndex;
     }
 
-    Map<String, Double> idfWeights() {
+    @Override
+    public Map<String, Double> idfWeights() {
         return this.idfWeights;
     }
 
-    SearchNormalizer normalizer() {
+    @Override
+    public SearchNormalizer normalizer() {
         return this.normalizer;
     }
 
-    NgramGenerator ngramGenerator() {
+    @Override
+    public NgramGenerator ngramGenerator() {
         return this.ngramGenerator;
     }
 
-    int maxResults() {
+    @Override
+    public int maxResults() {
         return this.maxResults;
     }
 
-    double minScore() {
+    @Override
+    public double minScore() {
         return this.minScore;
     }
 
-    boolean rerankWithEditDistance() {
+    @Override
+    public boolean rerankWithEditDistance() {
         return this.rerankWithEditDistance;
     }
 
-    int rerankLimit() {
+    @Override
+    public int rerankLimit() {
         return this.rerankLimit;
     }
 
-    double rerankWeight() {
+    @Override
+    public double rerankWeight() {
         return this.rerankWeight;
+    }
+
+    public int size() {
+        return this.items.size();
     }
 
     private void build(List<T> sourceItems, Function<T, String> extractSearchableText) {

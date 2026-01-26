@@ -1,9 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
-import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iExtended;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2i;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.*;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.LabelComponent;
 import net.caffeinemc.mods.sodium.api.config.option.OptionImpact;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
@@ -21,13 +18,16 @@ import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PageFrame extends AbstractFrame {
     protected final Dim2i originalDim;
@@ -47,12 +47,30 @@ public class PageFrame extends AbstractFrame {
         return new Builder();
     }
 
+
     public void setupFrame() {
         this.children.clear();
         this.controlElements.clear();
 
         int y = 0;
-        if (!this.page.groups().isEmpty()) {
+        List<SearchEntry> searchEntries = this.buildSearchEntries();
+        if (!searchEntries.isEmpty()) {
+            OptionGroup lastGroup = null;
+            for (SearchEntry entry : searchEntries) {
+                OptionGroup group = entry.group();
+                if (group != lastGroup) {
+                    if (lastGroup != null) {
+                        y += 4;
+                    }
+                    if (group.name() != null && !group.name().getString().isEmpty()) {
+                        y += 18;
+                    }
+                    lastGroup = group;
+                }
+                y += 18;
+            }
+            y += 4;
+        } else if (!this.page.groups().isEmpty()) {
             OptionGroup lastGroup = this.page.groups().get(this.page.groups().size() - 1);
 
             for (OptionGroup group : this.page.groups()) {
@@ -67,7 +85,7 @@ public class PageFrame extends AbstractFrame {
             }
         }
 
-        ((Dim2iExtended) ((Object) ((AbstractWidgetExtended) this).getDim())).setHeight(y);
+        ((Dim2iAccess) ((Object) ((AbstractWidgetExtended) this).getDim())).setHeight(y);
         this.page.groups().forEach(group -> group.options().forEach(option -> {
             if (option instanceof OptionExtended optionExtended) {
                 optionExtended.setParentDimension(((AbstractWidgetExtended) this).getDim());
@@ -76,50 +94,87 @@ public class PageFrame extends AbstractFrame {
     }
 
     @Override
+
     public void buildFrame() {
+
         if (this.page == null) return;
 
+
+
         this.children.clear();
+
         this.controlElements.clear();
 
         int y = 0;
-        for (OptionGroup group : this.page.groups()) {
-            if (group.name() != null && !group.name().getString().isEmpty()) {
-                Dim2i dim = new Dim2i(0, y + 4, this.getWidth(), 18);
-                ((Dim2iExtended) (Object) dim).setPoint2i(((Point2i) (Object) ((AbstractWidgetExtended) this).getDim()));
-                this.children.add(new LabelComponent(dim, group.name(), 0xFFFFFFFF));
+        List<SearchEntry> searchEntries = this.buildSearchEntries();
+        if (!searchEntries.isEmpty()) {
+            OptionGroup lastGroup = null;
+            for (SearchEntry entry : searchEntries) {
+                OptionGroup group = entry.group();
+                if (group != lastGroup) {
+                    if (lastGroup != null) {
+                        y += 4;
+                    }
+                    if (group.name() != null && !group.name().getString().isEmpty()) {
+                        Dim2i dim = new Dim2i(0, y + 4, this.getWidth(), 18);
+                        ((Dim2iAccess) (Object) dim).setPoint2i(((Point2iAccess) (Object) ((AbstractWidgetExtended) this).getDim()));
+                        this.children.add(new LabelComponent(dim, group.name(), 0xFFFFFFFF));
+                        y += 18;
+                    }
+                    lastGroup = group;
+                }
 
-                y += 18;
-            }
-
-            // Add each option's control element
-            for (Option option : group.options()) {
-                Control control = option.getControl();
+                Control control = entry.option().getControl();
                 Dim2i dim = new Dim2i(0, y, this.getWidth(), 18);
-                ((Dim2iExtended) (Object) dim).setPoint2i(((Point2i) (Object) ((AbstractWidgetExtended) this).getDim()));
+                ((Dim2iAccess) (Object) dim).setPoint2i(((Point2iAccess) (Object) ((AbstractWidgetExtended) this).getDim()));
                 ControlElement element = control.createElement(this.screen, this, dim, this.modOptions.theme());
                 ((OptionExtended) element.getOption()).setDim2i(dim);
                 this.children.add(element);
 
-                // Move down to the next option
                 y += 18;
             }
-
-            // Add padding beneath each option group
             y += 4;
+        } else {
+            for (OptionGroup group : this.page.groups()) {
+                if (group.name() != null && !group.name().getString().isEmpty()) {
+                    Dim2i dim = new Dim2i(0, y + 4, this.getWidth(), 18);
+                    ((Dim2iAccess) (Object) dim).setPoint2i(((Point2iAccess) (Object) ((AbstractWidgetExtended) this).getDim()));
+                    this.children.add(new LabelComponent(dim, group.name(), 0xFFFFFFFF));
+
+                    y += 18;
+                }
+
+                // Add each option's control element
+                for (Option option : group.options()) {
+                    Control control = option.getControl();
+                    Dim2i dim = new Dim2i(0, y, this.getWidth(), 18);
+                    ((Dim2iAccess) (Object) dim).setPoint2i(((Point2iAccess) (Object) ((AbstractWidgetExtended) this).getDim()));
+                    ControlElement element = control.createElement(this.screen, this, dim, this.modOptions.theme());
+                    ((OptionExtended) element.getOption()).setDim2i(dim);
+                    this.children.add(element);
+
+                    // Move down to the next option
+                    y += 18;
+                }
+
+                // Add padding beneath each option group
+                y += 4;
+            }
         }
 
+
         super.buildFrame();
+
     }
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         ControlElement hoveredElement = this.controlElements.stream()
-                .filter(controlElement -> ((Dim2iExtended) (Object) ((AbstractWidgetExtended) controlElement).getDim()).overlapWith(this.originalDim))
+                .filter(controlElement -> ((Dim2iAccess) (Object) ((AbstractWidgetExtended) controlElement).getDim()).overlapWith(this.originalDim))
                 .filter(ControlElement::isHovered)
                 .findFirst()
                 .orElse(this.controlElements.stream()
-                        .filter(controlElement -> ((Dim2iExtended) (Object) ((AbstractWidgetExtended) controlElement).getDim()).overlapWith(this.originalDim))
+                        .filter(controlElement -> ((Dim2iAccess) (Object) ((AbstractWidgetExtended) controlElement).getDim()).overlapWith(this.originalDim))
                         .filter(ControlElement::isFocused)
                         .findFirst()
                         .orElse(null));
@@ -187,6 +242,32 @@ public class PageFrame extends AbstractFrame {
         for (int i = 0; i < tooltip.size(); i++) {
             guiGraphics.drawString(Minecraft.getInstance().font, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
         }
+    }
+
+    private List<SearchEntry> buildSearchEntries() {
+        List<Identifier> resultIds = SodiumVideoOptionsScreen.sharedUiState().searchResultIds();
+        if (resultIds.isEmpty()) {
+            return List.of();
+        }
+        Map<Identifier, SearchEntry> entries = new HashMap<>();
+        for (OptionGroup group : this.page.groups()) {
+            for (Option option : group.options()) {
+                if (option instanceof OptionExtended optionExtended) {
+                    entries.put(optionExtended.getId(), new SearchEntry(group, option));
+                }
+            }
+        }
+        List<SearchEntry> ordered = new ArrayList<>(resultIds.size());
+        for (Identifier id : resultIds) {
+            SearchEntry entry = entries.get(id);
+            if (entry != null) {
+                ordered.add(entry);
+            }
+        }
+        return ordered;
+    }
+
+    private record SearchEntry(OptionGroup group, Option option) {
     }
 
     @Override

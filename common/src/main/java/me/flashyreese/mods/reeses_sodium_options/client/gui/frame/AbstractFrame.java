@@ -1,5 +1,8 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
+import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iAccess;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2iAccess;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.gui.options.control.AbstractOptionList;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
@@ -85,6 +88,14 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
         guiGraphics.enableScissor(x, y, x + width, y + height);
         action.run();
         guiGraphics.disableScissor();
+    }
+
+    protected Dim2i getFrameDim() {
+        return ((AbstractWidgetExtended) this).getDim();
+    }
+
+    protected static void setDimPoint(Dim2i dim, Point2iAccess point) {
+        ((Dim2iAccess) (Object) dim).setPoint2i(point);
     }
 
     public void registerFocusListener(Consumer<GuiEventListener> focusListener) {

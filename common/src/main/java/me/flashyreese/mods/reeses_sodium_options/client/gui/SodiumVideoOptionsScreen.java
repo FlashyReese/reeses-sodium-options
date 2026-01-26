@@ -23,6 +23,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,12 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable {
 
-    private static final AtomicReference<Component> tabFrameSelectedTab = new AtomicReference<>(null);
-    private static final AtomicReference<Integer> tabFrameScrollBarOffset = new AtomicReference<>(0);
-    private static final AtomicReference<Integer> optionPageScrollBarOffset = new AtomicReference<>(0);
-
-    private static final AtomicReference<String> lastSearch = new AtomicReference<>("");
-    private static final AtomicReference<Integer> lastSearchIndex = new AtomicReference<>(0);
+    private static final UiState SHARED_UI_STATE = new UiState();
     private static final List<FormattedText> DONATION_PROMPT_MESSAGE;
 
     static {
@@ -56,6 +52,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     }
 
     private final Screen prevScreen;
+    private final UiState uiState;
     private final List<OptionPage> pages = new ArrayList<>();
     private FlatButtonWidget applyButton, closeButton, undoButton;
     private FlatButtonWidget donateButton, hideDonateButton;
@@ -66,6 +63,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     public SodiumVideoOptionsScreen(Screen prev) {
         super(Component.literal("Reese's Sodium Menu"));
         this.prevScreen = prev;
+        this.uiState = SHARED_UI_STATE;
 
         this.checkPromptTimers();
 
@@ -127,7 +125,9 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
 
     // Hackalicious! Rebuild UI
     public void rebuildUI() {
+        boolean wasSearchBarFocused = this.searchTextField.isFocused();
         this.rebuildWidgets();
+        if (wasSearchBarFocused) this.setFocused(this.searchTextField);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         AbstractFrame frame = this.parentFrameBuilder().build();
         this.addRenderableWidget(frame);
 
-        this.searchTextField.setFocused(!lastSearch.get().trim().isEmpty());
+        //this.searchTextField.setFocused(!this.uiState.lastSearch().get().trim().isEmpty());
         if (this.searchTextField.isFocused()) {
             this.setFocused(this.searchTextField);
         } else {
@@ -200,8 +200,8 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         }
 
 
-        this.searchTextField = new SearchTextFieldComponent(searchTextFieldDim, ConfigManager.CONFIG.getModOptions().stream().flatMap(modOptions -> modOptions.pages().stream()).toList(), tabFrameSelectedTab,
-                tabFrameScrollBarOffset, optionPageScrollBarOffset, tabFrameDim.height(), this, lastSearch, lastSearchIndex);
+        this.searchTextField = new SearchTextFieldComponent(searchTextFieldDim, ConfigManager.CONFIG.getModOptions().stream().flatMap(modOptions -> modOptions.pages().stream()).toList(), this.uiState,
+                tabFrameDim.height(), this);
 
         basicFrameBuilder.addChild(dim -> this.searchTextField);
 
@@ -217,15 +217,15 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
                         .setDimension(tabFrameDim)
                         .withScreen(this)
                         .shouldRenderOutline(false)
-                        .setTabSectionScrollBarOffset(tabFrameScrollBarOffset)
-                        .setTabSectionSelectedTab(tabFrameSelectedTab)
+                        .setTabSectionScrollBarOffset(this.uiState.tabFrameScrollBarOffset())
+                        .setTabSectionSelectedTab(this.uiState.tabFrameSelectedTab())
                         .addTabs(tabs -> ConfigManager.CONFIG
-                                .getModOptions()
+                        .getModOptions()
                                 .forEach(config -> config.pages()
-                                        .forEach(page -> tabs.add(Tab.builder().from(this, config, page, optionPageScrollBarOffset))))
-                        )
-                        .onSetTab(() -> {
-                            optionPageScrollBarOffset.set(0);
+                                .forEach(page -> tabs.add(Tab.builder().from(this, config, page, this.uiState.optionPageScrollBarOffset()))))
+                                        )
+                                        .onSetTab(() -> {
+                            this.uiState.optionPageScrollBarOffset().set(0);
                         })
                         .build()
                 )
@@ -310,8 +310,8 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
 
     @Override
     public void onClose() {
-        lastSearch.set("");
-        lastSearchIndex.set(0);
+        this.uiState.lastSearch().set("");
+        this.uiState.lastSearchIndex().set(0);
         this.minecraft.setScreen(this.prevScreen);
     }
 
@@ -328,5 +328,51 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     @Override
     public Dim2i getDimensions() {
         return new Dim2i(0, 0, this.width, this.height);
+    }
+
+    public static UiState sharedUiState() {
+        return SHARED_UI_STATE;
+    }
+
+    public static final class UiState {
+        private final AtomicReference<Component> tabFrameSelectedTab = new AtomicReference<>(null);
+        private final AtomicReference<Integer> tabFrameScrollBarOffset = new AtomicReference<>(0);
+        private final AtomicReference<Integer> optionPageScrollBarOffset = new AtomicReference<>(0);
+        private final AtomicReference<String> lastSearch = new AtomicReference<>("");
+        private final AtomicReference<Integer> lastSearchIndex = new AtomicReference<>(0);
+        private final List<Identifier> searchResultIds = new ArrayList<>();
+
+        public AtomicReference<Component> tabFrameSelectedTab() {
+            return tabFrameSelectedTab;
+        }
+
+        public AtomicReference<Integer> tabFrameScrollBarOffset() {
+            return tabFrameScrollBarOffset;
+        }
+
+        public AtomicReference<Integer> optionPageScrollBarOffset() {
+            return optionPageScrollBarOffset;
+        }
+
+        public AtomicReference<String> lastSearch() {
+            return lastSearch;
+        }
+
+        public AtomicReference<Integer> lastSearchIndex() {
+            return lastSearchIndex;
+        }
+
+        public List<Identifier> searchResultIds() {
+            return List.copyOf(searchResultIds);
+        }
+
+        public boolean updateSearchResults(List<Identifier> ids) {
+            if (this.searchResultIds.equals(ids)) {
+                return false;
+            }
+            this.searchResultIds.clear();
+            this.searchResultIds.addAll(ids);
+            return true;
+        }
     }
 }
