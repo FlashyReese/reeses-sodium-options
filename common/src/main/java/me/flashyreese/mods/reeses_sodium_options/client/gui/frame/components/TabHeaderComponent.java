@@ -96,6 +96,10 @@ public class TabHeaderComponent extends AbstractWidget {
 
             drawScrollingString(guiGraphics, this.modOptions.name(), textX, this.getY() + 2, modOptions.theme().themeLighter, available);
             drawScrollingString(guiGraphics, this.modOptions.version(), textX, this.getY() + 12, modOptions.theme().themeDarker, available);
+
+            if (this.isFocused()) {
+                this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), (0x80 << 24) | modOptions.theme().themeLighter & 0xFFFFFF);
+            }
         });
     }
 }

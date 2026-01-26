@@ -74,6 +74,11 @@ public abstract class MixinSliderControlElement extends ControlElement implement
             return true;
         }
 
+        if (!event.isSelection() && !(event.isLeft() || event.isRight())) {
+            this.setEditMode(false);
+            return false;
+        }
+
         if (this.isEditMode()) {
             if (event.isLeft()) {
                 this.option.modifyValue(Mth.clamp(this.option.getValidatedValue() - this.option.getSteppedValidator().step(), this.option.getSteppedValidator().min(), this.option.getSteppedValidator().max()));

@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components;
 
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
@@ -134,6 +135,15 @@ public class SearchTextFieldComponent extends AbstractWidget {
             int selectionEndX = textStartX + this.font.width(displayedText.substring(0, selectionEndOffset));
             this.drawSelectionHighlight(guiGraphics, cursorX, textStartY - 1, selectionEndX - 1, textStartY + 1 + this.font.lineHeight);
         }
+
+        this.hovered = this.isMouseOver(mouseX, mouseY, ((AbstractWidgetExtended) this).getDim());
+        if (this.hovered) {
+            guiGraphics.requestCursor(CursorTypes.IBEAM);
+        }
+    }
+
+    public boolean isMouseOver(double mouseX, double mouseY, Dim2i dim) {
+        return mouseX >= dim.x() && mouseX < dim.getLimitX() && mouseY >= dim.y() && mouseY < dim.getLimitY();
     }
 
     @Override

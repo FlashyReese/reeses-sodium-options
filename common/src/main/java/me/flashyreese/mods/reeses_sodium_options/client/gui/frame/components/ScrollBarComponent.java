@@ -1,5 +1,8 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components;
 
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
+import net.caffeinemc.mods.sodium.client.gui.ColorTheme;
+import net.caffeinemc.mods.sodium.client.gui.Colors;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.GuiGraphics;
@@ -57,11 +60,32 @@ public class ScrollBarComponent extends AbstractWidget {
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), 0xFFAAAAAA);
-        this.drawRect(guiGraphics, this.scrollThumb.x(), this.scrollThumb.y(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
+        this.hovered = this.isMouseOver(mouseX, mouseY, this.scrollThumb);
+        ColorTheme theme = new ColorTheme(Colors.adjust(0xFFAAAAAA, 0.15f), Colors.lighten(0xFFAAAAAA), 0xFFAAAAAA);
+        int color = this.isDragging ? theme.themeLighter : (this.hovered ? theme.theme : theme.themeDarker);
+
+        this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), theme.themeDarker);
+        this.drawRect(guiGraphics, this.scrollThumb.x(), this.scrollThumb.y(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), color);
         if (this.isFocused()) {
-            this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), -1);
+            this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), theme.themeLighter);
+            this.drawRect(guiGraphics, this.scrollThumb.x(), this.scrollThumb.y(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), theme.themeLighter);
         }
+
+        if (this.hovered) {
+            guiGraphics.requestCursor(CursorTypes.POINTING_HAND);
+
+            if (this.isDragging && this.mode == ScrollDirection.VERTICAL) {
+                guiGraphics.requestCursor(CursorTypes.RESIZE_NS);
+
+            } else if (this.isDragging && this.mode == ScrollDirection.HORIZONTAL) {
+                guiGraphics.requestCursor(CursorTypes.RESIZE_EW);
+            }
+        }
+
+    }
+
+    public boolean isMouseOver(double mouseX, double mouseY, Dim2i dim) {
+        return mouseX >= dim.x() && mouseX < dim.getLimitX() && mouseY >= dim.y() && mouseY < dim.getLimitY();
     }
 
     @Override

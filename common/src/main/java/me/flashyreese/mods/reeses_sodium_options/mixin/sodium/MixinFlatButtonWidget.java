@@ -1,15 +1,18 @@
 package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExtended;
 import net.caffeinemc.mods.sodium.client.gui.ButtonTheme;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
+import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
@@ -37,6 +40,13 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     private boolean enabled;
 
 
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/widgets/FlatButtonWidget;isMouseOver(DD)Z", shift = At.Shift.AFTER))
+    private void changeCursorType(GuiGraphics graphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        if (this.enabled && this.hovered) {
+            graphics.requestCursor(CursorTypes.POINTING_HAND);
+        }
+    }
+
     @Inject(method = "getTextColor", at = @At("HEAD"), cancellable = true)
     private void modifyGetTextColor(CallbackInfoReturnable<Integer> cir) {
         if (this.isTab()) {
@@ -60,10 +70,18 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/widgets/FlatButtonWidget;drawRect(Lnet/minecraft/client/gui/GuiGraphics;IIIII)V", ordinal = 1))
     public void redirectDrawRect(Args args) {
         if (this.leftAlign) {
-            //this.drawRect(guiGraphics, x1, this.dim.y(), x1 + 1, y2, color);
+            //this.drawRect(guiGraphics, x1, this.dim.y(), x1 + 2, y2, color);
             args.set(2, this.getDim().y());
             args.set(3, (int) args.get(1) + 2);
             args.set(5, this.theme.theme);
+        }
+    }
+
+    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/widgets/FlatButtonWidget;drawBorder(Lnet/minecraft/client/gui/GuiGraphics;IIIII)V", ordinal = 0))
+    public void redirectDrawBorder(Args args) {
+        if (this.leftAlign) {
+            //this.drawRect(guiGraphics, x1, this.dim.y(), x1 + 1, y2, color);
+            args.set(5, (0x80 << 24) | this.theme.themeLighter & 0xFFFFFF);
         }
     }
 
