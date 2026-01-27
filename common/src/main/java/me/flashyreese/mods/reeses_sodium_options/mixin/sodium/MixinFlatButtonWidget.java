@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
@@ -29,6 +30,11 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     @Final
     private boolean isTab = false;
 
+    @Mutable
+    @Unique
+    @Final
+    private Dim2i dimBorder = this.getDim();
+
     @Shadow
     @Final
     private ButtonTheme theme;
@@ -42,9 +48,29 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/widgets/FlatButtonWidget;isMouseOver(DD)Z", shift = At.Shift.AFTER))
     private void changeCursorType(GuiGraphics graphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (this.enabled && this.hovered) {
+        if (this.enabled && this.hovered && !this.isTab()) {
             graphics.requestCursor(CursorTypes.POINTING_HAND);
         }
+        if (!this.enabled && this.hovered) {
+            graphics.requestCursor(CursorTypes.NOT_ALLOWED);
+        }
+    }
+
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/widgets/FlatButtonWidget;isMouseOver(DD)Z"))
+    private boolean redirectIsMouseOver(FlatButtonWidget instance, double mouseX, double mouseY) {
+        Dim2i dim = this.getDim();
+        Dim2i border = this.getDimBorder();
+
+        if (dim.getLimitX() <= border.x() || dim.getLimitY() <= border.y() || dim.x() >= border.getLimitX() || dim.y() >= border.getLimitY()) {
+            return false;
+        }
+
+        double x = Math.max(dim.x(), border.x());
+        double y = Math.max(dim.y(), border.y());
+        double limitX = Math.min(dim.getLimitX(), border.getLimitX());
+        double limitY = Math.min(dim.getLimitY(), border.getLimitY());
+
+        return mouseX >= x && mouseX < limitX && mouseY >= y && mouseY < limitY;
     }
 
     @Inject(method = "getTextColor", at = @At("HEAD"), cancellable = true)
@@ -103,5 +129,15 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     @Override
     public void setTab(boolean tab) {
         this.isTab = tab;
+    }
+
+    @Override
+    public Dim2i getDimBorder(){
+        return this.dimBorder;
+    }
+
+    @Override
+    public void setDimBorder(Dim2i dim2i) {
+        this.dimBorder = dim2i;
     }
 }

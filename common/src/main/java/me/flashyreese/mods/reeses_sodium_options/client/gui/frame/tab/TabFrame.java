@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab;
 
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iAccess;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExtended;
@@ -190,6 +191,10 @@ public class TabFrame extends AbstractFrame {
             for (AbstractWidget widget : this.children) {
                 if (widget != this.selectedFrame) {
                     widget.render(guiGraphics, mouseX, mouseY, delta);
+                }
+                if (widget instanceof FlatButtonWidgetExtended flatButtonWidgetExtended && flatButtonWidgetExtended.isTab() && widget.isHovered()) {
+                    flatButtonWidgetExtended.setDimBorder(frameDim);
+                    guiGraphics.requestCursor(CursorTypes.POINTING_HAND);
                 }
             }
         });
