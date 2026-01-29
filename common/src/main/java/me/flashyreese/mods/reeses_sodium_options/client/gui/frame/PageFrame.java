@@ -150,6 +150,11 @@ public class PageFrame extends AbstractFrame {
                     Dim2i dim = new Dim2i(0, y, this.getWidth(), 18);
                     ((Dim2iAccess) (Object) dim).setPoint2i(((Point2iAccess) (Object) ((AbstractWidgetExtended) this).getDim()));
                     ControlElement element = control.createElement(this.screen, this, dim, this.modOptions.theme());
+                    if (element instanceof SliderControlElementExtended sliderControlElementExtended) {
+                        sliderControlElementExtended.setDimBorder(originalDim);
+                    } else if (element instanceof AbstractWidgetExtended abstractWidgetExtended) {
+                        abstractWidgetExtended.setDimBorder(originalDim);
+                    }
                     ((OptionExtended) element.getOption()).setDim2i(dim);
                     this.children.add(element);
 

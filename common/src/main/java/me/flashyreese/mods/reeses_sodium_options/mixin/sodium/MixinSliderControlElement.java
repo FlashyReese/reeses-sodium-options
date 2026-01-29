@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(targets = "net.caffeinemc.mods.sodium.client.gui.options.control.SliderControl$SliderControlElement")
 public abstract class MixinSliderControlElement extends ControlElement implements SliderControlElementExtended {
@@ -25,6 +26,11 @@ public abstract class MixinSliderControlElement extends ControlElement implement
 
     @Unique
     private boolean editMode;
+
+    @Mutable
+    @Unique
+    @Final
+    private Dim2i dimBorder = new Dim2i(this.getSliderX(), this.getSliderY(), this.getSliderWidth(), this.getSliderHeight());
 
     public MixinSliderControlElement(AbstractOptionList list, Dim2i dim, ColorTheme theme) {
         super(list, dim, theme);
@@ -53,6 +59,18 @@ public abstract class MixinSliderControlElement extends ControlElement implement
     @Shadow
     public abstract boolean isMouseOverSlider(double mouseX, double mouseY);
 
+    @Shadow
+    public abstract int getSliderX();
+
+    @Shadow
+    public abstract int getSliderY();
+
+    @Shadow
+    public abstract int getSliderWidth();
+
+    @Shadow
+    public abstract int getSliderHeight();
+
     @Inject(method = "render", at = @At(value = "HEAD"))
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         //this.sliderBounds = new Rect2i(this.dim.getLimitX() - 96, this.dim.getCenterY() - 5, 90, 10);
@@ -63,6 +81,26 @@ public abstract class MixinSliderControlElement extends ControlElement implement
         if (drawSlider && this.isFocused() && this.isEditMode()) {
             this.drawRect(graphics, thumbX - 1, sliderY - 1, thumbX + 5, sliderY + sliderHeight + 1, 0xFFFFFFFF);
         }
+    }
+
+    @Inject(method = "isMouseOverSlider", at = @At("HEAD"), cancellable = true)
+    public void modifyIsMouseOverSlider(double mouseX, double mouseY, CallbackInfoReturnable<Boolean> cir) {
+        Dim2i dim = new Dim2i(this.getSliderX(), this.getSliderY(), this.getSliderWidth(), this.getSliderHeight());
+        Dim2i border = this.getDimBorder();
+
+        if (dim.getLimitX() <= border.x() || dim.getLimitY() <= border.y() || dim.x() >= border.getLimitX() || dim.y() >= border.getLimitY()) {
+            cir.cancel();
+            cir.setReturnValue(false);
+            return;
+        }
+
+        double x = Math.max(dim.x(), border.x());
+        double y = Math.max(dim.y(), border.y());
+        double limitX = Math.min(dim.getLimitX(), border.getLimitX());
+        double limitY = Math.min(dim.getLimitY(), border.getLimitY());
+
+        cir.cancel();
+        cir.setReturnValue(mouseX >= x && mouseX < limitX && mouseY >= y && mouseY < limitY);
     }
 
     @Override
@@ -110,5 +148,15 @@ public abstract class MixinSliderControlElement extends ControlElement implement
         }
 
         return false;
+    }
+
+    @Override
+    public Dim2i getDimBorder(){
+        return this.dimBorder;
+    }
+
+    @Override
+    public void setDimBorder(Dim2i dim2i) {
+        this.dimBorder = dim2i;
     }
 }

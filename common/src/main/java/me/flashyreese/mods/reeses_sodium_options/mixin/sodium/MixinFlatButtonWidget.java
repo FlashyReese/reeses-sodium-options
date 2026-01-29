@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
@@ -56,23 +55,6 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
         }
     }
 
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/widgets/FlatButtonWidget;isMouseOver(DD)Z"))
-    private boolean redirectIsMouseOver(FlatButtonWidget instance, double mouseX, double mouseY) {
-        Dim2i dim = this.getDim();
-        Dim2i border = this.getDimBorder();
-
-        if (dim.getLimitX() <= border.x() || dim.getLimitY() <= border.y() || dim.x() >= border.getLimitX() || dim.y() >= border.getLimitY()) {
-            return false;
-        }
-
-        double x = Math.max(dim.x(), border.x());
-        double y = Math.max(dim.y(), border.y());
-        double limitX = Math.min(dim.getLimitX(), border.getLimitX());
-        double limitY = Math.min(dim.getLimitY(), border.getLimitY());
-
-        return mouseX >= x && mouseX < limitX && mouseY >= y && mouseY < limitY;
-    }
-
     @Inject(method = "getTextColor", at = @At("HEAD"), cancellable = true)
     private void modifyGetTextColor(CallbackInfoReturnable<Integer> cir) {
         if (this.isTab()) {
@@ -106,7 +88,7 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
     @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/widgets/FlatButtonWidget;drawBorder(Lnet/minecraft/client/gui/GuiGraphics;IIIII)V", ordinal = 0))
     public void redirectDrawBorder(Args args) {
         if (this.leftAlign) {
-            //this.drawRect(guiGraphics, x1, this.dim.y(), x1 + 1, y2, color);
+            //this.drawBorder(guiGraphics, x1, y1, x2, y2, color);
             args.set(5, (0x80 << 24) | this.theme.themeLighter & 0xFFFFFF);
         }
     }

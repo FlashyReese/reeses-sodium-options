@@ -6,4 +6,8 @@ public interface AbstractWidgetExtended {
     Dim2i getDim();
 
     void setDim(Dim2i dim);
+
+    Dim2i getDimBorder();
+
+    void setDimBorder(Dim2i dim2i);
 }
