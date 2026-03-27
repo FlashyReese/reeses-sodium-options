@@ -7,7 +7,7 @@ import net.caffeinemc.mods.sodium.client.gui.VideoSettingsScreen;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,13 +25,13 @@ public class TabHeaderComponent extends AbstractWidget {
         this.modOptions = modOptions;
     }
 
-    public void applyScissor(GuiGraphics guiGraphics, int x, int y, int width, int height, Runnable action) {
+    public void applyScissor(GuiGraphicsExtractor guiGraphics, int x, int y, int width, int height, Runnable action) {
         guiGraphics.enableScissor(x, y, x + width, y + height);
         action.run();
         guiGraphics.disableScissor();
     }
 
-    private void drawScrollingString(GuiGraphics g, String text, int x, int y, int color, int availableWidth) {
+    private void drawScrollingString(GuiGraphicsExtractor g, String text, int x, int y, int color, int availableWidth) {
         Font font = Minecraft.getInstance().font;
 
         if (availableWidth <= 0 || text == null || text.isEmpty()) return;
@@ -40,7 +40,7 @@ public class TabHeaderComponent extends AbstractWidget {
         int lineHeight = font.lineHeight;
 
         if (textWidth <= availableWidth) {
-            g.drawString(font, text, x, y, color, false);
+            g.text(font, text, x, y, color, false);
             return;
         }
 
@@ -75,11 +75,11 @@ public class TabHeaderComponent extends AbstractWidget {
             offset = Math.max(0.0, overflow - tt * speedPxPerMs);
         }
 
-        this.applyScissor(g, x, y, availableWidth, lineHeight, () -> g.drawString(font, text, (int) (x - offset), y, color, false));
+        this.applyScissor(g, x, y, availableWidth, lineHeight, () -> g.text(font, text, (int) (x - offset), y, color, false));
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
+    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
         this.applyScissor(guiGraphics, this.getX(), this.getY(), this.getWidth(), this.getHeight(), () -> {
             this.drawRect(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), ColorARGB.pack(0, 0, 0, 245));
             this.drawRect(guiGraphics, this.getX(), this.getLimitY() - 1, this.getLimitX(), this.getLimitY(), modOptions.theme().themeLighter);

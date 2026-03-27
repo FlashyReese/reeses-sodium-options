@@ -3,7 +3,7 @@ import net.fabricmc.loom.task.AbstractRemapJarTask
 plugins {
     id("java")
     id("idea")
-    id("fabric-loom") version "1.14-SNAPSHOT"
+    id("net.fabricmc.fabric-loom") version "1.15.4"
 }
 
 val MINECRAFT_VERSION: String by rootProject.extra
@@ -20,35 +20,26 @@ tasks.configureEach {
 
 dependencies {
     minecraft(group = "com.mojang", name = "minecraft", version = MINECRAFT_VERSION)
-    mappings(loom.layered() {
-        officialMojangMappings()
-        if (PARCHMENT_VERSION != null) {
-            parchment("org.parchmentmc.data:parchment-${MINECRAFT_VERSION}:${PARCHMENT_VERSION}@zip")
-        }
-    })
-    compileOnly("io.github.llamalad7:mixinextras-common:0.3.5")
-    annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5")
+    compileOnly("io.github.llamalad7:mixinextras-common:0.5.0")
+    annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.0")
     compileOnly("net.fabricmc:sponge-mixin:0.13.2+mixin.0.8.5")
 
     fun addDependentFabricModule(name: String) {
         val module = fabricApi.module(name, FABRIC_API_VERSION)
-        modCompileOnly(module)
+        implementation(module)
     }
 
     addDependentFabricModule("fabric-api-base")
-    addDependentFabricModule("fabric-block-view-api-v2")
-    //addDependentFabricModule("fabric-renderer-api-v1")
+    addDependentFabricModule("fabric-block-getter-api-v2")
+    addDependentFabricModule("fabric-rendering-v1")
 
-    modImplementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
-}
-
-tasks.withType<AbstractRemapJarTask>().forEach {
-    it.targetNamespace = "named"
+    implementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
 }
 
 loom {
     mixin {
-        defaultRefmapName = "${rootProject.name}.refmap.json"
+        useLegacyMixinAp = false
+        //defaultRefmapName = "${rootProject.name}.refmap.json"
     }
 }
 

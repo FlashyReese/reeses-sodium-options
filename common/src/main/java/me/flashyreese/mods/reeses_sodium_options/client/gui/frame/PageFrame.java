@@ -13,7 +13,7 @@ import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
@@ -168,7 +168,7 @@ public class PageFrame extends AbstractFrame {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
         ControlElement hoveredElement = this.controlElements.stream()
                 .filter(controlElement -> ((Dim2iAccess) (Object) ((AbstractWidgetExtended) controlElement).getDim()).overlapWith(this.originalDim))
                 .filter(ControlElement::isHovered)
@@ -178,7 +178,7 @@ public class PageFrame extends AbstractFrame {
                         .filter(ControlElement::isFocused)
                         .findFirst()
                         .orElse(null));
-        super.render(guiGraphics, mouseX, mouseY, delta);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         if (hoveredElement != null && this.lastHoveredElement == hoveredElement &&
                 ((this.originalDim.containsCursor(mouseX, mouseY) && hoveredElement.isHovered() && hoveredElement.isMouseOver(mouseX, mouseY))
                         || hoveredElement.isFocused())) {
@@ -192,7 +192,7 @@ public class PageFrame extends AbstractFrame {
         }
     }
 
-    private void renderOptionTooltip(GuiGraphics guiGraphics, ControlElement element) {
+    private void renderOptionTooltip(GuiGraphicsExtractor guiGraphics, ControlElement element) {
         if (this.lastTime + 500 > System.currentTimeMillis()) return;
 
         Dim2i dim = ((AbstractWidgetExtended) element).getDim();
@@ -240,7 +240,7 @@ public class PageFrame extends AbstractFrame {
         this.drawBorder(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, modOptions.theme().theme);
 
         for (int i = 0; i < tooltip.size(); i++) {
-            guiGraphics.drawString(Minecraft.getInstance().font, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
+            guiGraphics.text(Minecraft.getInstance().font, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
         }
     }
 
