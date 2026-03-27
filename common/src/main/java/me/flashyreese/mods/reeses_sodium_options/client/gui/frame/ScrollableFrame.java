@@ -7,7 +7,7 @@ import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -137,22 +137,22 @@ public class ScrollableFrame extends AbstractFrame {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
         if (this.canScrollHorizontal || this.canScrollVertical) {
             if (this.renderOutline) {
                 this.drawBorder(guiGraphics, ((AbstractWidgetExtended) this).getDim().x(), ((AbstractWidgetExtended) this).getDim().y(), ((AbstractWidgetExtended) this).getDim().getLimitX(), ((AbstractWidgetExtended) this).getDim().getLimitY(), 0xFFAAAAAA);
             }
-            this.applyScissor(guiGraphics, this.viewPortDimension.x(), this.viewPortDimension.y(), this.viewPortDimension.width(), this.viewPortDimension.height(), () -> super.render(guiGraphics, mouseX, mouseY, delta));
+            this.applyScissor(guiGraphics, this.viewPortDimension.x(), this.viewPortDimension.y(), this.viewPortDimension.width(), this.viewPortDimension.height(), () -> super.extractRenderState(guiGraphics, mouseX, mouseY, delta));
         } else {
-            super.render(guiGraphics, mouseX, mouseY, delta);
+            super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         }
 
         if (this.canScrollHorizontal) {
-            this.horizontalScrollBar.render(guiGraphics, mouseX, mouseY, delta);
+            this.horizontalScrollBar.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         }
 
         if (this.canScrollVertical) {
-            this.verticalScrollBar.render(guiGraphics, mouseX, mouseY, delta);
+            this.verticalScrollBar.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         }
     }
 

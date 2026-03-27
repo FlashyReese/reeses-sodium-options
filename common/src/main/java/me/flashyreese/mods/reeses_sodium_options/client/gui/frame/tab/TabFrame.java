@@ -13,7 +13,7 @@ import net.caffeinemc.mods.sodium.client.gui.ButtonTheme;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -184,18 +184,18 @@ public class TabFrame extends AbstractFrame {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
         Dim2i frameDim = this.getFrameDim();
         this.applyScissor(guiGraphics, frameDim.x(), frameDim.y(), frameDim.width(), frameDim.height(), () -> {
             for (AbstractWidget widget : this.children) {
                 if (widget != this.selectedFrame) {
-                    widget.render(guiGraphics, mouseX, mouseY, delta);
+                    widget.extractRenderState(guiGraphics, mouseX, mouseY, delta);
                 }
             }
         });
-        this.selectedFrame.render(guiGraphics, mouseX, mouseY, delta);
+        this.selectedFrame.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         if (this.tabSectionCanScroll) {
-            this.tabSectionScrollBar.render(guiGraphics, mouseX, mouseY, delta);
+            this.tabSectionScrollBar.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         }
     }
 

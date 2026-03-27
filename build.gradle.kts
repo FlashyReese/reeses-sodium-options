@@ -1,12 +1,12 @@
 plugins {
     id("java")
-    id("fabric-loom") version ("1.14-SNAPSHOT") apply (false)
+    id("net.fabricmc.fabric-loom") version ("1.15.4") apply (false)
 }
 
-val MINECRAFT_VERSION by extra { "1.21.11" }
-val NEOFORGE_VERSION by extra { "21.11.10-beta" }
-val FABRIC_LOADER_VERSION by extra { "0.18.2" }
-val FABRIC_API_VERSION by extra { "0.139.4+1.21.11" }
+val MINECRAFT_VERSION by extra { "26.1" }
+val NEOFORGE_VERSION by extra { "26.1.0.5-beta" }
+val FABRIC_LOADER_VERSION by extra { "0.18.5" }
+val FABRIC_API_VERSION by extra { "0.144.3+26.1" }
 
 // This value can be set to null to disable Parchment.
 val PARCHMENT_VERSION by extra { null }
@@ -14,8 +14,8 @@ val PARCHMENT_VERSION by extra { null }
 // https://semver.org/
 val MAVEN_GROUP by extra { "me.flashyreese.mods" }
 val ARCHIVE_NAME by extra { "reeses-sodium-options" }
-val MOD_VERSION by extra { "2.0.3" }
-val SODIUM_VERSION by extra { "0.8.3+mc1.21.11" }
+val MOD_VERSION by extra { "2.0.4" }
+val SODIUM_VERSION by extra { "0.8.7+mc26.1" }
 
 allprojects {
     apply(plugin = "java")
@@ -43,7 +43,7 @@ subprojects {
         archivesName = "$ARCHIVE_NAME-${project.name}"
     }
 
-    java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+    java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
     tasks.processResources {
         filesMatching("META-INF/neoforge.mods.toml") {
@@ -56,7 +56,7 @@ subprojects {
 
     tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"
-        options.release.set(21)
+        options.release.set(25)
     }
 
     tasks.withType<GenerateModuleMetadata>().configureEach {

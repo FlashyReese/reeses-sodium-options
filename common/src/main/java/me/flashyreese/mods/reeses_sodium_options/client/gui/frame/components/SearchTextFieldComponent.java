@@ -13,7 +13,7 @@ import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -84,7 +84,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
         if (!this.isVisible()) {
             return;
         }
@@ -110,7 +110,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         }
         if (!displayedText.isEmpty()) {
             String preCursorText = isCursorWithinDisplayedText ? displayedText.substring(0, selectionStartOffset) : displayedText;
-            guiGraphics.drawString(this.font, this.renderTextProvider.apply(preCursorText, this.firstCharacterIndex), textEndX, textStartY, 0xFFFFFFFF);
+            guiGraphics.text(this.font, this.renderTextProvider.apply(preCursorText, this.firstCharacterIndex), textEndX, textStartY, 0xFFFFFFFF);
             textEndX = textEndX + this.font.width(this.renderTextProvider.apply(preCursorText, this.firstCharacterIndex));
         }
         boolean isCursorAtEnd = this.selectionStart < this.text.length() || this.text.length() >= this.getMaxLength();
@@ -122,7 +122,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
             --textEndX;
         }
         if (!displayedText.isEmpty() && isCursorWithinDisplayedText && selectionStartOffset < displayedText.length()) {
-            guiGraphics.drawString(this.font, this.renderTextProvider.apply(displayedText.substring(selectionStartOffset), this.selectionStart), textEndX, textStartY, 0xFFFFFFFF);
+            guiGraphics.text(this.font, this.renderTextProvider.apply(displayedText.substring(selectionStartOffset), this.selectionStart), textEndX, textStartY, 0xFFFFFFFF);
         }
         // Cursor
         if (this.isFocused()) {
@@ -161,7 +161,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         this.focused = focused;
     }
 
-    private void drawSelectionHighlight(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY) {
+    private void drawSelectionHighlight(GuiGraphicsExtractor guiGraphics, int startX, int startY, int endX, int endY) {
         int temp;
         if (startX < endX) {
             temp = startX;

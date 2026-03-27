@@ -49,7 +49,7 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
         super(dim);
     }
 
-    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/widgets/FlatButtonWidget;drawString(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/network/chat/Component;III)V"))
+    @ModifyArgs(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/widgets/FlatButtonWidget;drawString(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/network/chat/Component;III)V"))
     public void redirectDrawString(Args args) {
         if (this.leftAlign) { // Aligns the text to the left by 10 pixels
             //this.drawString(guiGraphics, text, this.dim.x() + 10, y, color);
@@ -57,7 +57,7 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
         }
     }
 
-    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/widgets/FlatButtonWidget;drawRect(Lnet/minecraft/client/gui/GuiGraphics;IIIII)V", ordinal = 1))
+    @ModifyArgs(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/widgets/FlatButtonWidget;drawRect(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIIII)V", ordinal = 1))
     public void redirectDrawRect(Args args) {
         if (this.leftAlign) {
             //this.drawRect(guiGraphics, x1, this.dim.y(), x1 + 1, y2, color);
