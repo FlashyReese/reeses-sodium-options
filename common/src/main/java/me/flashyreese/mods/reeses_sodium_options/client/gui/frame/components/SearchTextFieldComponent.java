@@ -13,19 +13,17 @@ import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -84,7 +82,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     @Override
-    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         if (!this.isVisible()) {
             return;
         }
@@ -110,7 +108,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         }
         if (!displayedText.isEmpty()) {
             String preCursorText = isCursorWithinDisplayedText ? displayedText.substring(0, selectionStartOffset) : displayedText;
-            guiGraphics.text(this.font, this.renderTextProvider.apply(preCursorText, this.firstCharacterIndex), textEndX, textStartY, 0xFFFFFFFF);
+            guiGraphics.drawString(this.font, this.renderTextProvider.apply(preCursorText, this.firstCharacterIndex), textEndX, textStartY, 0xFFFFFFFF);
             textEndX = textEndX + this.font.width(this.renderTextProvider.apply(preCursorText, this.firstCharacterIndex));
         }
         boolean isCursorAtEnd = this.selectionStart < this.text.length() || this.text.length() >= this.getMaxLength();
@@ -122,12 +120,12 @@ public class SearchTextFieldComponent extends AbstractWidget {
             --textEndX;
         }
         if (!displayedText.isEmpty() && isCursorWithinDisplayedText && selectionStartOffset < displayedText.length()) {
-            guiGraphics.text(this.font, this.renderTextProvider.apply(displayedText.substring(selectionStartOffset), this.selectionStart), textEndX, textStartY, 0xFFFFFFFF);
+            guiGraphics.drawString(this.font, this.renderTextProvider.apply(displayedText.substring(selectionStartOffset), this.selectionStart), textEndX, textStartY, 0xFFFFFFFF);
         }
         // Cursor
         if (this.isFocused()) {
             int color = ((int) (this.currentCursorAlpha * 255) << 24) | 0x00D0D0D0;
-            guiGraphics.fill(RenderPipelines.GUI, cursorX, textStartY - 1, cursorX + 1, textStartY + 1 + this.font.lineHeight, color);
+            guiGraphics.fill(RenderType.guiOverlay(), cursorX, textStartY - 1, cursorX + 1, textStartY + 1 + this.font.lineHeight, color);
         }
         // Highlighted text
         if (selectionEndOffset != selectionStartOffset) {
@@ -137,12 +135,12 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean repeated) {
-        int clickX = Mth.floor(event.x()) - this.getX() - 6;
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        int clickX = Mth.floor(mouseX) - this.getX() - 6;
         String displayedText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
         this.setCursor(this.font.plainSubstrByWidth(displayedText, clickX).length() + this.firstCharacterIndex);
 
-        this.setFocused(this.isMouseOver(event.x(), event.y()));
+        this.setFocused(this.isMouseOver(mouseX, mouseY));
         this.pages.forEach(page -> page
                 .groups()
                 .stream()
@@ -161,7 +159,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         this.focused = focused;
     }
 
-    private void drawSelectionHighlight(GuiGraphicsExtractor guiGraphics, int startX, int startY, int endX, int endY) {
+    private void drawSelectionHighlight(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY) {
         int temp;
         if (startX < endX) {
             temp = startX;
@@ -179,7 +177,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (startX > this.getX() + this.getWidth()) {
             startX = this.getX() + this.getWidth();
         }
-        guiGraphics.fill(RenderPipelines.GUI_TEXT_HIGHLIGHT, startX, startY, endX, endY, -16776961);
+        guiGraphics.fill(RenderType.guiTextHighlight(), startX, startY, endX, endY, -16776961);
     }
 
     private int getMaxLength() {
@@ -228,7 +226,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         );
 
         this.uiState.lastSearch().set(query.trim());
-        List<Identifier> resultIds = List.of();
+        List<ResourceLocation> resultIds = List.of();
         if (this.editable && !query.trim().isEmpty()) {
             List<Option> searchResults = this.searchIndex.newSession(query)
                     .results()
@@ -251,7 +249,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     private void erase(int offset) {
-        if (Minecraft.getInstance().hasControlDown()) {
+        if (Screen.hasControlDown()) {
             this.eraseWords(offset);
         } else {
             this.eraseCharacters(offset);
@@ -387,14 +385,14 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean charTyped(CharacterEvent characterEvent) {
+    public boolean charTyped(char chr, int modifiers) {
         if (!this.isActive()) {
             return false;
         }
-        if (characterEvent.isAllowedChatCharacter()) {
+        if (StringUtil.isAllowedChatCharacter(chr)) {
             if (this.editable) {
                 this.uiState.lastSearch().set(this.text.trim());
-                this.write(characterEvent.codepointAsString());
+                this.write(Character.toString(chr));
                 this.uiState.lastSearchIndex().set(0);            }
             return true;
         }
@@ -403,7 +401,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
 
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         this.pages.forEach(page -> page
                 .groups()
                 .stream()
@@ -417,21 +415,21 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (!this.isActive()) {
             return false;
         } else {
-            this.selecting = event.hasShiftDown();
-            if (event.isSelectAll()) {
+            this.selecting = Screen.hasShiftDown();
+            if (Screen.isSelectAll(keyCode)) {
                 this.setCursorToEnd();
                 this.setSelectionEnd(0);
                 return true;
-            } else if (event.isCopy()) {
+            } else if (Screen.isCopy(keyCode)) {
                 Minecraft.getInstance().keyboardHandler.setClipboard(this.getSelectedText());
                 return true;
-            } else if (event.isPaste()) {
+            } else if (Screen.isPaste(keyCode)) {
                 if (this.editable) {
                     this.write(Minecraft.getInstance().keyboardHandler.getClipboard());
                 }
 
                 return true;
-            } else if (event.isCut()) {
+            } else if (Screen.isCut(keyCode)) {
                 Minecraft.getInstance().keyboardHandler.setClipboard(this.getSelectedText());
                 if (this.editable) {
                     this.write("");
@@ -439,7 +437,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
 
                 return true;
             } else {
-                switch (event.key()) {
+                switch (keyCode) {
                     case GLFW.GLFW_KEY_ENTER -> {
                         if (this.editable) {
                             int count = 0;
@@ -480,7 +478,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         if (this.editable) {
                             this.selecting = false;
                             this.erase(-1);
-                            this.selecting = event.hasShiftDown();
+                            this.selecting = Screen.hasShiftDown();
                         }
                         return true;
                     }
@@ -488,12 +486,12 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         if (this.editable) {
                             this.selecting = false;
                             this.erase(1);
-                            this.selecting = event.hasShiftDown();
+                            this.selecting = Screen.hasShiftDown();
                         }
                         return true;
                     }
                     case GLFW.GLFW_KEY_RIGHT -> {
-                        if (event.hasControlDown()) {
+                        if (Screen.hasControlDown()) {
                             this.setCursor(this.getWordSkipPosition(1));
                         } else {
                             this.moveCursor(1);
@@ -503,7 +501,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
                         return state;
                     }
                     case GLFW.GLFW_KEY_LEFT -> {
-                        if (event.hasControlDown()) {
+                        if (Screen.hasControlDown()) {
                             this.setCursor(this.getWordSkipPosition(-1));
                         } else {
                             this.moveCursor(-1);

@@ -6,7 +6,7 @@ import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,8 +24,8 @@ public abstract class MixinControlElement extends AbstractWidget {
     @Shadow
     public abstract Option getOption();
 
-    @Redirect(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/options/control/ControlElement;drawString(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Ljava/lang/String;III)V"))
-    public void drawString(ControlElement instance, GuiGraphicsExtractor drawContext, String s, int x, int y, int color) {
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/options/control/ControlElement;drawString(Lnet/minecraft/client/gui/GuiGraphics;Ljava/lang/String;III)V"))
+    public void drawString(ControlElement instance, GuiGraphics drawContext, String s, int x, int y, int color) {
         if (this.getOption() instanceof OptionExtended optionExtended && optionExtended.isHighlight()) {
             String replacement = optionExtended.getSelected() ? ChatFormatting.DARK_GREEN.toString() : ChatFormatting.YELLOW.toString();
 

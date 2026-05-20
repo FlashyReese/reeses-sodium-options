@@ -13,9 +13,8 @@ import net.caffeinemc.mods.sodium.client.gui.ButtonTheme;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
@@ -184,34 +183,34 @@ public class TabFrame extends AbstractFrame {
     }
 
     @Override
-    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         Dim2i frameDim = this.getFrameDim();
         this.applyScissor(guiGraphics, frameDim.x(), frameDim.y(), frameDim.width(), frameDim.height(), () -> {
             for (AbstractWidget widget : this.children) {
                 if (widget != this.selectedFrame) {
-                    widget.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+                    widget.render(guiGraphics, mouseX, mouseY, delta);
                 }
             }
         });
-        this.selectedFrame.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+        this.selectedFrame.render(guiGraphics, mouseX, mouseY, delta);
         if (this.tabSectionCanScroll) {
-            this.tabSectionScrollBar.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+            this.tabSectionScrollBar.render(guiGraphics, mouseX, mouseY, delta);
         }
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        return (this.getFrameDim().containsCursor(event.x(), event.y()) && super.mouseClicked(event, bl)) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseClicked(event, bl));
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return (this.getFrameDim().containsCursor(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, button)) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseClicked(mouseX, mouseY, button));
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        return super.mouseDragged(event, deltaX, deltaY) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseDragged(event, deltaX, deltaY));
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY));
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
-        return super.mouseReleased(event) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseReleased(event));
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return super.mouseReleased(mouseX, mouseY, button) || (this.tabSectionCanScroll && this.tabSectionScrollBar.mouseReleased(mouseX, mouseY, button));
     }
 
     @Override

@@ -3,7 +3,7 @@ package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Unique;
 public class MixinOption implements OptionExtended {
     @Shadow
     @Final
-    Identifier id;
+    ResourceLocation id;
 
     @Unique
     private Dim2i parent;
@@ -25,7 +25,7 @@ public class MixinOption implements OptionExtended {
     private boolean selected;
 
     @Override
-    public Identifier getId() {
+    public ResourceLocation getId() {
         return id;
     }
 

@@ -2,13 +2,10 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components;
 
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
@@ -58,7 +55,7 @@ public class ScrollBarComponent extends AbstractWidget {
 
 
     @Override
-    public void extractRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), 0xFFAAAAAA);
         this.drawRect(guiGraphics, this.scrollThumb.x(), this.scrollThumb.y(), this.scrollThumb.getLimitX(), this.scrollThumb.getLimitY(), 0xFFAAAAAA);
         if (this.isFocused()) {
@@ -67,15 +64,15 @@ public class ScrollBarComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        if (this.isMouseOver(event.x(), event.y())) {
-            if (this.scrollThumb.containsCursor(event.x(), event.y())) {
-                this.scrollThumbClickOffset = (int) (this.mode == ScrollDirection.VERTICAL ? event.y() - this.scrollThumb.getCenterY() : event.x() - this.scrollThumb.getCenterX());
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (this.isMouseOver(mouseX, mouseY)) {
+            if (this.scrollThumb.containsCursor(mouseX, mouseY)) {
+                this.scrollThumbClickOffset = (int) (this.mode == ScrollDirection.VERTICAL ? mouseY - this.scrollThumb.getCenterY() : mouseX - this.scrollThumb.getCenterX());
                 this.isDragging = true;
             } else {
                 int thumbLength = this.mode == ScrollDirection.VERTICAL ? this.scrollThumb.height() : this.scrollThumb.width();
                 int trackLength = this.mode == ScrollDirection.VERTICAL ? this.getHeight() : this.getWidth();
-                int value = (int) (((this.mode == ScrollDirection.VERTICAL ? event.y() - this.getY() : event.x() - this.getX()) - thumbLength / 2.0) * this.maxContentOffset / (trackLength - thumbLength));
+                int value = (int) (((this.mode == ScrollDirection.VERTICAL ? mouseY - this.getY() : mouseX - this.getX()) - thumbLength / 2.0) * this.maxContentOffset / (trackLength - thumbLength));
                 this.setOffset(value);
                 this.isDragging = false;
             }
@@ -86,19 +83,19 @@ public class ScrollBarComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() == 0) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (button == 0) {
             this.isDragging = false;
         }
         return false;
     }
 
     @Override
-    public boolean mouseDragged(@NonNull MouseButtonEvent event, double deltaX, double deltaY) {
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (this.isDragging) {
             int thumbLength = this.mode == ScrollDirection.VERTICAL ? this.scrollThumb.height() : this.scrollThumb.width();
             int trackLength = this.mode == ScrollDirection.VERTICAL ? this.getHeight() : this.getWidth();
-            int value = (int) (((this.mode == ScrollDirection.VERTICAL ? event.y() : event.x()) - this.scrollThumbClickOffset - (this.mode == ScrollDirection.VERTICAL ? this.getY() : this.getX()) - thumbLength / 2.0) * this.maxContentOffset / (trackLength - thumbLength));
+            int value = (int) (((this.mode == ScrollDirection.VERTICAL ? mouseY : mouseX) - this.scrollThumbClickOffset - (this.mode == ScrollDirection.VERTICAL ? this.getY() : this.getX()) - thumbLength / 2.0) * this.maxContentOffset / (trackLength - thumbLength));
             this.setOffset(value);
             return true;
         }
@@ -130,12 +127,12 @@ public class ScrollBarComponent extends AbstractWidget {
     }
 
     @Override
-    public boolean keyPressed(@NonNull KeyEvent event) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!this.isFocused()) {
             return false;
         }
 
-        int newOffset = switch (event.key()) {
+        int newOffset = switch (keyCode) {
             case GLFW.GLFW_KEY_UP -> this.getOffset() - SCROLL_STEP;
             case GLFW.GLFW_KEY_DOWN -> this.getOffset() + SCROLL_STEP;
             case GLFW.GLFW_KEY_LEFT ->

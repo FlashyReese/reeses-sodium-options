@@ -16,15 +16,13 @@ import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import net.caffeinemc.mods.sodium.client.services.PlatformRuntimeInformation;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -235,11 +233,11 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     }
 
     @Override
-    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         this.updateControls();
-        super.extractRenderState(guiGraphics, this.prompt != null ? -1 : mouseX, this.prompt != null ? -1 : mouseY, delta);
+        super.render(guiGraphics, this.prompt != null ? -1 : mouseX, this.prompt != null ? -1 : mouseY, delta);
         if (this.prompt != null) {
-            this.prompt.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+            this.prompt.render(guiGraphics, mouseX, mouseY, delta);
         }
     }
 
@@ -280,27 +278,27 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean repeated) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.prompt != null) {
-            return this.prompt.mouseClicked(event, repeated);
+            return this.prompt.mouseClicked(mouseX, mouseY, button);
         }
 
-        return super.mouseClicked(event, repeated);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (this.prompt != null) {
-            return this.prompt.keyPressed(event);
+            return this.prompt.keyPressed(keyCode, scanCode, modifiers);
         }
 
-        if (event.key() == GLFW.GLFW_KEY_P && (event.modifiers() & GLFW.GLFW_MOD_SHIFT) != 0 && !(this.searchTextField != null && this.searchTextField.isFocused())) {
+        if (keyCode == GLFW.GLFW_KEY_P && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0 && !(this.searchTextField != null && this.searchTextField.isFocused())) {
             Minecraft.getInstance().setScreen(new VideoSettingsScreen(this.prevScreen, Minecraft.getInstance(), Minecraft.getInstance().options));
 
             return true;
         }
 
-        return super.keyPressed(event);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -340,7 +338,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         private final AtomicReference<Integer> optionPageScrollBarOffset = new AtomicReference<>(0);
         private final AtomicReference<String> lastSearch = new AtomicReference<>("");
         private final AtomicReference<Integer> lastSearchIndex = new AtomicReference<>(0);
-        private final List<Identifier> searchResultIds = new ArrayList<>();
+        private final List<ResourceLocation> searchResultIds = new ArrayList<>();
 
         public AtomicReference<Component> tabFrameSelectedTab() {
             return tabFrameSelectedTab;
@@ -362,11 +360,11 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
             return lastSearchIndex;
         }
 
-        public List<Identifier> searchResultIds() {
+        public List<ResourceLocation> searchResultIds() {
             return List.copyOf(searchResultIds);
         }
 
-        public boolean updateSearchResults(List<Identifier> ids) {
+        public boolean updateSearchResults(List<ResourceLocation> ids) {
             if (this.searchResultIds.equals(ids)) {
                 return false;
             }

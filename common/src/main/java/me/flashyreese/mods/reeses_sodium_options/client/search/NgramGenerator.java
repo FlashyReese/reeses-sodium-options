@@ -1,7 +1,5 @@
 package me.flashyreese.mods.reeses_sodium_options.client.search;
 
-import net.minecraft.resources.Identifier;
-
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,10 +77,14 @@ public final class NgramGenerator {
 
         // Preserve Minecraft identifier punctuation inside tokens (ASCII only)
         if (cp <= 0x7F) {
-            return Identifier.isAllowedInIdentifier((char) cp);
+            return isResourceLocationPunctuation((char) cp);
         }
 
         return false;
+    }
+
+    private static boolean isResourceLocationPunctuation(char c) {
+        return c == '_' || c == '-' || c == '.' || c == '/' || c == ':';
     }
 
     private void flushToken(StringBuilder token, List<String> out) {

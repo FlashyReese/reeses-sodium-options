@@ -1,10 +1,10 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui;
 
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public interface OptionExtended {
-    Identifier getId();
+    ResourceLocation getId();
 
     boolean isHighlight();
 

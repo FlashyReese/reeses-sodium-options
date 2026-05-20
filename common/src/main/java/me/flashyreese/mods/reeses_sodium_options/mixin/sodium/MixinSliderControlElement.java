@@ -8,10 +8,11 @@ import net.caffeinemc.mods.sodium.client.gui.ColorTheme;
 import net.caffeinemc.mods.sodium.client.gui.options.control.AbstractOptionList;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.CommonInputs;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
+import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -53,32 +54,32 @@ public abstract class MixinSliderControlElement extends ControlElement implement
     @Shadow
     public abstract boolean isMouseOverSlider(double mouseX, double mouseY);
 
-    @Inject(method = "extractRenderState", at = @At(value = "HEAD"))
-    public void extractRenderState(GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    @Inject(method = "render", at = @At(value = "HEAD"))
+    public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         //this.sliderBounds = new Rect2i(this.dim.getLimitX() - 96, this.dim.getCenterY() - 5, 90, 10);
     }
 
-    @Inject(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/options/control/SliderControl$SliderControlElement;drawString(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/network/chat/Component;III)V", ordinal = 0))
-    public void rso$renderSlider(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta, CallbackInfo ci, @Local(ordinal = 3) int sliderY, @Local(ordinal = 5) int sliderHeight, @Local(ordinal = 1) boolean drawSlider, @Local(ordinal = 7) int thumbX) {
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gui/options/control/SliderControl$SliderControlElement;drawString(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/network/chat/Component;III)V", ordinal = 0))
+    public void rso$renderSlider(GuiGraphics graphics, int mouseX, int mouseY, float delta, CallbackInfo ci, @Local(ordinal = 3) int sliderY, @Local(ordinal = 5) int sliderHeight, @Local(ordinal = 1) boolean drawSlider, @Local(ordinal = 7) int thumbX) {
         if (drawSlider && this.isFocused() && this.isEditMode()) {
             this.drawRect(graphics, thumbX - 1, sliderY - 1, thumbX + 5, sliderY + sliderHeight + 1, 0xFFFFFFFF);
         }
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!isFocused()) return false;
 
-        if (event.isSelection()) {
+        if (CommonInputs.selected(keyCode)) {
             this.setEditMode(!this.isEditMode());
             return true;
         }
 
         if (this.isEditMode()) {
-            if (event.isLeft()) {
+            if (keyCode == GLFW.GLFW_KEY_LEFT) {
                 this.option.modifyValue(Mth.clamp(this.option.getValidatedValue() - this.option.getSteppedValidator().step(), this.option.getSteppedValidator().min(), this.option.getSteppedValidator().max()));
                 return true;
-            } else if (event.isRight()) {
+            } else if (keyCode == GLFW.GLFW_KEY_RIGHT) {
                 this.option.modifyValue(Mth.clamp(this.option.getValidatedValue() + this.option.getSteppedValidator().step(), this.option.getSteppedValidator().min(), this.option.getSteppedValidator().max()));
                 return true;
             }
@@ -98,7 +99,7 @@ public abstract class MixinSliderControlElement extends ControlElement implement
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (this.getOption().isEnabled() && this.isMouseOverSlider((int) mouseX, (int) mouseY) && Minecraft.getInstance().hasShiftDown()) {
+        if (this.getOption().isEnabled() && this.isMouseOverSlider((int) mouseX, (int) mouseY) && Screen.hasShiftDown()) {
             this.setValueFromMouseScroll(verticalAmount); // todo: horizontal separation
 
             return true;

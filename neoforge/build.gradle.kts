@@ -39,6 +39,29 @@ repositories {
     }
 }
 
+val sodiumNeoForgeWrapper = configurations.create("sodiumNeoForgeWrapper") {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    isTransitive = false
+}
+
+val sodiumNeoForgeCompatibilityJar = tasks.register<Jar>("sodiumNeoForgeCompatibilityJar") {
+    archiveBaseName.set("sodium-neoforge-compatibility")
+
+    // Sodium's NeoForge wrapper contains helper classes outside the nested mod jar.
+    from({ sodiumNeoForgeWrapper.map { zipTree(it) } }) {
+        include("net/caffeinemc/mods/sodium/client/compatibility/**")
+        include("net/caffeinemc/mods/sodium/client/console/**")
+        include("net/caffeinemc/mods/sodium/client/platform/**")
+        include("net/caffeinemc/mods/sodium/desktop/**")
+        include("net/caffeinemc/mods/sodium/service/**")
+    }
+}
+
+tasks.matching { it.name == "prepareClientRun" || it.name == "writeClientLegacyClasspath" }.configureEach {
+    dependsOn(sodiumNeoForgeCompatibilityJar)
+}
+
 tasks.jar {
     from(rootDir.resolve("LICENSE.txt"))
 
@@ -59,6 +82,12 @@ neoForge {
     runs {
         create("client") {
             client()
+            taskBefore(sodiumNeoForgeCompatibilityJar)
+            val compatibilityFiles = project.files(sodiumNeoForgeCompatibilityJar.flatMap { it.archiveFile })
+            compatibilityFiles.builtBy(sodiumNeoForgeCompatibilityJar)
+            additionalRuntimeClasspathConfiguration.dependencies.add(
+                    project.dependencies.create(compatibilityFiles)
+            )
         }
     }
 
@@ -90,9 +119,11 @@ tasks.test {
 
 dependencies {
     compileOnly(project(":common"))
-    implementation("net.caffeinemc:sodium-neoforge-mod:$SODIUM_VERSION")
-    implementation("net.caffeinemc:sodium-neoforge-api:${SODIUM_VERSION}")
-    implementation("net.caffeinemc:sodium-neoforge:${SODIUM_VERSION}")
+    compileOnly("net.caffeinemc:sodium-neoforge-mod:$SODIUM_VERSION")
+    compileOnly("net.caffeinemc:sodium-neoforge-api:${SODIUM_VERSION}")
+    runtimeOnly("net.caffeinemc:sodium-neoforge-mod:$SODIUM_VERSION")
+    runtimeOnly("net.caffeinemc:sodium-neoforge:${SODIUM_VERSION}")
+    add(sodiumNeoForgeWrapper.name, "net.caffeinemc:sodium-neoforge:${SODIUM_VERSION}")
 }
 
 // NeoGradle compiles the game, but we don't want to add our common code to the game's code
@@ -110,7 +141,7 @@ tasks.withType<ProcessResources>().matching(notNeoTask).configureEach {
     from(project(":common").sourceSets.main.get().resources)
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 publishing {
     publications {

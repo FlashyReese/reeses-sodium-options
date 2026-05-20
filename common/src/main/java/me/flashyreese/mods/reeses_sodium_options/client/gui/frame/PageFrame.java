@@ -13,12 +13,12 @@ import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
@@ -168,7 +168,7 @@ public class PageFrame extends AbstractFrame {
     }
 
     @Override
-    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         ControlElement hoveredElement = this.controlElements.stream()
                 .filter(controlElement -> ((Dim2iAccess) (Object) ((AbstractWidgetExtended) controlElement).getDim()).overlapWith(this.originalDim))
                 .filter(ControlElement::isHovered)
@@ -178,7 +178,7 @@ public class PageFrame extends AbstractFrame {
                         .filter(ControlElement::isFocused)
                         .findFirst()
                         .orElse(null));
-        super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+        super.render(guiGraphics, mouseX, mouseY, delta);
         if (hoveredElement != null && this.lastHoveredElement == hoveredElement &&
                 ((this.originalDim.containsCursor(mouseX, mouseY) && hoveredElement.isHovered() && hoveredElement.isMouseOver(mouseX, mouseY))
                         || hoveredElement.isFocused())) {
@@ -192,7 +192,7 @@ public class PageFrame extends AbstractFrame {
         }
     }
 
-    private void renderOptionTooltip(GuiGraphicsExtractor guiGraphics, ControlElement element) {
+    private void renderOptionTooltip(GuiGraphics guiGraphics, ControlElement element) {
         if (this.lastTime + 500 > System.currentTimeMillis()) return;
 
         Dim2i dim = ((AbstractWidgetExtended) element).getDim();
@@ -240,16 +240,16 @@ public class PageFrame extends AbstractFrame {
         this.drawBorder(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, modOptions.theme().theme);
 
         for (int i = 0; i < tooltip.size(); i++) {
-            guiGraphics.text(Minecraft.getInstance().font, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
+            guiGraphics.drawString(Minecraft.getInstance().font, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
         }
     }
 
     private List<SearchEntry> buildSearchEntries() {
-        List<Identifier> resultIds = SodiumVideoOptionsScreen.sharedUiState().searchResultIds();
+        List<ResourceLocation> resultIds = SodiumVideoOptionsScreen.sharedUiState().searchResultIds();
         if (resultIds.isEmpty()) {
             return List.of();
         }
-        Map<Identifier, SearchEntry> entries = new HashMap<>();
+        Map<ResourceLocation, SearchEntry> entries = new HashMap<>();
         for (OptionGroup group : this.page.groups()) {
             for (Option option : group.options()) {
                 if (option instanceof OptionExtended optionExtended) {
@@ -258,7 +258,7 @@ public class PageFrame extends AbstractFrame {
             }
         }
         List<SearchEntry> ordered = new ArrayList<>(resultIds.size());
-        for (Identifier id : resultIds) {
+        for (ResourceLocation id : resultIds) {
             SearchEntry entry = entries.get(id);
             if (entry != null) {
                 ordered.add(entry);

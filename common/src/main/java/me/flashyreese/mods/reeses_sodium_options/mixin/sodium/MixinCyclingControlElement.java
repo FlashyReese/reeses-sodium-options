@@ -5,8 +5,6 @@ import net.caffeinemc.mods.sodium.client.gui.ColorTheme;
 import net.caffeinemc.mods.sodium.client.gui.options.control.AbstractOptionList;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.input.MouseButtonEvent;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -22,9 +20,10 @@ public abstract class MixinCyclingControlElement<T extends Enum<T>> extends Cont
     @Shadow
     protected abstract void cycleControl(boolean reverse);
 
-    public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
-        if (this.getOption().isEnabled() && event.button() == 0 && this.isMouseOver(event.x(), event.y())) {
-            this.cycleControl(event.button() == 1);
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (this.getOption().isEnabled() && button == 0 && this.isMouseOver(mouseX, mouseY)) {
+            this.cycleControl(button == 1);
             return true;
         } else {
             return false;

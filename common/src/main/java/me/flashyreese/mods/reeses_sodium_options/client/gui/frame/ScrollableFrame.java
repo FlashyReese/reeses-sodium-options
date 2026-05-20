@@ -7,10 +7,9 @@ import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -137,22 +136,22 @@ public class ScrollableFrame extends AbstractFrame {
     }
 
     @Override
-    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         if (this.canScrollHorizontal || this.canScrollVertical) {
             if (this.renderOutline) {
                 this.drawBorder(guiGraphics, ((AbstractWidgetExtended) this).getDim().x(), ((AbstractWidgetExtended) this).getDim().y(), ((AbstractWidgetExtended) this).getDim().getLimitX(), ((AbstractWidgetExtended) this).getDim().getLimitY(), 0xFFAAAAAA);
             }
-            this.applyScissor(guiGraphics, this.viewPortDimension.x(), this.viewPortDimension.y(), this.viewPortDimension.width(), this.viewPortDimension.height(), () -> super.extractRenderState(guiGraphics, mouseX, mouseY, delta));
+            this.applyScissor(guiGraphics, this.viewPortDimension.x(), this.viewPortDimension.y(), this.viewPortDimension.width(), this.viewPortDimension.height(), () -> super.render(guiGraphics, mouseX, mouseY, delta));
         } else {
-            super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+            super.render(guiGraphics, mouseX, mouseY, delta);
         }
 
         if (this.canScrollHorizontal) {
-            this.horizontalScrollBar.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+            this.horizontalScrollBar.render(guiGraphics, mouseX, mouseY, delta);
         }
 
         if (this.canScrollVertical) {
-            this.verticalScrollBar.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+            this.verticalScrollBar.render(guiGraphics, mouseX, mouseY, delta);
         }
     }
 
@@ -163,18 +162,18 @@ public class ScrollableFrame extends AbstractFrame {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        return super.mouseClicked(event, bl) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseClicked(event, bl)) || (this.canScrollVertical && this.verticalScrollBar.mouseClicked(event, bl));
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return super.mouseClicked(mouseX, mouseY, button) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseClicked(mouseX, mouseY, button)) || (this.canScrollVertical && this.verticalScrollBar.mouseClicked(mouseX, mouseY, button));
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        return super.mouseDragged(event, deltaX, deltaY) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseDragged(event, deltaX, deltaY)) || (this.canScrollVertical && this.verticalScrollBar.mouseDragged(event, deltaX, deltaY));
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) || (this.canScrollVertical && this.verticalScrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY));
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
-        return super.mouseReleased(event) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseReleased(event)) || (this.canScrollVertical && this.verticalScrollBar.mouseReleased(event));
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return super.mouseReleased(mouseX, mouseY, button) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseReleased(mouseX, mouseY, button)) || (this.canScrollVertical && this.verticalScrollBar.mouseReleased(mouseX, mouseY, button));
     }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {

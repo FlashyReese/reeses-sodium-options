@@ -9,7 +9,7 @@ import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -75,16 +75,16 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
     }
 
     @Override
-    public void extractRenderState(@NotNull GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
         if (this.renderOutline) {
             this.drawBorder(drawContext, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), 0xFFAAAAAA);
         }
         for (Renderable renderable : this.children) {
-            renderable.extractRenderState(drawContext, mouseX, mouseY, delta);
+            renderable.render(drawContext, mouseX, mouseY, delta);
         }
     }
 
-    public void applyScissor(GuiGraphicsExtractor guiGraphics, int x, int y, int width, int height, Runnable action) {
+    public void applyScissor(GuiGraphics guiGraphics, int x, int y, int width, int height, Runnable action) {
         guiGraphics.enableScissor(x, y, x + width, y + height);
         action.run();
         guiGraphics.disableScissor();
