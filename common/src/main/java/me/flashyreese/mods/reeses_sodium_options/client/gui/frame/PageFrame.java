@@ -100,7 +100,6 @@ public class PageFrame extends AbstractFrame {
         if (this.page == null) return;
 
 
-
         this.children.clear();
 
         this.controlElements.clear();
@@ -236,12 +235,18 @@ public class PageFrame extends AbstractFrame {
         if (tooltip.isEmpty())
             return;
 
+        // 1.21.1 batches GuiGraphics calls; isolate the overlay so option rows cannot draw over it.
+        guiGraphics.flush();
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0.0F, 0.0F, 400.0F);
         this.drawRect(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
         this.drawBorder(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, modOptions.theme().theme);
 
         for (int i = 0; i < tooltip.size(); i++) {
             guiGraphics.drawString(Minecraft.getInstance().font, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
         }
+        guiGraphics.flush();
+        guiGraphics.pose().popPose();
     }
 
     private List<SearchEntry> buildSearchEntries() {
@@ -267,12 +272,12 @@ public class PageFrame extends AbstractFrame {
         return ordered;
     }
 
-    private record SearchEntry(OptionGroup group, Option option) {
-    }
-
     @Override
     public @Nullable ComponentPath nextFocusPath(@NotNull FocusNavigationEvent navigation) {
         return super.nextFocusPath(navigation);
+    }
+
+    private record SearchEntry(OptionGroup group, Option option) {
     }
 
     public static class Builder {
