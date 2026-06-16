@@ -24,6 +24,6 @@ public abstract class MixinSodiumOptionsGUI extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     public void postInit(CallbackInfo ci) {
-        this.minecraft.setScreen(new SodiumVideoOptionsScreen(this.prevScreen));
+        this.minecraft.gui.setScreen(new SodiumVideoOptionsScreen(this.prevScreen));
     }
 }

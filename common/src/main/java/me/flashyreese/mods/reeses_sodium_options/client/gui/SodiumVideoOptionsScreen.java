@@ -295,7 +295,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         }
 
         if (event.key() == GLFW.GLFW_KEY_P && (event.modifiers() & GLFW.GLFW_MOD_SHIFT) != 0 && !(this.searchTextField != null && this.searchTextField.isFocused())) {
-            Minecraft.getInstance().setScreen(new VideoSettingsScreen(this.prevScreen, Minecraft.getInstance(), Minecraft.getInstance().options));
+            Minecraft.getInstance().gui.setScreen(new VideoSettingsScreen(this.prevScreen, Minecraft.getInstance(), Minecraft.getInstance().options));
 
             return true;
         }
@@ -312,7 +312,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     public void onClose() {
         this.uiState.lastSearch().set("");
         this.uiState.lastSearchIndex().set(0);
-        this.minecraft.setScreen(this.prevScreen);
+        this.minecraft.gui.setScreen(this.prevScreen);
     }
 
     @Override
