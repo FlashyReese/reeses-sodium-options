@@ -1,7 +1,7 @@
 plugins {
     id("java")
     id("idea")
-    id("net.fabricmc.fabric-loom") version ("1.15.4")
+    id("net.fabricmc.fabric-loom") version ("1.17.11")
 }
 
 val MINECRAFT_VERSION: String by rootProject.extra
@@ -39,21 +39,20 @@ tasks.test {
 }
 
 loom {
-    @Suppress("UnstableApiUsage")
-    mixin { defaultRefmapName.set("${rootProject.name}.refmap.json") }
+    mixin.defaultRefmapName.set("${rootProject.name}.refmap.json")
 
     runs {
         named("client") {
             client()
-            configName = "Fabric Client"
-            ideConfigGenerated(true)
-            runDir("run")
+            displayName.set("Fabric Client")
+            generateRunConfig.set(true)
+            runDirectory.set(layout.projectDirectory.dir("run"))
         }
         named("server") {
             server()
-            configName = "Fabric Server"
-            ideConfigGenerated(true)
-            runDir("run")
+            displayName.set("Fabric Server")
+            generateRunConfig.set(true)
+            runDirectory.set(layout.projectDirectory.dir("run"))
         }
     }
 }

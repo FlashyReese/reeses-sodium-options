@@ -1,9 +1,7 @@
-import net.fabricmc.loom.task.AbstractRemapJarTask
-
 plugins {
     id("java")
     id("idea")
-    id("net.fabricmc.fabric-loom") version "1.15.4"
+    id("net.fabricmc.fabric-loom") version "1.17.11"
 }
 
 val MINECRAFT_VERSION: String by rootProject.extra
@@ -34,13 +32,6 @@ dependencies {
     addDependentFabricModule("fabric-rendering-v1")
 
     implementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
-}
-
-loom {
-    mixin {
-        useLegacyMixinAp = false
-        //defaultRefmapName = "${rootProject.name}.refmap.json"
-    }
 }
 
 publishing {
