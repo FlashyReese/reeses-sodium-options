@@ -122,7 +122,7 @@ public class TabHeaderComponent extends AbstractWidget {
                 drawScrollingString(guiGraphics, this.modOptions.name(), textX, this.getY() + 2, TEXT_COLOR, available);
                 drawScrollingString(guiGraphics, this.modOptions.version(), textX, this.getY() + 12, SECONDARY_TEXT_COLOR, available);
             } else {
-                int centeredY = this.getY() + (this.getHeight() - Minecraft.getInstance().font.lineHeight) / 2;
+                int centeredY = this.getY() + Math.ceilDiv(this.getHeight() - Minecraft.getInstance().font.lineHeight, 2);
                 drawScrollingString(guiGraphics, this.modOptions.name(), textX, centeredY, TEXT_COLOR, available);
             }
 
