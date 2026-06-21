@@ -1,6 +1,7 @@
 package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SliderControlElementExtended;
 import net.caffeinemc.mods.sodium.client.config.structure.IntegerOption;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
@@ -98,7 +99,13 @@ public abstract class MixinSliderControlElement extends ControlElement implement
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (this.getOption().isEnabled() && this.isMouseOverSlider((int) mouseX, (int) mouseY) && Minecraft.getInstance().hasShiftDown()) {
+        if (!ReeseSodiumOptionsConfig.config().isShiftScrollSliderAdjustments()
+                || !this.getOption().isEnabled()
+                || !Minecraft.getInstance().hasShiftDown()) {
+            return false;
+        }
+
+        if (this.isMouseOverSlider((int) mouseX, (int) mouseY)) {
             this.setValueFromMouseScroll(verticalAmount); // todo: horizontal separation
 
             return true;

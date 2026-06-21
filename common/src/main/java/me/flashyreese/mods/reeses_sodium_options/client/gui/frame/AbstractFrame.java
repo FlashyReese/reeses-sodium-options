@@ -3,6 +3,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iAccess;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2iAccess;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionUndoButtonControl;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.gui.options.control.AbstractOptionList;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
@@ -15,6 +16,7 @@ import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -120,10 +122,17 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
 
     @Override
     public void setFocused(@Nullable GuiEventListener focused) {
+        if (this.focused == focused) {
+            return;
+        }
+
         if (this.focused != null) {
             this.focused.setFocused(false);
         }
         this.focused = focused;
+        if (focused != null) {
+            focused.setFocused(true);
+        }
         if (this.focusListener != null) {
             this.focusListener.accept(focused);
         }
@@ -132,6 +141,17 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
     @Override
     public @NotNull List<? extends GuiEventListener> children() {
         return this.children;
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        GuiEventListener focused = this.getFocused();
+
+        if (focused instanceof OptionUndoButtonControl undoButtonControl && undoButtonControl.rso$isUndoButtonFocused()) {
+            return undoButtonControl.rso$getUndoButtonElement().keyPressed(event);
+        }
+
+        return focused != null && focused.keyPressed(event);
     }
 
     @Override

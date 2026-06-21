@@ -32,3 +32,6 @@ side = "CLIENT"
 
 [[mixins]]
 config = "reeses-sodium-options.mixins.json"
+
+[modproperties.reeses_sodium_options]
+"sodium:config_api_user" = "me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfigEntryPoint"
