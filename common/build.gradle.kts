@@ -3,7 +3,7 @@ import net.fabricmc.loom.task.AbstractRemapJarTask
 plugins {
     id("java")
     id("idea")
-    id("fabric-loom") version "1.14-SNAPSHOT"
+    id("fabric-loom") version "1.17.12"
 }
 
 val MINECRAFT_VERSION: String by rootProject.extra
@@ -26,9 +26,9 @@ dependencies {
             parchment("org.parchmentmc.data:parchment-${MINECRAFT_VERSION}:${PARCHMENT_VERSION}@zip")
         }
     })
-    compileOnly("io.github.llamalad7:mixinextras-common:0.3.5")
-    annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5")
-    compileOnly("net.fabricmc:sponge-mixin:0.13.2+mixin.0.8.5")
+    compileOnly("io.github.llamalad7:mixinextras-common:0.5.4")
+    annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.4")
+    compileOnly("net.fabricmc:sponge-mixin:0.17.3+mixin.0.8.7")
 
     fun addDependentFabricModule(name: String) {
         val module = fabricApi.module(name, FABRIC_API_VERSION)
