@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
+import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.*;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.LabelComponent;
 import net.caffeinemc.mods.sodium.api.config.option.OptionImpact;
@@ -7,8 +8,10 @@ import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
 import net.caffeinemc.mods.sodium.client.config.structure.OptionGroup;
 import net.caffeinemc.mods.sodium.client.config.structure.Page;
+import net.caffeinemc.mods.sodium.client.gui.ColorTheme;
 import net.caffeinemc.mods.sodium.client.gui.options.control.Control;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
+import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -30,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 
 public class PageFrame extends AbstractFrame {
+    private static final int DEFAULT_TOOLTIP_BORDER_COLOR = 0xFF94E4D3;
+    private static final int OPTION_HEIGHT = 18;
+
     protected final Dim2i originalDim;
     protected final Page page;
     private long lastTime = 0;
@@ -63,11 +69,11 @@ public class PageFrame extends AbstractFrame {
                         y += 4;
                     }
                     if (group.name() != null && !group.name().getString().isEmpty()) {
-                        y += 18;
+                        y += OPTION_HEIGHT;
                     }
                     lastGroup = group;
                 }
-                y += 18;
+                y += OPTION_HEIGHT;
             }
             y += 4;
         } else if (!this.page.groups().isEmpty()) {
@@ -75,10 +81,10 @@ public class PageFrame extends AbstractFrame {
 
             for (OptionGroup group : this.page.groups()) {
                 if (group.name() != null && !group.name().getString().isEmpty()) {
-                    y += 18;
+                    y += OPTION_HEIGHT;
                 }
 
-                y += group.options().size() * 18;
+                y += group.options().size() * OPTION_HEIGHT;
                 if (group != lastGroup) {
                     y += 4;
                 }
@@ -116,45 +122,35 @@ public class PageFrame extends AbstractFrame {
                         y += 4;
                     }
                     if (group.name() != null && !group.name().getString().isEmpty()) {
-                        Dim2i dim = new Dim2i(0, y + 4, this.getWidth(), 18);
+                        Dim2i dim = new Dim2i(0, y + 4, this.getWidth(), OPTION_HEIGHT);
                         ((Dim2iAccess) (Object) dim).setPoint2i(((Point2iAccess) (Object) ((AbstractWidgetExtended) this).getDim()));
                         this.children.add(new LabelComponent(dim, group.name(), 0xFFFFFFFF));
-                        y += 18;
+                        y += OPTION_HEIGHT;
                     }
                     lastGroup = group;
                 }
 
-                Control control = entry.option().getControl();
-                Dim2i dim = new Dim2i(0, y, this.getWidth(), 18);
-                ((Dim2iAccess) (Object) dim).setPoint2i(((Point2iAccess) (Object) ((AbstractWidgetExtended) this).getDim()));
-                ControlElement element = control.createElement(this.screen, this, dim, this.modOptions.theme());
-                ((OptionExtended) element.getOption()).setDim2i(dim);
-                this.children.add(element);
+                this.addOptionControl(entry.option(), y);
 
-                y += 18;
+                y += OPTION_HEIGHT;
             }
             y += 4;
         } else {
             for (OptionGroup group : this.page.groups()) {
                 if (group.name() != null && !group.name().getString().isEmpty()) {
-                    Dim2i dim = new Dim2i(0, y + 4, this.getWidth(), 18);
+                    Dim2i dim = new Dim2i(0, y + 4, this.getWidth(), OPTION_HEIGHT);
                     ((Dim2iAccess) (Object) dim).setPoint2i(((Point2iAccess) (Object) ((AbstractWidgetExtended) this).getDim()));
                     this.children.add(new LabelComponent(dim, group.name(), 0xFFFFFFFF));
 
-                    y += 18;
+                    y += OPTION_HEIGHT;
                 }
 
                 // Add each option's control element
                 for (Option option : group.options()) {
-                    Control control = option.getControl();
-                    Dim2i dim = new Dim2i(0, y, this.getWidth(), 18);
-                    ((Dim2iAccess) (Object) dim).setPoint2i(((Point2iAccess) (Object) ((AbstractWidgetExtended) this).getDim()));
-                    ControlElement element = control.createElement(this.screen, this, dim, this.modOptions.theme());
-                    ((OptionExtended) element.getOption()).setDim2i(dim);
-                    this.children.add(element);
+                    this.addOptionControl(option, y);
 
                     // Move down to the next option
-                    y += 18;
+                    y += OPTION_HEIGHT;
                 }
 
                 // Add padding beneath each option group
@@ -165,6 +161,18 @@ public class PageFrame extends AbstractFrame {
 
         super.buildFrame();
 
+    }
+
+    private void addOptionControl(Option option, int y) {
+        Dim2i controlDim = new Dim2i(0, y, this.getWidth(), OPTION_HEIGHT);
+        ((Dim2iAccess) (Object) controlDim).setPoint2i(((Point2iAccess) (Object) ((AbstractWidgetExtended) this).getDim()));
+
+        Control control = option.getControl();
+        ControlElement element = control.createElement(this.screen, this, controlDim, this.optionControlTheme());
+        if (element.getOption() instanceof OptionExtended optionExtended) {
+            optionExtended.setDim2i(controlDim);
+        }
+        this.children.add(element);
     }
 
     @Override
@@ -193,7 +201,9 @@ public class PageFrame extends AbstractFrame {
     }
 
     private void renderOptionTooltip(GuiGraphics guiGraphics, ControlElement element) {
-        if (this.lastTime + 500 > System.currentTimeMillis()) return;
+        if (this.lastTime + ReeseSodiumOptionsConfig.config().getTooltipDelayMs() > System.currentTimeMillis()) {
+            return;
+        }
 
         Dim2i dim = ((AbstractWidgetExtended) element).getDim();
 
@@ -209,8 +219,10 @@ public class PageFrame extends AbstractFrame {
         Option option = element.getOption();
         List<FormattedCharSequence> tooltip = new ArrayList<>();
 
-        tooltip.add(Language.getInstance().getVisualOrder(Component.literal(((OptionExtended) option).getId().toString()).withStyle(ChatFormatting.GRAY)));
-        tooltip.add(Language.getInstance().getVisualOrder(Component.literal("")));
+        if (ReeseSodiumOptionsConfig.config().isTooltipOptionIds()) {
+            tooltip.add(Language.getInstance().getVisualOrder(Component.literal(((OptionExtended) option).getId().toString()).withStyle(ChatFormatting.GRAY)));
+            tooltip.add(Language.getInstance().getVisualOrder(Component.literal("")));
+        }
 
         tooltip.addAll(Minecraft.getInstance().font.split(option.getTooltip(), boxWidth - (textPadding * 2)));
 
@@ -237,7 +249,8 @@ public class PageFrame extends AbstractFrame {
             return;
 
         this.drawRect(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
-        this.drawBorder(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, modOptions.theme().theme);
+        int borderColor = ReeseSodiumOptionsConfig.config().isColorThemes() ? modOptions.theme().theme : DEFAULT_TOOLTIP_BORDER_COLOR;
+        this.drawBorder(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, borderColor);
 
         for (int i = 0; i < tooltip.size(); i++) {
             guiGraphics.drawString(Minecraft.getInstance().font, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
@@ -265,6 +278,10 @@ public class PageFrame extends AbstractFrame {
             }
         }
         return ordered;
+    }
+
+    private ColorTheme optionControlTheme() {
+        return ReeseSodiumOptionsConfig.config().isColorThemes() ? this.modOptions.theme() : FlatButtonWidget.DEFAULT_THEME;
     }
 
     private record SearchEntry(OptionGroup group, Option option) {

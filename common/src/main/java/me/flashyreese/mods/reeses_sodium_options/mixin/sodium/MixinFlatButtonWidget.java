@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
+import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExtended;
 import net.caffeinemc.mods.sodium.client.gui.ButtonTheme;
@@ -39,7 +40,7 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
 
     @Inject(method = "getTextColor", at = @At("HEAD"), cancellable = true)
     private void modifyGetTextColor(CallbackInfoReturnable<Integer> cir) {
-        if (this.isTab()) {
+        if (this.isTab() && ReeseSodiumOptionsConfig.config().isColorThemes()) {
             int color = this.enabled ? (this.selected ? this.theme.themeLighter : this.hovered ? this.theme.theme : this.theme.themeDarker) : this.theme.themeDarker;
             cir.setReturnValue(color);
         }
@@ -63,7 +64,7 @@ public abstract class MixinFlatButtonWidget extends AbstractWidget implements Fl
             //this.drawRect(guiGraphics, x1, this.dim.y(), x1 + 1, y2, color);
             args.set(2, this.getDim().y());
             args.set(3, (int) args.get(1) + 2);
-            args.set(5, this.theme.theme);
+            args.set(5, this.isTab() && !ReeseSodiumOptionsConfig.config().isColorThemes() ? FlatButtonWidget.DEFAULT_THEME.theme : this.theme.theme);
         }
     }
 
