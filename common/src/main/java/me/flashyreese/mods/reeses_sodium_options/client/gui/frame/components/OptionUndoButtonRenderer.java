@@ -16,7 +16,11 @@ public final class OptionUndoButtonRenderer {
 
     public static boolean isActive(StatefulOption<?> option) {
         return ReeseSodiumOptionsConfig.config().isUndoButtonOverlay()
-                && option.isEnabled()
+                && canUndo(option);
+    }
+
+    public static boolean canUndo(StatefulOption<?> option) {
+        return option.isEnabled()
                 && option.hasChanged();
     }
 

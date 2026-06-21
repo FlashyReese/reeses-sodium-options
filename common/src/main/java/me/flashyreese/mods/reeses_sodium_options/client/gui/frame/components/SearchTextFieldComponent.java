@@ -213,6 +213,29 @@ public class SearchTextFieldComponent extends AbstractWidget {
         }
     }
 
+    public boolean hasText() {
+        return !this.text.isEmpty();
+    }
+
+    public void clearText() {
+        if (this.text.isEmpty()) {
+            return;
+        }
+
+        this.text = "";
+        this.firstCharacterIndex = 0;
+        this.selectionStart = 0;
+        this.selectionEnd = 0;
+        this.lastCursorPosition = 0;
+        this.uiState.lastSearchIndex().set(0);
+        this.onChanged(this.text);
+    }
+
+    public void selectAllText() {
+        this.setCursorToEnd();
+        this.setSelectionEnd(0);
+    }
+
     private void onChanged(String query) {
         this.pages.forEach(page -> page
                 .groups()
