@@ -4,12 +4,15 @@ import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOption
 import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iAccess;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.FlatButtonWidgetExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2iAccess;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.ScrollableFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.ScrollBarComponent;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.TabHeaderComponent;
 import net.caffeinemc.mods.sodium.client.config.structure.ExternalPage;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
+import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.gui.ButtonTheme;
 import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
 import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
@@ -19,6 +22,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 
@@ -430,6 +434,67 @@ public class TabFrame extends AbstractFrame {
 
     public Optional<Tab<?>> getSelectedTab() {
         return selectedTab;
+    }
+
+    public Optional<String> getSelectedTabKey() {
+        return this.selectedTab.map(TabFrame::getTabKey);
+    }
+
+    public ControlElement findSelectedControl(Identifier optionId) {
+        if (this.selectedFrame == null) {
+            return null;
+        }
+
+        return this.selectedFrame.findFirstControlElement(control -> control.getOption() instanceof OptionExtended optionExtended
+                && optionExtended.getId().equals(optionId));
+    }
+
+    public ControlElement findFirstSelectedControl() {
+        if (this.selectedFrame instanceof ScrollableFrame scrollableFrame) {
+            return scrollableFrame.findFirstControlElement();
+        }
+
+        return this.selectedFrame == null ? null : this.selectedFrame.findFirstControlElement(control -> true);
+    }
+
+    public ControlElement findLastSelectedControl() {
+        if (this.selectedFrame instanceof ScrollableFrame scrollableFrame) {
+            return scrollableFrame.findLastControlElement();
+        }
+
+        return this.selectedFrame == null ? null : this.selectedFrame.findLastControlElement(control -> true);
+    }
+
+    public ControlElement findFirstVisibleSelectedControl() {
+        if (this.selectedFrame instanceof ScrollableFrame scrollableFrame) {
+            return scrollableFrame.findFirstVisibleControlElement();
+        }
+
+        return this.findFirstSelectedControl();
+    }
+
+    public ControlElement findLastVisibleSelectedControl() {
+        if (this.selectedFrame instanceof ScrollableFrame scrollableFrame) {
+            return scrollableFrame.findLastVisibleControlElement();
+        }
+
+        return this.findLastSelectedControl();
+    }
+
+    public boolean scrollSelectedPageToStart() {
+        return this.selectedFrame instanceof ScrollableFrame scrollableFrame && scrollableFrame.scrollToStart();
+    }
+
+    public boolean scrollSelectedPageToEnd() {
+        return this.selectedFrame instanceof ScrollableFrame scrollableFrame && scrollableFrame.scrollToEnd();
+    }
+
+    public boolean scrollSelectedPage(int direction) {
+        return this.selectedFrame instanceof ScrollableFrame scrollableFrame && scrollableFrame.scrollPage(direction);
+    }
+
+    private static String getTabKey(Tab<?> tab) {
+        return tab.getModOptions().configId() + ":" + tab.getTitle().getString();
     }
 
     private record TabGroup(String id, ModOptions modOptions, List<Tab<?>> tabs) {

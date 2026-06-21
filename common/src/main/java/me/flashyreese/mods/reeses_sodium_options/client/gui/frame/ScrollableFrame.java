@@ -181,6 +181,65 @@ public class ScrollableFrame extends AbstractFrame {
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) || (this.canScrollVertical && this.verticalScrollBar.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount));
     }
 
+    public boolean scrollToStart() {
+        if (!this.canScrollVertical) {
+            return false;
+        }
+
+        return this.setVerticalOffset(0);
+    }
+
+    public boolean scrollToEnd() {
+        if (!this.canScrollVertical) {
+            return false;
+        }
+
+        return this.setVerticalOffset(Integer.MAX_VALUE);
+    }
+
+    public boolean scrollPage(int direction) {
+        if (!this.canScrollVertical || direction == 0) {
+            return false;
+        }
+
+        int pageSize = Math.max(ScrollBarComponent.SCROLL_STEP, this.viewPortDimension.height() - 18);
+
+        return this.setVerticalOffset(this.verticalScrollBar.getOffset() + direction * pageSize);
+    }
+
+    public @Nullable ControlElement findFirstControlElement() {
+        return this.findFirstControlElement(control -> true);
+    }
+
+    public @Nullable ControlElement findLastControlElement() {
+        return this.findLastControlElement(control -> true);
+    }
+
+    public @Nullable ControlElement findFirstVisibleControlElement() {
+        return this.findFirstControlElement(this::isControlVisible);
+    }
+
+    public @Nullable ControlElement findLastVisibleControlElement() {
+        return this.findLastControlElement(this::isControlVisible);
+    }
+
+    private boolean setVerticalOffset(int offset) {
+        int previousOffset = this.verticalScrollBar.getOffset();
+        this.verticalScrollBar.setOffset(offset);
+
+        return this.verticalScrollBar.getOffset() != previousOffset;
+    }
+
+    private boolean isControlVisible(ControlElement controlElement) {
+        if (!this.canScrollVertical || this.viewPortDimension == null) {
+            return true;
+        }
+
+        Dim2i dim = ((AbstractWidgetExtended) controlElement).getDim();
+
+        return ((Dim2iAccess) (Object) dim).overlapWith(this.viewPortDimension);
+    }
+
     public static class Builder {
         private boolean renderOutline = false;
         private Dim2i dim = null;

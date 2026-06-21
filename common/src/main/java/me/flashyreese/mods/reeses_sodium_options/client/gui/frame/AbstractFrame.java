@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public abstract class AbstractFrame extends AbstractOptionList implements ContainerEventHandler {
     protected final Screen screen;
@@ -74,6 +75,44 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
                 this.controlElements.add((ControlElement) element);
             }
         }
+    }
+
+    public List<ControlElement> getControlElements() {
+        return List.copyOf(this.controlElements);
+    }
+
+    public @Nullable ControlElement findFirstControlElement(Predicate<ControlElement> predicate) {
+        return this.controlElements.stream()
+                .filter(predicate)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public @Nullable ControlElement findLastControlElement(Predicate<ControlElement> predicate) {
+        for (int i = this.controlElements.size() - 1; i >= 0; i--) {
+            ControlElement controlElement = this.controlElements.get(i);
+            if (predicate.test(controlElement)) {
+                return controlElement;
+            }
+        }
+
+        return null;
+    }
+
+    public boolean focusControlElement(ControlElement controlElement) {
+        for (GuiEventListener child : this.children) {
+            if (child == controlElement) {
+                this.setFocused(controlElement);
+                return true;
+            }
+
+            if (child instanceof AbstractFrame frame && frame.focusControlElement(controlElement)) {
+                this.setFocused(frame);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
