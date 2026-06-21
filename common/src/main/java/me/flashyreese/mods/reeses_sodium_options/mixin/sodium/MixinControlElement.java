@@ -38,6 +38,10 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
     private boolean rso$dragging;
     @Unique
     private OptionUndoButtonElement rso$undoButtonElement;
+    @Unique
+    private int rso$heldUndoButtonWidth = -1;
+    @Unique
+    private boolean rso$undoButtonHidden;
 
     protected MixinControlElement(Dim2i dim) {
         super(dim);
@@ -62,7 +66,8 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
             return true;
         }
 
-        return this.getOption() instanceof StatefulOption<?> statefulOption
+        return !this.rso$isUndoButtonHidden()
+                && this.getOption() instanceof StatefulOption<?> statefulOption
                 && OptionUndoButtonRenderer.isMouseOver(this.rso$getVisibleDim(), statefulOption, mouseX, mouseY);
     }
 
@@ -89,7 +94,7 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
 
         OptionUndoButtonElement undoButton = this.rso$getUndoButtonElement();
 
-        if (this.isFocused() && undoButton.isActive() && this.rso$shouldEnterUndoButton(navigation)) {
+        if (this.isFocused() && !this.rso$isUndoButtonHidden() && undoButton.isActive() && this.rso$shouldEnterUndoButton(navigation)) {
             ComponentPath childPath = undoButton.nextFocusPath(navigation);
 
             cir.setReturnValue(childPath == null ? null : ComponentPath.path((ContainerEventHandler) (Object) this, childPath));
@@ -119,7 +124,7 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
     public @NotNull List<? extends GuiEventListener> children() {
         OptionUndoButtonElement undoButton = this.rso$getUndoButtonElement();
 
-        return undoButton.isActive() ? List.of(undoButton) : List.of();
+        return !this.rso$isUndoButtonHidden() && undoButton.isActive() ? List.of(undoButton) : List.of();
     }
 
     @Override
@@ -134,7 +139,8 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
 
     @Override
     public @Nullable GuiEventListener getFocused() {
-        if (this.rso$focusedChild instanceof OptionUndoButtonElement undoButton && !undoButton.isActive()) {
+        if (this.rso$focusedChild instanceof OptionUndoButtonElement undoButton
+                && (this.rso$isUndoButtonHidden() || !undoButton.isActive())) {
             this.rso$clearUndoButtonFocus();
         }
 
@@ -189,10 +195,34 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
     }
 
     @Override
+    public boolean rso$isUndoButtonHidden() {
+        return this.rso$undoButtonHidden;
+    }
+
+    @Override
+    public void rso$holdUndoButtonLayout(boolean hideButton) {
+        if (this.rso$heldUndoButtonWidth < 0) {
+            this.rso$heldUndoButtonWidth = this.rso$getNaturalUndoButtonWidth();
+        }
+
+        this.rso$undoButtonHidden = hideButton && this.rso$heldUndoButtonWidth == 0;
+
+        if (this.rso$undoButtonHidden) {
+            this.rso$clearUndoButtonFocus();
+        }
+    }
+
+    @Override
+    public void rso$releaseUndoButtonLayoutHold() {
+        this.rso$heldUndoButtonWidth = -1;
+        this.rso$undoButtonHidden = false;
+    }
+
+    @Override
     public void rso$focusUndoButton() {
         OptionUndoButtonElement undoButton = this.rso$getUndoButtonElement();
 
-        if (undoButton.isActive()) {
+        if (!this.rso$isUndoButtonHidden() && undoButton.isActive()) {
             this.setFocused(undoButton);
         }
     }
@@ -208,6 +238,15 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
 
     @Unique
     private int rso$getUndoButtonWidth() {
+        if (this.rso$heldUndoButtonWidth >= 0) {
+            return this.rso$heldUndoButtonWidth;
+        }
+
+        return this.rso$getNaturalUndoButtonWidth();
+    }
+
+    @Unique
+    private int rso$getNaturalUndoButtonWidth() {
         return this.getOption() instanceof StatefulOption<?> statefulOption
                 ? OptionUndoButtonRenderer.getReservedWidth(this.rso$getVisibleDim(), statefulOption)
                 : 0;

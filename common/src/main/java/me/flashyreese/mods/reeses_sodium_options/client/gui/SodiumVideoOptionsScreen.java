@@ -343,6 +343,17 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     }
 
     @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        boolean handled = super.mouseReleased(event);
+
+        if (event.button() == 0 && this.rootFrame != null) {
+            this.rootFrame.releaseUndoButtonLayoutHolds();
+        }
+
+        return handled;
+    }
+
+    @Override
     public boolean keyPressed(KeyEvent event) {
         if (this.prompt != null) {
             return this.prompt.keyPressed(event);
