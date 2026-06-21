@@ -114,6 +114,14 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
         return false;
     }
 
+    public void releaseUndoButtonLayoutHolds() {
+        for (ControlElement controlElement : this.controlElements) {
+            if (controlElement instanceof OptionUndoButtonControl undoButtonControl) {
+                undoButtonControl.rso$releaseUndoButtonLayoutHold();
+            }
+        }
+    }
+
     @Override
     public void render(@NotNull GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
         if (this.renderOutline) {

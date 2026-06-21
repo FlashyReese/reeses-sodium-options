@@ -5,6 +5,12 @@ public interface OptionUndoButtonControl {
 
     boolean rso$isUndoButtonFocused();
 
+    boolean rso$isUndoButtonHidden();
+
+    void rso$holdUndoButtonLayout(boolean hideButton);
+
+    void rso$releaseUndoButtonLayoutHold();
+
     void rso$focusUndoButton();
 
     void rso$clearUndoButtonFocus();

@@ -7,6 +7,7 @@ import net.caffeinemc.mods.sodium.client.gui.ColorTheme;
 import net.caffeinemc.mods.sodium.client.gui.options.control.AbstractOptionList;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.lwjgl.glfw.GLFW;
 
 @Mixin(targets = "net.caffeinemc.mods.sodium.client.gui.options.control.StatefulControlElement")
 public abstract class MixinStatefulControlElement extends ControlElement {
@@ -27,7 +29,17 @@ public abstract class MixinStatefulControlElement extends ControlElement {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void rso$renderUndoButton(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        boolean focused = ((OptionUndoButtonControl) this).rso$isUndoButtonFocused();
+        OptionUndoButtonControl undoButtonControl = (OptionUndoButtonControl) this;
+
+        if (undoButtonControl.rso$isUndoButtonHidden()) {
+            if (rso$isLeftMouseButtonDown()) {
+                return;
+            }
+
+            undoButtonControl.rso$releaseUndoButtonLayoutHold();
+        }
+
+        boolean focused = undoButtonControl.rso$isUndoButtonFocused();
 
         OptionUndoButtonRenderer.render(guiGraphics, this.rso$getVisibleDim(), this.getOption(), mouseX, mouseY, focused);
     }
@@ -36,7 +48,9 @@ public abstract class MixinStatefulControlElement extends ControlElement {
     private void rso$mouseClickedUndoButton(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         StatefulOption<?> option = this.getOption();
 
-        if (button == 0 && OptionUndoButtonRenderer.isMouseOver(this.rso$getVisibleDim(), option, mouseX, mouseY)) {
+        if (!((OptionUndoButtonControl) this).rso$isUndoButtonHidden()
+                && button == 0
+                && OptionUndoButtonRenderer.isMouseOver(this.rso$getVisibleDim(), option, mouseX, mouseY)) {
             ((OptionUndoButtonControl) this).rso$focusUndoButton();
             ((OptionUndoButtonControl) this).rso$getUndoButtonElement().mouseClicked(mouseX, mouseY, button);
             cir.setReturnValue(true);
@@ -48,6 +62,13 @@ public abstract class MixinStatefulControlElement extends ControlElement {
         Dim2i dim = this.getDimensions();
 
         return new Dim2i(this.getX(), this.getY(), dim.width(), dim.height());
+    }
+
+    @Unique
+    private static boolean rso$isLeftMouseButtonDown() {
+        long window = Minecraft.getInstance().getWindow().getWindow();
+
+        return GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
     }
 
 }
