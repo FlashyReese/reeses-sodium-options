@@ -194,6 +194,10 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
     public boolean keyPressed(KeyEvent event) {
         GuiEventListener focused = this.getFocused();
 
+        if (focused instanceof OptionUndoButtonControl undoButtonControl && undoButtonControl.rso$isResetButtonFocused()) {
+            return undoButtonControl.rso$getResetButtonElement().keyPressed(event);
+        }
+
         if (focused instanceof OptionUndoButtonControl undoButtonControl && undoButtonControl.rso$isUndoButtonFocused()) {
             return undoButtonControl.rso$getUndoButtonElement().keyPressed(event);
         }
