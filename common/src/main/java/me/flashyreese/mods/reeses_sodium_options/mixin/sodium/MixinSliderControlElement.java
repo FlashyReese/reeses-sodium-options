@@ -3,6 +3,8 @@ package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 import com.llamalad7.mixinextras.sugar.Local;
 import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SliderControlElementExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionUndoButtonControl;
 import net.caffeinemc.mods.sodium.client.config.structure.IntegerOption;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
 import net.caffeinemc.mods.sodium.client.gui.ColorTheme;
@@ -12,11 +14,13 @@ import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(targets = "net.caffeinemc.mods.sodium.client.gui.options.control.SliderControl$SliderControlElement")
 public abstract class MixinSliderControlElement extends ControlElement implements SliderControlElementExtended {
@@ -63,6 +67,22 @@ public abstract class MixinSliderControlElement extends ControlElement implement
     public void rso$renderSlider(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta, CallbackInfo ci, @Local(ordinal = 3) int sliderY, @Local(ordinal = 5) int sliderHeight, @Local(ordinal = 1) boolean drawSlider, @Local(ordinal = 7) int thumbX) {
         if (drawSlider && this.isFocused() && this.isEditMode()) {
             this.drawRect(graphics, thumbX - 1, sliderY - 1, thumbX + 5, sliderY + sliderHeight + 1, 0xFFFFFFFF);
+        }
+    }
+
+    @Inject(method = "setValueFromMouse", at = @At("HEAD"))
+    private void rso$holdUndoButtonLayoutDuringMouseValueChange(double mouseX, CallbackInfo ci) {
+        ((OptionUndoButtonControl) this).rso$holdUndoButtonLayout(true);
+    }
+
+    @Inject(method = "mouseReleased", at = @At("TAIL"))
+    private void rso$releaseUndoButtonLayoutAfterSliderDrag(MouseButtonEvent event, CallbackInfoReturnable<Boolean> cir) {
+        if (event.button() == 0) {
+            ((OptionUndoButtonControl) this).rso$releaseUndoButtonLayoutHold();
+
+            if (this.list instanceof AbstractFrame frame) {
+                frame.buildFrame();
+            }
         }
     }
 
