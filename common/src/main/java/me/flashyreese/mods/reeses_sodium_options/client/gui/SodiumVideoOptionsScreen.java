@@ -7,6 +7,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.Tab;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.TabFrame;
 import net.caffeinemc.mods.sodium.client.SodiumClientMod;
 import net.caffeinemc.mods.sodium.client.config.ConfigManager;
+import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.config.structure.OptionPage;
 import net.caffeinemc.mods.sodium.client.data.fingerprint.HashedFingerprint;
 import net.caffeinemc.mods.sodium.client.gui.SodiumOptions;
@@ -16,7 +17,12 @@ import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import net.caffeinemc.mods.sodium.client.services.PlatformRuntimeInformation;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
 import net.minecraft.client.input.KeyEvent;
@@ -33,12 +39,15 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable {
 
     private static final UiState SHARED_UI_STATE = new UiState();
+    private static final String RSO_CONFIG_ID = "reeses-sodium-options";
     private static final List<FormattedText> DONATION_PROMPT_MESSAGE;
 
     static {
@@ -58,7 +67,11 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     private FlatButtonWidget donateButton, hideDonateButton;
     private boolean hasPendingChanges;
     private SearchTextFieldComponent searchTextField;
+    private AbstractFrame rootFrame;
     private @Nullable ScreenPrompt prompt;
+    private @Nullable ComponentPath previousArrowFocusPath;
+    private @Nullable GuiEventListener currentArrowFocusLeaf;
+    private @Nullable ScreenDirection lastArrowDirection;
 
     public SodiumVideoOptionsScreen(Screen prev) {
         super(Component.literal("Reese's Sodium Menu"));
@@ -126,8 +139,9 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     // Hackalicious! Rebuild UI
     public void rebuildUI() {
         boolean wasSearchBarFocused = this.searchTextField.isFocused();
+        this.clearArrowNavigationMemory();
         this.rebuildWidgets();
-        if (wasSearchBarFocused) this.setFocused(this.searchTextField);
+        if (wasSearchBarFocused) this.focusSearchTextField();
     }
 
     @Override
@@ -136,18 +150,29 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
 
         ConfigManager.CONFIG.invalidateGlobalRebuildDependents();
 
-        AbstractFrame frame = this.parentFrameBuilder().build();
-        this.addRenderableWidget(frame);
+        this.rootFrame = this.parentFrameBuilder().build();
+        this.addRenderableWidget(this.rootFrame);
 
         //this.searchTextField.setFocused(!this.uiState.lastSearch().get().trim().isEmpty());
         if (this.searchTextField.isFocused()) {
-            this.setFocused(this.searchTextField);
+            this.focusSearchTextField();
         } else {
-            this.setFocused(frame);
+            this.setFocused(this.rootFrame);
         }
 
         if (this.prompt != null) {
             this.prompt.init();
+        }
+    }
+
+    private void focusSearchTextField() {
+        this.searchTextField.setFocused(true);
+
+        if (this.rootFrame != null) {
+            this.rootFrame.setFocused(this.searchTextField);
+            this.setFocused(this.rootFrame);
+        } else {
+            this.setFocused(this.searchTextField);
         }
     }
 
@@ -200,7 +225,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         }
 
 
-        this.searchTextField = new SearchTextFieldComponent(searchTextFieldDim, ConfigManager.CONFIG.getModOptions().stream().flatMap(modOptions -> modOptions.pages().stream()).toList(), this.uiState,
+        this.searchTextField = new SearchTextFieldComponent(searchTextFieldDim, getOrderedModOptions().stream().flatMap(modOptions -> modOptions.pages().stream()).toList(), this.uiState,
                 tabFrameDim.height(), this);
 
         basicFrameBuilder.addChild(dim -> this.searchTextField);
@@ -219,8 +244,9 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
                         .shouldRenderOutline(false)
                         .setTabSectionScrollBarOffset(this.uiState.tabFrameScrollBarOffset())
                         .setTabSectionSelectedTab(this.uiState.tabFrameSelectedTab())
-                        .addTabs(tabs -> ConfigManager.CONFIG
-                        .getModOptions()
+                        .setTabSectionSelectedGroup(this.uiState.tabFrameSelectedGroup())
+                        .setManuallyCollapsedTabGroups(this.uiState.manuallyCollapsedTabGroups())
+                        .addTabs(tabs -> getOrderedModOptions()
                                 .forEach(config -> config.pages()
                                 .forEach(page -> tabs.add(Tab.builder().from(this, config, page, this.uiState.optionPageScrollBarOffset()))))
                                         )
@@ -232,6 +258,16 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
                 .addChild(dim -> this.undoButton)
                 .addChild(dim -> this.applyButton)
                 .addChild(dim -> this.closeButton);
+    }
+
+    private static List<ModOptions> getOrderedModOptions() {
+        return ConfigManager.CONFIG.getModOptions().stream()
+                .sorted((left, right) -> Boolean.compare(isOwnConfig(left), isOwnConfig(right)))
+                .toList();
+    }
+
+    private static boolean isOwnConfig(ModOptions modOptions) {
+        return RSO_CONFIG_ID.equals(modOptions.configId());
     }
 
     @Override
@@ -281,6 +317,8 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean repeated) {
+        this.clearArrowNavigationMemory();
+
         if (this.prompt != null) {
             return this.prompt.mouseClicked(event, repeated);
         }
@@ -300,7 +338,114 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
             return true;
         }
 
+        ScreenDirection arrowDirection = getArrowDirection(event);
+        if (arrowDirection != null) {
+            return this.keyPressedArrow(event, arrowDirection);
+        }
+
+        this.clearArrowNavigationMemory();
+
         return super.keyPressed(event);
+    }
+
+    private boolean keyPressedArrow(KeyEvent event, ScreenDirection direction) {
+        GuiEventListener focused = this.getFocused();
+        if (focused != null && focused.keyPressed(event)) {
+            this.clearArrowNavigationMemory();
+            return true;
+        }
+
+        ComponentPath currentFocusPath = this.getCurrentFocusPath();
+        if (this.restorePreviousArrowFocus(direction, currentFocusPath)) {
+            return true;
+        }
+
+        ComponentPath nextFocusPath = this.nextFocusPath(new FocusNavigationEvent.ArrowNavigation(direction));
+        if (nextFocusPath == null) {
+            this.clearArrowNavigationMemory();
+            return false;
+        }
+
+        this.changeFocus(nextFocusPath);
+        this.rememberArrowNavigation(direction, currentFocusPath, nextFocusPath);
+
+        return true;
+    }
+
+    private boolean restorePreviousArrowFocus(ScreenDirection direction, @Nullable ComponentPath currentFocusPath) {
+        if (this.previousArrowFocusPath == null
+                || this.lastArrowDirection == null
+                || currentFocusPath == null
+                || direction != this.lastArrowDirection.getOpposite()
+                || leafComponent(currentFocusPath) != this.currentArrowFocusLeaf
+                || !this.containsFocusLeaf(leafComponent(this.previousArrowFocusPath))) {
+            return false;
+        }
+
+        ComponentPath previousPath = this.previousArrowFocusPath;
+        this.changeFocus(previousPath);
+        this.previousArrowFocusPath = currentFocusPath;
+        this.currentArrowFocusLeaf = leafComponent(previousPath);
+        this.lastArrowDirection = direction;
+
+        return true;
+    }
+
+    private void rememberArrowNavigation(ScreenDirection direction, @Nullable ComponentPath previousPath, ComponentPath currentPath) {
+        if (previousPath == null || leafComponent(previousPath) == leafComponent(currentPath)) {
+            this.clearArrowNavigationMemory();
+            return;
+        }
+
+        this.previousArrowFocusPath = previousPath;
+        this.currentArrowFocusLeaf = leafComponent(currentPath);
+        this.lastArrowDirection = direction;
+    }
+
+    private void clearArrowNavigationMemory() {
+        this.previousArrowFocusPath = null;
+        this.currentArrowFocusLeaf = null;
+        this.lastArrowDirection = null;
+    }
+
+    private boolean containsFocusLeaf(GuiEventListener leaf) {
+        for (GuiEventListener child : this.children()) {
+            if (containsFocusLeaf(child, leaf)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static GuiEventListener leafComponent(ComponentPath path) {
+        return path instanceof ComponentPath.Path containerPath ? leafComponent(containerPath.childPath()) : path.component();
+    }
+
+    private static boolean containsFocusLeaf(GuiEventListener component, GuiEventListener leaf) {
+        if (component == leaf) {
+            return true;
+        }
+
+        if (component instanceof ContainerEventHandler container) {
+            for (GuiEventListener child : container.children()) {
+                if (containsFocusLeaf(child, leaf)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static @Nullable ScreenDirection getArrowDirection(KeyEvent event) {
+        return switch (event.key()) {
+            case GLFW.GLFW_KEY_LEFT -> ScreenDirection.LEFT;
+            case GLFW.GLFW_KEY_RIGHT -> ScreenDirection.RIGHT;
+            case GLFW.GLFW_KEY_UP -> ScreenDirection.UP;
+            case GLFW.GLFW_KEY_DOWN -> ScreenDirection.DOWN;
+            default -> null;
+        };
     }
 
     @Override
@@ -336,14 +481,20 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
 
     public static final class UiState {
         private final AtomicReference<Component> tabFrameSelectedTab = new AtomicReference<>(null);
+        private final AtomicReference<String> tabFrameSelectedGroup = new AtomicReference<>(null);
         private final AtomicReference<Integer> tabFrameScrollBarOffset = new AtomicReference<>(0);
         private final AtomicReference<Integer> optionPageScrollBarOffset = new AtomicReference<>(0);
         private final AtomicReference<String> lastSearch = new AtomicReference<>("");
         private final AtomicReference<Integer> lastSearchIndex = new AtomicReference<>(0);
         private final List<Identifier> searchResultIds = new ArrayList<>();
+        private final Set<String> manuallyCollapsedTabGroups = new HashSet<>();
 
         public AtomicReference<Component> tabFrameSelectedTab() {
             return tabFrameSelectedTab;
+        }
+
+        public AtomicReference<String> tabFrameSelectedGroup() {
+            return tabFrameSelectedGroup;
         }
 
         public AtomicReference<Integer> tabFrameScrollBarOffset() {
@@ -352,6 +503,10 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
 
         public AtomicReference<Integer> optionPageScrollBarOffset() {
             return optionPageScrollBarOffset;
+        }
+
+        public Set<String> manuallyCollapsedTabGroups() {
+            return manuallyCollapsedTabGroups;
         }
 
         public AtomicReference<String> lastSearch() {

@@ -19,7 +19,7 @@ Replaces Sodium's Options Screen
 [[dependencies.reeses_sodium_options]]
 modId = "minecraft"
 type = "required"
-versionRange = "[26.1,)"
+versionRange = "[26.1.0,26.2.0)"
 ordering = "NONE"
 side = "CLIENT"
 
@@ -32,3 +32,6 @@ side = "CLIENT"
 
 [[mixins]]
 config = "reeses-sodium-options.mixins.json"
+
+[modproperties.reeses_sodium_options]
+"sodium:config_api_user" = "me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfigEntryPoint"
