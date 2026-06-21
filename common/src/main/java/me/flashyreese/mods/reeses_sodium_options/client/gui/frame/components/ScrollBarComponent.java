@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 
 public class ScrollBarComponent extends AbstractWidget {
 
-    protected static final int SCROLL_STEP = 6;
+    public static final int SCROLL_STEP = 6;
 
     private final ScrollDirection mode;
     private final int contentLength;
