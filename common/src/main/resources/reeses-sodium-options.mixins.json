@@ -11,8 +11,10 @@
     "sodium.MixinDim2i",
     "sodium.MixinFlatButtonWidget",
     "sodium.MixinOption",
+    "sodium.MixinResetButton",
     "sodium.MixinSliderControlElement",
     "sodium.MixinSodiumOptionsGUI",
+    "sodium.MixinStatefulControlElement",
     "sodium.MixinTickBoxControlElement"
   ],
   "injectors": {
