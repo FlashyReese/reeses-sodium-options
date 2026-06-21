@@ -20,6 +20,11 @@
   "icon": "icon.png",
   "license": "MIT",
   "environment": "client",
+  "entrypoints": {
+    "sodium:config_api_user": [
+      "me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfigEntryPoint"
+    ]
+  },
   "mixins": [
     "reeses-sodium-options.mixins.json"
   ],
@@ -39,7 +44,7 @@
     }
   },
   "depends": {
-    "minecraft": ">=26.1",
+    "minecraft": "~26.1.0",
     "sodium": ">=0.8.7"
   },
   "breaks": {
