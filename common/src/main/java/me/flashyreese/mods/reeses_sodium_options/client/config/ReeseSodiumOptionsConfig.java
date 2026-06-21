@@ -156,7 +156,8 @@ public final class ReeseSodiumOptionsConfig {
         private boolean colorThemes = true;
         private boolean reverseCyclingControls = true;
         private boolean shiftScrollSliderAdjustments = true;
-        private boolean resetButtonOverlay = true;
+        private boolean resetButtonOverlay = false;
+        private boolean rsoResetButtonOverlay = true;
         private boolean undoButtonOverlay = true;
 
         public boolean isTabHeaderIcons() {
@@ -245,6 +246,14 @@ public final class ReeseSodiumOptionsConfig {
 
         public void setResetButtonOverlay(boolean resetButtonOverlay) {
             this.resetButtonOverlay = resetButtonOverlay;
+        }
+
+        public boolean isRsoResetButtonOverlay() {
+            return this.rsoResetButtonOverlay;
+        }
+
+        public void setRsoResetButtonOverlay(boolean rsoResetButtonOverlay) {
+            this.rsoResetButtonOverlay = rsoResetButtonOverlay;
         }
 
         public boolean isUndoButtonOverlay() {

@@ -29,6 +29,8 @@
   "rso.options.shift_scroll_slider_adjustments.tooltip": "Allows scrolling over sliders while holding Shift to adjust their values.",
   "rso.options.reset_button_overlay.name": "Sodium Reset Button Overlay",
   "rso.options.reset_button_overlay.tooltip": "Shows Sodium's Shift-hover reset-to-default button on changed options.",
+  "rso.options.rso_reset_button_overlay.name": "RSO Reset Button Overlay",
+  "rso.options.rso_reset_button_overlay.tooltip": "Shows RSO's reset-to-default button on options whose current value differs from the default.",
   "rso.options.undo_button_overlay.name": "Undo Button Overlay",
   "rso.options.undo_button_overlay.tooltip": "Shows an undo button on changed options to restore their applied value.",
   "rso.options.support_project.name": "Support the project via Ko-fi",
