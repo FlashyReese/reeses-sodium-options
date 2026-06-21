@@ -54,7 +54,7 @@ public class OptionUndoButtonElement implements GuiEventListener {
         return this.undo();
     }
 
-    private boolean undo() {
+    public boolean undo() {
         StatefulOption<?> option = this.optionSupplier.get();
 
         if (option == null || !OptionUndoButtonRenderer.isActive(option)) {
