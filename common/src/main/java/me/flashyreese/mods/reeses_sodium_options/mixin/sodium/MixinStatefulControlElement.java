@@ -1,6 +1,7 @@
 package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionUndoButtonControl;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionResetButtonRenderer;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionUndoButtonRenderer;
 import net.caffeinemc.mods.sodium.client.config.structure.StatefulOption;
 import net.caffeinemc.mods.sodium.client.gui.ColorTheme;
@@ -28,31 +29,47 @@ public abstract class MixinStatefulControlElement extends ControlElement {
     public abstract StatefulOption<?> getOption();
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void rso$renderUndoButton(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        OptionUndoButtonControl undoButtonControl = (OptionUndoButtonControl) this;
+    private void rso$renderActionButtons(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        OptionUndoButtonControl actionButtonControl = (OptionUndoButtonControl) this;
 
-        if (undoButtonControl.rso$isUndoButtonHidden()) {
-            if (rso$isLeftMouseButtonDown()) {
-                return;
-            }
-
-            undoButtonControl.rso$releaseUndoButtonLayoutHold();
+        if (actionButtonControl.rso$isActionButtonLayoutHeld() && !rso$isLeftMouseButtonDown()) {
+            actionButtonControl.rso$releaseUndoButtonLayoutHold();
         }
 
-        boolean focused = undoButtonControl.rso$isUndoButtonFocused();
+        boolean undoButtonVisible = actionButtonControl.rso$isUndoButtonVisible();
 
-        OptionUndoButtonRenderer.render(guiGraphics, this.rso$getVisibleDim(), this.getOption(), mouseX, mouseY, focused);
+        if (actionButtonControl.rso$isResetButtonVisible()) {
+            OptionResetButtonRenderer.render(guiGraphics, this.rso$getVisibleDim(), this.getOption(), mouseX, mouseY, actionButtonControl.rso$isResetButtonFocused(), undoButtonVisible);
+        }
+
+        if (undoButtonVisible) {
+            OptionUndoButtonRenderer.render(guiGraphics, this.rso$getVisibleDim(), this.getOption(), mouseX, mouseY, actionButtonControl.rso$isUndoButtonFocused());
+        }
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void rso$mouseClickedUndoButton(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
+    private void rso$mouseClickedActionButton(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         StatefulOption<?> option = this.getOption();
+        OptionUndoButtonControl actionButtonControl = (OptionUndoButtonControl) this;
 
-        if (!((OptionUndoButtonControl) this).rso$isUndoButtonHidden()
-                && button == 0
-                && OptionUndoButtonRenderer.isMouseOver(this.rso$getVisibleDim(), option, mouseX, mouseY)) {
-            ((OptionUndoButtonControl) this).rso$focusUndoButton();
-            ((OptionUndoButtonControl) this).rso$getUndoButtonElement().mouseClicked(mouseX, mouseY, button);
+        if (button != 0) {
+            return;
+        }
+
+        Dim2i visibleDim = this.rso$getVisibleDim();
+        boolean undoButtonVisible = actionButtonControl.rso$isUndoButtonVisible();
+
+        if (actionButtonControl.rso$isResetButtonVisible()
+                && OptionResetButtonRenderer.isMouseOver(visibleDim, option, mouseX, mouseY, undoButtonVisible)) {
+            actionButtonControl.rso$focusResetButton();
+            actionButtonControl.rso$getResetButtonElement().mouseClicked(mouseX, mouseY, button);
+            cir.setReturnValue(true);
+            return;
+        }
+
+        if (undoButtonVisible && OptionUndoButtonRenderer.isMouseOver(visibleDim, option, mouseX, mouseY)) {
+            actionButtonControl.rso$focusUndoButton();
+            actionButtonControl.rso$getUndoButtonElement().mouseClicked(mouseX, mouseY, button);
             cir.setReturnValue(true);
         }
     }

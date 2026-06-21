@@ -123,6 +123,14 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
                         "reset_button_overlay",
                         value -> ReeseSodiumOptionsConfig.config().setResetButtonOverlay(value),
                         () -> ReeseSodiumOptionsConfig.config().isResetButtonOverlay(),
+                        false,
+                        false
+                ))
+                .addOption(this.createBooleanOption(
+                        builder,
+                        "rso_reset_button_overlay",
+                        value -> ReeseSodiumOptionsConfig.config().setRsoResetButtonOverlay(value),
+                        () -> ReeseSodiumOptionsConfig.config().isRsoResetButtonOverlay(),
                         true,
                         false
                 ))

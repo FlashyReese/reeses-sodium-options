@@ -2,6 +2,7 @@ package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
 import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionUndoButtonControl;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionResetButtonRenderer;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionUndoButtonRenderer;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
 import net.caffeinemc.mods.sodium.client.config.structure.StatefulOption;
@@ -28,7 +29,7 @@ public abstract class MixinCyclingControlElement<T extends Enum<T>> extends Cont
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.rso$mouseClickedUndoButton(mouseX, mouseY, button)) {
+        if (this.rso$mouseClickedActionButton(mouseX, mouseY, button)) {
             return true;
         }
 
@@ -52,18 +53,33 @@ public abstract class MixinCyclingControlElement<T extends Enum<T>> extends Cont
     }
 
     @Unique
-    private boolean rso$mouseClickedUndoButton(double mouseX, double mouseY, int button) {
+    private boolean rso$mouseClickedActionButton(double mouseX, double mouseY, int button) {
         Option option = this.getOption();
         if (!(option instanceof StatefulOption<?> statefulOption)) {
             return false;
         }
 
-        if (button != 0 || !OptionUndoButtonRenderer.isMouseOver(this.rso$getVisibleDim(), statefulOption, mouseX, mouseY)) {
+        if (button != 0) {
             return false;
         }
 
-        ((OptionUndoButtonControl) this).rso$focusUndoButton();
-        ((OptionUndoButtonControl) this).rso$getUndoButtonElement().mouseClicked(mouseX, mouseY, button);
+        OptionUndoButtonControl actionButtonControl = (OptionUndoButtonControl) this;
+        Dim2i visibleDim = this.rso$getVisibleDim();
+        boolean undoButtonVisible = actionButtonControl.rso$isUndoButtonVisible();
+
+        if (actionButtonControl.rso$isResetButtonVisible()
+                && OptionResetButtonRenderer.isMouseOver(visibleDim, statefulOption, mouseX, mouseY, undoButtonVisible)) {
+            actionButtonControl.rso$focusResetButton();
+            actionButtonControl.rso$getResetButtonElement().mouseClicked(mouseX, mouseY, button);
+            return true;
+        }
+
+        if (!undoButtonVisible || !OptionUndoButtonRenderer.isMouseOver(visibleDim, statefulOption, mouseX, mouseY)) {
+            return false;
+        }
+
+        actionButtonControl.rso$focusUndoButton();
+        actionButtonControl.rso$getUndoButtonElement().mouseClicked(mouseX, mouseY, button);
 
         return true;
     }

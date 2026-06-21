@@ -2,6 +2,8 @@ package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionUndoButtonControl;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionResetButtonElement;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionResetButtonRenderer;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionUndoButtonElement;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionUndoButtonRenderer;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
@@ -28,6 +30,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(ControlElement.class)
@@ -37,11 +40,17 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
     @Unique
     private boolean rso$dragging;
     @Unique
+    private OptionResetButtonElement rso$resetButtonElement;
+    @Unique
     private OptionUndoButtonElement rso$undoButtonElement;
     @Unique
-    private int rso$heldUndoButtonWidth = -1;
+    private int rso$heldActionButtonWidth = -1;
     @Unique
-    private boolean rso$undoButtonHidden;
+    private boolean rso$heldResetButtonVisible;
+    @Unique
+    private boolean rso$heldUndoButtonVisible;
+    @Unique
+    private boolean rso$hideNewActionButtons;
 
     protected MixinControlElement(Dim2i dim) {
         super(dim);
@@ -52,12 +61,12 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
 
     @Override
     public int getWidth() {
-        return this.getDimensions().width() - this.rso$getUndoButtonWidth();
+        return this.getDimensions().width() - this.rso$getActionButtonWidth();
     }
 
     @Override
     public int getLimitX() {
-        return this.getDimensions().getLimitX() - this.rso$getUndoButtonWidth();
+        return this.getDimensions().getLimitX() - this.rso$getActionButtonWidth();
     }
 
     @Override
@@ -66,9 +75,15 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
             return true;
         }
 
-        return !this.rso$isUndoButtonHidden()
-                && this.getOption() instanceof StatefulOption<?> statefulOption
-                && OptionUndoButtonRenderer.isMouseOver(this.rso$getVisibleDim(), statefulOption, mouseX, mouseY);
+        if (!(this.getOption() instanceof StatefulOption<?> statefulOption)) {
+            return false;
+        }
+
+        Dim2i visibleDim = this.rso$getVisibleDim();
+        boolean undoButtonVisible = this.rso$isUndoButtonVisible();
+
+        return (this.rso$isResetButtonVisible() && OptionResetButtonRenderer.isMouseOver(visibleDim, statefulOption, mouseX, mouseY, undoButtonVisible))
+                || (undoButtonVisible && OptionUndoButtonRenderer.isMouseOver(visibleDim, statefulOption, mouseX, mouseY));
     }
 
     @Inject(method = "nextFocusPath", at = @At("HEAD"), cancellable = true)
@@ -83,6 +98,16 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
                 return;
             }
 
+            if (focusedChild == this.rso$getResetButtonElement() && this.rso$shouldEnterActionButton(navigation) && this.rso$isUndoButtonVisible()) {
+                cir.setReturnValue(this.rso$getChildFocusPath(this.rso$getUndoButtonElement()));
+                return;
+            }
+
+            if (focusedChild == this.rso$getUndoButtonElement() && this.rso$shouldReturnToControl(navigation) && this.rso$isResetButtonVisible()) {
+                cir.setReturnValue(this.rso$getChildFocusPath(this.rso$getResetButtonElement()));
+                return;
+            }
+
             if (this.rso$shouldReturnToControl(navigation)) {
                 cir.setReturnValue(ComponentPath.leaf((GuiEventListener) (Object) this));
                 return;
@@ -92,12 +117,10 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
             return;
         }
 
-        OptionUndoButtonElement undoButton = this.rso$getUndoButtonElement();
+        GuiEventListener firstActionButton = this.rso$getFirstVisibleActionButton();
 
-        if (this.isFocused() && !this.rso$isUndoButtonHidden() && undoButton.isActive() && this.rso$shouldEnterUndoButton(navigation)) {
-            ComponentPath childPath = undoButton.nextFocusPath(navigation);
-
-            cir.setReturnValue(childPath == null ? null : ComponentPath.path((ContainerEventHandler) (Object) this, childPath));
+        if (this.isFocused() && firstActionButton != null && this.rso$shouldEnterActionButton(navigation)) {
+            cir.setReturnValue(this.rso$getChildFocusPath(firstActionButton));
         }
     }
 
@@ -122,9 +145,17 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
 
     @Override
     public @NotNull List<? extends GuiEventListener> children() {
-        OptionUndoButtonElement undoButton = this.rso$getUndoButtonElement();
+        List<GuiEventListener> children = new ArrayList<>(2);
 
-        return !this.rso$isUndoButtonHidden() && undoButton.isActive() ? List.of(undoButton) : List.of();
+        if (this.rso$isResetButtonVisible()) {
+            children.add(this.rso$getResetButtonElement());
+        }
+
+        if (this.rso$isUndoButtonVisible()) {
+            children.add(this.rso$getUndoButtonElement());
+        }
+
+        return children;
     }
 
     @Override
@@ -139,8 +170,8 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
 
     @Override
     public @Nullable GuiEventListener getFocused() {
-        if (this.rso$focusedChild instanceof OptionUndoButtonElement undoButton
-                && (this.rso$isUndoButtonHidden() || !undoButton.isActive())) {
+        if ((this.rso$focusedChild == this.rso$resetButtonElement && !this.rso$isResetButtonVisible())
+                || (this.rso$focusedChild == this.rso$undoButtonElement && !this.rso$isUndoButtonVisible())) {
             this.rso$clearUndoButtonFocus();
         }
 
@@ -176,6 +207,21 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
     }
 
     @Override
+    public OptionResetButtonElement rso$getResetButtonElement() {
+        if (this.rso$resetButtonElement == null) {
+            this.rso$resetButtonElement = new OptionResetButtonElement(
+                    this::rso$getVisibleDim,
+                    this::rso$getStatefulOption,
+                    this::rso$isUndoButtonVisible,
+                    this::playClickSound,
+                    this::rso$clearUndoButtonFocus
+            );
+        }
+
+        return this.rso$resetButtonElement;
+    }
+
+    @Override
     public OptionUndoButtonElement rso$getUndoButtonElement() {
         if (this.rso$undoButtonElement == null) {
             this.rso$undoButtonElement = new OptionUndoButtonElement(
@@ -190,40 +236,67 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
     }
 
     @Override
+    public boolean rso$isResetButtonFocused() {
+        return this.getFocused() == this.rso$getResetButtonElement();
+    }
+
+    @Override
     public boolean rso$isUndoButtonFocused() {
         return this.getFocused() == this.rso$getUndoButtonElement();
     }
 
     @Override
-    public boolean rso$isUndoButtonHidden() {
-        return this.rso$undoButtonHidden;
+    public boolean rso$isResetButtonVisible() {
+        return this.rso$isResetButtonNaturallyVisible()
+                && (!this.rso$isActionButtonLayoutHeld() || !this.rso$hideNewActionButtons || this.rso$heldResetButtonVisible);
+    }
+
+    @Override
+    public boolean rso$isUndoButtonVisible() {
+        return this.rso$isUndoButtonNaturallyVisible()
+                && (!this.rso$isActionButtonLayoutHeld() || !this.rso$hideNewActionButtons || this.rso$heldUndoButtonVisible);
+    }
+
+    @Override
+    public boolean rso$isActionButtonLayoutHeld() {
+        return this.rso$heldActionButtonWidth >= 0;
     }
 
     @Override
     public void rso$holdUndoButtonLayout(boolean hideButton) {
-        if (this.rso$heldUndoButtonWidth < 0) {
-            this.rso$heldUndoButtonWidth = this.rso$getNaturalUndoButtonWidth();
+        if (!this.rso$isActionButtonLayoutHeld()) {
+            this.rso$heldResetButtonVisible = this.rso$isResetButtonNaturallyVisible();
+            this.rso$heldUndoButtonVisible = this.rso$isUndoButtonNaturallyVisible();
+            this.rso$heldActionButtonWidth = this.rso$getNaturalActionButtonWidth();
         }
 
-        this.rso$undoButtonHidden = hideButton && this.rso$heldUndoButtonWidth == 0;
+        this.rso$hideNewActionButtons = hideButton;
 
-        if (this.rso$undoButtonHidden) {
+        if ((this.rso$focusedChild == this.rso$resetButtonElement && !this.rso$isResetButtonVisible())
+                || (this.rso$focusedChild == this.rso$undoButtonElement && !this.rso$isUndoButtonVisible())) {
             this.rso$clearUndoButtonFocus();
         }
     }
 
     @Override
     public void rso$releaseUndoButtonLayoutHold() {
-        this.rso$heldUndoButtonWidth = -1;
-        this.rso$undoButtonHidden = false;
+        this.rso$heldActionButtonWidth = -1;
+        this.rso$heldResetButtonVisible = false;
+        this.rso$heldUndoButtonVisible = false;
+        this.rso$hideNewActionButtons = false;
+    }
+
+    @Override
+    public void rso$focusResetButton() {
+        if (this.rso$isResetButtonVisible()) {
+            this.setFocused(this.rso$getResetButtonElement());
+        }
     }
 
     @Override
     public void rso$focusUndoButton() {
-        OptionUndoButtonElement undoButton = this.rso$getUndoButtonElement();
-
-        if (!this.rso$isUndoButtonHidden() && undoButton.isActive()) {
-            this.setFocused(undoButton);
+        if (this.rso$isUndoButtonVisible()) {
+            this.setFocused(this.rso$getUndoButtonElement());
         }
     }
 
@@ -237,19 +310,25 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
     }
 
     @Unique
-    private int rso$getUndoButtonWidth() {
-        if (this.rso$heldUndoButtonWidth >= 0) {
-            return this.rso$heldUndoButtonWidth;
+    private int rso$getActionButtonWidth() {
+        if (this.rso$isActionButtonLayoutHeld()) {
+            return this.rso$heldActionButtonWidth;
         }
 
-        return this.rso$getNaturalUndoButtonWidth();
+        return this.rso$getNaturalActionButtonWidth();
     }
 
     @Unique
-    private int rso$getNaturalUndoButtonWidth() {
-        return this.getOption() instanceof StatefulOption<?> statefulOption
-                ? OptionUndoButtonRenderer.getReservedWidth(this.rso$getVisibleDim(), statefulOption)
-                : 0;
+    private int rso$getNaturalActionButtonWidth() {
+        StatefulOption<?> statefulOption = this.rso$getStatefulOption();
+        if (statefulOption == null) {
+            return 0;
+        }
+
+        Dim2i visibleDim = this.rso$getVisibleDim();
+
+        return OptionResetButtonRenderer.getReservedWidth(visibleDim, statefulOption)
+                + OptionUndoButtonRenderer.getReservedWidth(visibleDim, statefulOption);
     }
 
     @Unique
@@ -267,7 +346,35 @@ public abstract class MixinControlElement extends AbstractWidget implements Cont
     }
 
     @Unique
-    private boolean rso$shouldEnterUndoButton(FocusNavigationEvent navigation) {
+    private boolean rso$isResetButtonNaturallyVisible() {
+        StatefulOption<?> statefulOption = this.rso$getStatefulOption();
+
+        return statefulOption != null && OptionResetButtonRenderer.isActive(statefulOption);
+    }
+
+    @Unique
+    private boolean rso$isUndoButtonNaturallyVisible() {
+        StatefulOption<?> statefulOption = this.rso$getStatefulOption();
+
+        return statefulOption != null && OptionUndoButtonRenderer.isActive(statefulOption);
+    }
+
+    @Unique
+    private @Nullable GuiEventListener rso$getFirstVisibleActionButton() {
+        if (this.rso$isResetButtonVisible()) {
+            return this.rso$getResetButtonElement();
+        }
+
+        return this.rso$isUndoButtonVisible() ? this.rso$getUndoButtonElement() : null;
+    }
+
+    @Unique
+    private ComponentPath rso$getChildFocusPath(GuiEventListener child) {
+        return ComponentPath.path((ContainerEventHandler) (Object) this, ComponentPath.leaf(child));
+    }
+
+    @Unique
+    private boolean rso$shouldEnterActionButton(FocusNavigationEvent navigation) {
         if (navigation instanceof FocusNavigationEvent.ArrowNavigation arrowNavigation) {
             return arrowNavigation.direction() == ScreenDirection.RIGHT;
         }

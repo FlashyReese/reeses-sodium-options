@@ -496,6 +496,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         }
 
         if (focusedControl instanceof OptionUndoButtonControl undoButtonControl
+                && undoButtonControl.rso$isUndoButtonFocused()
                 && undoButtonControl.rso$getUndoButtonElement().undo()) {
             this.updateControls();
             return true;
