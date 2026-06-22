@@ -1,55 +1,46 @@
-import net.fabricmc.loom.task.AbstractRemapJarTask
-
 plugins {
     id("java")
     id("idea")
-    id("fabric-loom") version "1.17.12"
+    id("dev.architectury.loom")
+    id("architectury-plugin")
 }
 
-val MINECRAFT_VERSION: String by rootProject.extra
-val PARCHMENT_VERSION: String? by rootProject.extra
-val FABRIC_LOADER_VERSION: String by rootProject.extra
-val FABRIC_API_VERSION: String by rootProject.extra
+val MINECRAFT_VERSION = rootProject.extra["MINECRAFT_VERSION"] as String
+val FABRIC_LOADER_VERSION = rootProject.extra["FABRIC_LOADER_VERSION"] as String
 
-val SODIUM_VERSION: String by rootProject.extra
+val SODIUM_VERSION = rootProject.extra["SODIUM_VERSION"] as String
+
+architectury {
+    common("fabric", "neoforge")
+    injectInjectables = false
+}
 
 // This trick hides common tasks in the IDEA list.
 tasks.configureEach {
     group = null
 }
 
+tasks.named<Jar>("jar") {
+    destinationDirectory.set(layout.buildDirectory.dir("libs"))
+    archiveClassifier.set("")
+}
+
+tasks.named<net.fabricmc.loom.task.RemapJarTask>("remapJar") {
+    archiveClassifier.set("remapped")
+}
+
 dependencies {
-    minecraft(group = "com.mojang", name = "minecraft", version = MINECRAFT_VERSION)
-    mappings(loom.layered() {
+    minecraft("com.mojang:minecraft:$MINECRAFT_VERSION")
+    mappings(loom.layered {
         officialMojangMappings()
-        if (PARCHMENT_VERSION != null) {
-            parchment("org.parchmentmc.data:parchment-${MINECRAFT_VERSION}:${PARCHMENT_VERSION}@zip")
-        }
     })
+
     compileOnly("io.github.llamalad7:mixinextras-common:0.5.4")
     annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.4")
     compileOnly("net.fabricmc:sponge-mixin:0.17.3+mixin.0.8.7")
+    compileOnly("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
 
-    fun addDependentFabricModule(name: String) {
-        val module = fabricApi.module(name, FABRIC_API_VERSION)
-        modCompileOnly(module)
-    }
-
-    addDependentFabricModule("fabric-api-base")
-    addDependentFabricModule("fabric-block-view-api-v2")
-    //addDependentFabricModule("fabric-renderer-api-v1")
-
-    modImplementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
-}
-
-tasks.withType<AbstractRemapJarTask>().forEach {
-    it.targetNamespace = "named"
-}
-
-loom {
-    mixin {
-        defaultRefmapName = "${rootProject.name}.refmap.json"
-    }
+    modCompileOnly("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
 }
 
 publishing {
