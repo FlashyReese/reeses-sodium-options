@@ -1,25 +1,32 @@
 plugins {
     id("java")
-    id("net.fabricmc.fabric-loom") version ("1.17.12") apply (false)
+    id("dev.architectury.loom-no-remap") version "1.17.483" apply false
+    id("architectury-plugin") version "3.5.169"
+    id("com.gradleup.shadow") version "9.3.0" apply false
 }
 
-val MINECRAFT_VERSION by extra { "26.2" }
-val NEOFORGE_VERSION by extra { "26.2.0.6-beta" }
-val FABRIC_LOADER_VERSION by extra { "0.19.3" }
-val FABRIC_API_VERSION by extra { "0.152.2+26.2" }
-
-// This value can be set to null to disable Parchment.
-val PARCHMENT_VERSION by extra { null }
+val MINECRAFT_VERSION = "26.2"
+val NEOFORGE_VERSION = "26.2.0.6-beta"
+val FABRIC_LOADER_VERSION = "0.19.3"
+val FABRIC_API_VERSION = "0.152.2+26.2"
 
 // https://semver.org/
-val MAVEN_GROUP by extra { "me.flashyreese.mods" }
-val ARCHIVE_NAME by extra { "reeses-sodium-options" }
-val MOD_VERSION by extra { "2.1.0" }
-val SODIUM_VERSION by extra { "0.9.0+mc26.2" }
+val MAVEN_GROUP = providers.gradleProperty("maven_group").get()
+val ARCHIVE_NAME = providers.gradleProperty("archives_name").get()
+val MOD_VERSION = "2.1.0"
+val SODIUM_VERSION = "0.9.0+mc26.2"
+
+extra["MINECRAFT_VERSION"] = MINECRAFT_VERSION
+extra["NEOFORGE_VERSION"] = NEOFORGE_VERSION
+extra["FABRIC_LOADER_VERSION"] = FABRIC_LOADER_VERSION
+extra["FABRIC_API_VERSION"] = FABRIC_API_VERSION
+extra["SODIUM_VERSION"] = SODIUM_VERSION
+
+architectury {
+    minecraft = MINECRAFT_VERSION
+}
 
 allprojects {
-    apply(plugin = "java")
-    apply(plugin = "maven-publish")
     group = MAVEN_GROUP
     version = createVersionString()
 }
@@ -29,10 +36,11 @@ tasks.withType<JavaCompile> {
 }
 
 subprojects {
+    apply(plugin = "java")
     apply(plugin = "maven-publish")
 
     repositories {
-        maven("https://maven.parchmentmc.org/")
+        maven("https://maven.fabricmc.net/")
         maven("https://api.modrinth.com/maven")
         maven("https://libraries.minecraft.net/")
         maven("https://maven.caffeinemc.net/releases")
@@ -44,15 +52,6 @@ subprojects {
     }
 
     java.toolchain.languageVersion = JavaLanguageVersion.of(25)
-
-    tasks.processResources {
-        filesMatching("META-INF/neoforge.mods.toml") {
-            expand(mapOf("version" to createVersionString()))
-        }
-    }
-
-    version = createVersionString()
-    group = "me.flashyreese.mods"
 
     tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"
