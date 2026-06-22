@@ -1,46 +1,35 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id("java")
     id("idea")
-    id("net.fabricmc.fabric-loom") version ("1.17.12")
+    id("dev.architectury.loom-no-remap")
+    id("architectury-plugin")
+    id("com.gradleup.shadow")
 }
 
-val MINECRAFT_VERSION: String by rootProject.extra
-val PARCHMENT_VERSION: String? by rootProject.extra
-val FABRIC_LOADER_VERSION: String by rootProject.extra
-val FABRIC_API_VERSION: String by rootProject.extra
-val MOD_VERSION: String by rootProject.extra
+val MINECRAFT_VERSION = rootProject.extra["MINECRAFT_VERSION"] as String
+val FABRIC_LOADER_VERSION = rootProject.extra["FABRIC_LOADER_VERSION"] as String
+val FABRIC_API_VERSION = rootProject.extra["FABRIC_API_VERSION"] as String
 
-val SODIUM_VERSION: String by rootProject.extra
+val SODIUM_VERSION = rootProject.extra["SODIUM_VERSION"] as String
 
 base {
     archivesName.set("${rootProject.name}-fabric")
 }
 
-dependencies {
-    minecraft("com.mojang:minecraft:${MINECRAFT_VERSION}")
-    compileOnly("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
-
-    fun addEmbeddedFabricModule(name: String) {
-        val module = fabricApi.module(name, FABRIC_API_VERSION)
-        implementation(module)
-    }
-
-    // Fabric API modules
-    addEmbeddedFabricModule("fabric-api-base")
-    addEmbeddedFabricModule("fabric-block-getter-api-v2")
-    addEmbeddedFabricModule("fabric-rendering-v1")
-    compileOnly(project(":common"))
-    implementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
-
-}
-
-tasks.test {
-    failOnNoDiscoveredTests = false
+architectury {
+    platformSetupLoomIde()
+    fabric()
 }
 
 loom {
-    @Suppress("UnstableApiUsage")
-    mixin { defaultRefmapName.set("${rootProject.name}.refmap.json") }
+    mods {
+        create("reeses-sodium-options") {
+            sourceSet("main")
+            sourceSet("main", ":common")
+        }
+    }
 
     runs {
         named("client") {
@@ -58,16 +47,68 @@ loom {
     }
 }
 
-tasks {
-    withType<JavaCompile> {
-        source(project(":common").sourceSets.main.get().allSource)
+val common = configurations.create("common") {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
+val shadowBundle = configurations.create("shadowBundle") {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
+configurations.named("compileClasspath") {
+    extendsFrom(common)
+}
+
+configurations.named("runtimeClasspath") {
+    extendsFrom(common)
+}
+
+configurations.named("developmentFabric") {
+    extendsFrom(common)
+}
+
+dependencies {
+    minecraft("net.minecraft:minecraft:$MINECRAFT_VERSION")
+    implementation("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
+
+    fun addEmbeddedFabricModule(name: String) {
+        val module = fabricApi.module(name, FABRIC_API_VERSION)
+        implementation(module)
     }
 
-    javadoc { source(project(":common").sourceSets.main.get().allJava) }
+    // Fabric API modules
+    addEmbeddedFabricModule("fabric-api-base")
+    addEmbeddedFabricModule("fabric-block-getter-api-v2")
+    addEmbeddedFabricModule("fabric-rendering-v1")
+    implementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
+    add("common", project(":common")) {
+        isTransitive = false
+    }
+    add("shadowBundle", project(path = ":common", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
+}
 
+tasks.test {
+    failOnNoDiscoveredTests = false
+}
+
+tasks.withType<JavaExec>().configureEach {
+    if (name.contains("dev.architectury.transformer.TransformerRuntime.main")) {
+        dependsOn(
+            "generateDLIConfig",
+            "prepareArchitecturyTransformer",
+            "configureLaunch",
+            "configureClientLaunch",
+        )
+        classpath += configurations.named("runtimeClasspath").get()
+    }
+}
+
+tasks {
     processResources {
-        from(project(":common").sourceSets.main.get().resources)
-
         inputs.property("version", project.version)
 
         filesMatching("fabric.mod.json") {
@@ -76,8 +117,23 @@ tasks {
     }
 
     jar {
+        archiveClassifier.set("dev")
         from(rootDir.resolve("LICENSE.txt"))
     }
+}
+
+tasks.named<ShadowJar>("shadowJar") {
+    configurations = listOf(shadowBundle)
+    archiveClassifier.set("")
+    from(rootDir.resolve("LICENSE.txt"))
+}
+
+configurations.named("runtimeElements") {
+    outgoing.artifacts.clear()
+}
+
+artifacts {
+    add("runtimeElements", tasks.named("shadowJar"))
 }
 
 publishing {
