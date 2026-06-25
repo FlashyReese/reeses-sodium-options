@@ -25,7 +25,7 @@ final class OptionActionButtonRenderer {
         boolean hovered = buttonBounds.contains(mouseX, mouseY);
 
         guiGraphics.fill(buttonBounds.x(), buttonBounds.y(), buttonBounds.getLimitX(), buttonBounds.getLimitY(), hovered ? BACKGROUND_HOVERED : BACKGROUND);
-        if (focused) {
+        if (focused && BaseWidget.isKeyboardFocusVisible()) {
             BaseWidget.border(guiGraphics, buttonBounds.x(), buttonBounds.y(), buttonBounds.getLimitX(), buttonBounds.getLimitY(), BORDER_FOCUSED);
         }
 

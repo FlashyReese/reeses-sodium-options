@@ -60,7 +60,7 @@ public class FlatButtonWidget extends BaseWidget {
             this.drawRect(guiGraphics, this.getX(), this.getLimitY() - 1, this.getLimitX(), this.getLimitY(), GuiThemes.SELECTED_UNDERLINE);
         }
 
-        if (this.drawFrame || (this.enabled && this.isFocused())) {
+        if (this.drawFrame || (this.enabled && this.shouldRenderFocusBorder())) {
             this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), GuiThemes.FLAT_BUTTON_FOCUS_BORDER);
         }
     }

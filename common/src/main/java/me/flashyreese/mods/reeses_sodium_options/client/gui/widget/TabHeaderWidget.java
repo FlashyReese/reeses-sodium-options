@@ -131,7 +131,7 @@ public class TabHeaderWidget extends BaseWidget {
                 drawScrollingString(guiGraphics, this.modOptions.name(), textX, centeredY, TEXT_COLOR, available);
             }
 
-            if (this.isFocused()) {
+            if (this.shouldRenderFocusBorder()) {
                 this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), GuiThemes.OPTION_FOCUS_BORDER);
             }
         });

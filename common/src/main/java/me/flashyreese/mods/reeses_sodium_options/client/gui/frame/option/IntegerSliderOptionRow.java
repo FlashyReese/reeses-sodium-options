@@ -5,6 +5,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOption
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionStateStore;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.BaseWidget;
 import net.caffeinemc.mods.sodium.api.config.option.SteppedValidator;
 import net.caffeinemc.mods.sodium.client.config.structure.IntegerOption;
 import net.minecraft.client.Minecraft;
@@ -74,7 +75,7 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
 
             this.drawRect(guiGraphics, sliderX, trackY, sliderX + SLIDER_WIDTH, trackY + 1, this.theme.themeLighter);
             this.drawRect(guiGraphics, thumbX, sliderY, thumbX + THUMB_WIDTH, sliderY + TRACK_HEIGHT, 0xFFFFFFFF);
-            if (this.isRowFocused() && this.editMode) {
+            if (this.isRowFocused() && this.editMode && BaseWidget.isKeyboardFocusVisible()) {
                 this.drawBorder(guiGraphics, thumbX - 1, sliderY - 1, thumbX + THUMB_WIDTH + 1, sliderY + TRACK_HEIGHT + 1, 0xFFFFFFFF);
             }
 

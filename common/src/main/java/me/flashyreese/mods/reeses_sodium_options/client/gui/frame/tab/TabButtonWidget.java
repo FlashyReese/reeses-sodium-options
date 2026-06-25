@@ -48,7 +48,7 @@ final class TabButtonWidget extends BaseWidget {
             this.drawRect(guiGraphics, this.getX(), this.getY(), this.getX() + SELECTION_WIDTH, this.getLimitY(), this.theme.theme);
         }
 
-        if (this.isFocused()) {
+        if (this.shouldRenderFocusBorder()) {
             this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), GuiThemes.OPTION_FOCUS_BORDER);
         }
     }

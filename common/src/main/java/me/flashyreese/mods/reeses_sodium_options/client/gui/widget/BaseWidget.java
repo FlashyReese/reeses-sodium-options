@@ -72,6 +72,14 @@ public abstract class BaseWidget implements Renderable, GuiEventListener, Narrat
         return this.hovered;
     }
 
+    public static boolean isKeyboardFocusVisible() {
+        return Minecraft.getInstance().getLastInputType().isKeyboard();
+    }
+
+    protected boolean shouldRenderFocusBorder() {
+        return this.isFocused() && isKeyboardFocusVisible();
+    }
+
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
         return this.dim.contains(mouseX, mouseY);

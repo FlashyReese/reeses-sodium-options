@@ -74,7 +74,7 @@ public class LabelWidget extends BaseWidget {
         this.drawString(guiGraphics, chevron, chevronX, textY, this.color);
         this.drawString(guiGraphics, this.text, chevronX + this.font.width(chevron) + CHEVRON_GAP, textY, this.color);
 
-        if (this.isFocused()) {
+        if (this.shouldRenderFocusBorder()) {
             this.drawBorder(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), GuiThemes.OPTION_FOCUS_BORDER);
         }
 
