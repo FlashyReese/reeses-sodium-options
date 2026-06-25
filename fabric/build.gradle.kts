@@ -12,6 +12,9 @@ val MINECRAFT_VERSION = rootProject.extra["MINECRAFT_VERSION"] as String
 val FABRIC_LOADER_VERSION = rootProject.extra["FABRIC_LOADER_VERSION"] as String
 
 val SODIUM_VERSION = rootProject.extra["SODIUM_VERSION"] as String
+val CONTROLIFY_VERSION = rootProject.extra["CONTROLIFY_VERSION"] as String
+val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
+
 base {
     archivesName.set("${rootProject.name}-fabric")
 }
@@ -73,6 +76,11 @@ dependencies {
     })
     modImplementation("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
     modImplementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
+    if (CONTROLIFY_ENABLED) {
+        modCompileOnly("dev.isxander:controlify:$CONTROLIFY_VERSION-fabric") {
+            isTransitive = false
+        }
+    }
     add("common", project(path = ":common", configuration = "namedElements")) {
         isTransitive = false
     }
@@ -92,9 +100,21 @@ tasks.matching { it.name == "runClient" || it.name == "runServer" }.configureEac
 tasks {
     processResources {
         inputs.property("version", project.version)
+        inputs.property("controlifyEnabled", CONTROLIFY_ENABLED)
 
         filesMatching("fabric.mod.json") {
             expand(mapOf("version" to project.version))
+        }
+
+        if (!CONTROLIFY_ENABLED) {
+            doLast {
+                val metadata = layout.buildDirectory.file("resources/main/fabric.mod.json").get().asFile
+                val text = metadata.readText()
+                    .replace(Regex("""    "controlify": \[\R      "me\.flashyreese\.mods\.reeses_sodium_options\.client\.controlify\.ReeseSodiumOptionsControlifyEntrypoint"\R    ],\R"""), "")
+                    .replace(Regex("""  "suggests": \{\R    "controlify": "[^"]+"\R  },\R"""), "")
+
+                metadata.writeText(text)
+            }
         }
     }
 

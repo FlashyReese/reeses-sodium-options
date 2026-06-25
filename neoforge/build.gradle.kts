@@ -11,6 +11,8 @@ plugins {
 val MINECRAFT_VERSION = rootProject.extra["MINECRAFT_VERSION"] as String
 val NEOFORGE_VERSION = rootProject.extra["NEOFORGE_VERSION"] as String
 val SODIUM_VERSION = rootProject.extra["SODIUM_VERSION"] as String
+val CONTROLIFY_VERSION = rootProject.extra["CONTROLIFY_VERSION"] as String
+val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
 val SODIUM_NEOFORGE_RUNTIME_MODS = listOf(
     "org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19",
     "org.sinytra.forgified-fabric-api:fabric-renderer-api-v1:3.4.1+9125b6dc19",
@@ -75,6 +77,11 @@ dependencies {
     add("forgeRuntimeLibrary", "net.caffeinemc:sodium-neoforge:$SODIUM_VERSION") {
         isTransitive = false
     }
+    if (CONTROLIFY_ENABLED) {
+        modCompileOnly("dev.isxander:controlify:$CONTROLIFY_VERSION-neoforge") {
+            isTransitive = false
+        }
+    }
     SODIUM_NEOFORGE_RUNTIME_MODS.forEach {
         modRuntimeOnly(it)
     }
@@ -108,9 +115,20 @@ tasks.withType<JavaExec>().configureEach {
 tasks {
     processResources {
         inputs.property("version", project.version)
+        inputs.property("controlifyEnabled", CONTROLIFY_ENABLED)
 
         filesMatching("META-INF/neoforge.mods.toml") {
             expand(mapOf("version" to project.version))
+        }
+
+        if (!CONTROLIFY_ENABLED) {
+            doLast {
+                val metadata = layout.buildDirectory.file("resources/main/META-INF/neoforge.mods.toml").get().asFile
+                val text = metadata.readText()
+                    .replace(Regex("""\[\[dependencies\.reeses_sodium_options]]\RmodId = "controlify"\Rtype = "optional"\RversionRange = "\[[^"]+"\Rordering = "AFTER"\Rside = "CLIENT"\R\R?"""), "")
+
+                metadata.writeText(text)
+            }
         }
     }
 

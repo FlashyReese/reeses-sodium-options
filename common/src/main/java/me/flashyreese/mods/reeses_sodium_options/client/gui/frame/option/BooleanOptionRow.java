@@ -1,6 +1,7 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionStateStore;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
 import net.caffeinemc.mods.sodium.client.config.structure.BooleanOption;
@@ -9,6 +10,8 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+
+import java.util.List;
 
 final class BooleanOptionRow extends AbstractOptionRow {
     private static final int CONTENT_WIDTH = 30;
@@ -31,6 +34,10 @@ final class BooleanOptionRow extends AbstractOptionRow {
     @Override
     protected int controlContentWidth() {
         return CONTENT_WIDTH;
+    }
+
+    public List<ControlGuide> controlGuides() {
+        return this.canShowControlGuide() ? List.of(ControlGuide.press("Toggle")) : List.of();
     }
 
     @Override

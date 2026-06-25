@@ -9,6 +9,8 @@ val MINECRAFT_VERSION = rootProject.extra["MINECRAFT_VERSION"] as String
 val FABRIC_LOADER_VERSION = rootProject.extra["FABRIC_LOADER_VERSION"] as String
 
 val SODIUM_VERSION = rootProject.extra["SODIUM_VERSION"] as String
+val CONTROLIFY_VERSION = rootProject.extra["CONTROLIFY_VERSION"] as String
+val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
 
 architectury {
     common("fabric", "neoforge")
@@ -29,6 +31,13 @@ tasks.named<net.fabricmc.loom.task.RemapJarTask>("remapJar") {
     archiveClassifier.set("remapped")
 }
 
+sourceSets.named("main") {
+    if (!CONTROLIFY_ENABLED) {
+        java.exclude("me/flashyreese/mods/reeses_sodium_options/client/controlify/**")
+        resources.exclude("META-INF/services/dev.isxander.controlify.api.entrypoint.ControlifyEntrypoint")
+    }
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:$MINECRAFT_VERSION")
     mappings(loom.layered {
@@ -41,6 +50,11 @@ dependencies {
     compileOnly("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
 
     modCompileOnly("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
+    if (CONTROLIFY_ENABLED) {
+        modCompileOnly("dev.isxander:controlify:$CONTROLIFY_VERSION-fabric") {
+            isTransitive = false
+        }
+    }
 }
 
 publishing {

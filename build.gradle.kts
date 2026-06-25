@@ -9,6 +9,11 @@ val MINECRAFT_VERSION = "1.21.1"
 val NEOFORGE_VERSION = "21.1.234"
 val FABRIC_LOADER_VERSION = "0.19.3"
 val FABRIC_API_VERSION = "0.116.12+1.21.1"
+val CONTROLIFY_VERSION = "3.0.0+lts+1.21.1"
+val CONTROLIFY_ENABLED = providers.gradleProperty("rso.enableControlify")
+    .map { it.toBoolean() }
+    .orElse(true)
+    .get()
 
 // https://semver.org/
 val MAVEN_GROUP = providers.gradleProperty("maven_group").get()
@@ -21,6 +26,8 @@ extra["NEOFORGE_VERSION"] = NEOFORGE_VERSION
 extra["FABRIC_LOADER_VERSION"] = FABRIC_LOADER_VERSION
 extra["FABRIC_API_VERSION"] = FABRIC_API_VERSION
 extra["SODIUM_VERSION"] = SODIUM_VERSION
+extra["CONTROLIFY_VERSION"] = CONTROLIFY_VERSION
+extra["CONTROLIFY_ENABLED"] = CONTROLIFY_ENABLED
 
 architectury {
     minecraft = MINECRAFT_VERSION
@@ -46,6 +53,7 @@ subprojects {
         maven("https://maven.su5ed.dev/releases")
         maven("https://maven.caffeinemc.net/releases")
         maven("https://maven.caffeinemc.net/snapshots")
+        maven("https://maven.isxander.dev/releases")
     }
 
     base {

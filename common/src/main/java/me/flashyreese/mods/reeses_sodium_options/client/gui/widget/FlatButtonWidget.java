@@ -11,6 +11,8 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.UnaryOperator;
+
 public class FlatButtonWidget extends BaseWidget {
     public static final GuiTheme DEFAULT_THEME = GuiThemes.DEFAULT_BUTTON;
 
@@ -20,6 +22,7 @@ public class FlatButtonWidget extends BaseWidget {
     private final boolean drawFrame;
     private final boolean leftAlign;
     private final GuiTheme theme;
+    private UnaryOperator<Component> labelDecorator = UnaryOperator.identity();
     private boolean selected;
     private boolean enabled = true;
     private boolean visible = true;
@@ -49,10 +52,11 @@ public class FlatButtonWidget extends BaseWidget {
             this.drawRect(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), this.backgroundColor());
         }
 
-        int textWidth = this.font.width(this.label);
+        Component label = this.labelDecorator.apply(this.label);
+        int textWidth = this.font.width(label);
         int textX = this.leftAlign ? this.getX() + 8 : this.getCenterX() - textWidth / 2;
         int textY = this.getCenterY() - this.font.lineHeight / 2;
-        this.drawString(guiGraphics, this.label, textX, textY, this.textColor());
+        this.drawString(guiGraphics, label, textX, textY, this.textColor());
 
         if (this.enabled && this.selected) {
             this.drawRect(guiGraphics, this.getX(), this.getLimitY() - 1, this.getLimitX(), this.getLimitY(), GuiThemes.SELECTED_UNDERLINE);
@@ -71,6 +75,15 @@ public class FlatButtonWidget extends BaseWidget {
 
         this.doAction();
 
+        return true;
+    }
+
+    public boolean tryPress() {
+        if (!this.enabled || !this.visible) {
+            return false;
+        }
+
+        this.doAction();
         return true;
     }
 
@@ -118,6 +131,10 @@ public class FlatButtonWidget extends BaseWidget {
 
     public boolean isVisible() {
         return this.visible;
+    }
+
+    public void setLabelDecorator(@Nullable UnaryOperator<Component> labelDecorator) {
+        this.labelDecorator = labelDecorator == null ? UnaryOperator.identity() : labelDecorator;
     }
 
     private int backgroundColor() {

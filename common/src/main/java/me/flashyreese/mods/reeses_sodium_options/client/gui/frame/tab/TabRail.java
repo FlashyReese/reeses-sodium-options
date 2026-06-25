@@ -75,7 +75,7 @@ final class TabRail {
         int offsetY = 0;
         boolean firstGroup = true;
         for (TabGroup group : this.groupModel.groups()) {
-            int width = this.dim.width() - (this.canScroll ? 12 : 4);
+            int width = this.tabContentWidth();
             if (!this.groupModel.shouldShowHeaders()) {
                 for (Tab<?> tab : group.tabs()) {
                     LayoutBounds tabDim = LayoutBounds.relativeTo(this.dim, 0, offsetY, width, TabFrame.TAB_HEIGHT);
@@ -218,6 +218,10 @@ final class TabRail {
         return widgetDim.x() >= this.dim.x()
                 && widgetDim.getLimitX() <= this.dim.getLimitX()
                 && widgetDim.height() <= this.dim.height();
+    }
+
+    private int tabContentWidth() {
+        return this.dim.width() - (this.canScroll ? 12 : 4);
     }
 
     private int calculateWidth(LayoutBounds frameDim) {
