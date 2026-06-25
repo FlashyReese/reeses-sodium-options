@@ -35,8 +35,8 @@ public final class OptionActionButtonController {
         this.optionSupplier = optionSupplier;
         // Ordered left-to-right: reset sits to the left of undo.
         this.buttons = new ArrayList<>(2);
-        this.buttons.add(new ActionButton(0, OptionResetAction.ICON, option -> Component.translatable("rso.narration.reset_to_default", option.getName()), OptionResetAction::isActive, OptionResetAction::resetToDefault, clickSound));
-        this.undoButton = new ActionButton(1, OptionUndoAction.ICON, option -> Component.translatable("rso.narration.undo_changes", option.getName()), OptionUndoAction::isActive, OptionUndoAction::undoChanges, clickSound);
+        this.buttons.add(new ActionButton(0, OptionResetAction.ICON, Component.literal("Reset"), option -> Component.translatable("rso.narration.reset_to_default", option.getName()), OptionResetAction::isActive, OptionResetAction::resetToDefault, clickSound));
+        this.undoButton = new ActionButton(1, OptionUndoAction.ICON, Component.literal("Undo"), option -> Component.translatable("rso.narration.undo_changes", option.getName()), OptionUndoAction::isActive, OptionUndoAction::undoChanges, clickSound);
         this.buttons.add(this.undoButton);
     }
 
@@ -301,13 +301,14 @@ public final class OptionActionButtonController {
         private final OptionActionButtonElement element;
         private boolean heldVisible;
 
-        private ActionButton(int index, Identifier icon, Function<StatefulOption<?>, Component> narrationLabelProvider, Predicate<StatefulOption<?>> activePredicate, Consumer<StatefulOption<?>> action, Runnable clickSound) {
+        private ActionButton(int index, Identifier icon, Component guideLabel, Function<StatefulOption<?>, Component> narrationLabelProvider, Predicate<StatefulOption<?>> activePredicate, Consumer<StatefulOption<?>> action, Runnable clickSound) {
             this.index = index;
             this.element = new OptionActionButtonElement(
                     OptionActionButtonController.this.rowBoundsSupplier,
                     OptionActionButtonController.this.optionSupplier,
                     this::buttonsFromRight,
                     icon,
+                    guideLabel,
                     narrationLabelProvider,
                     activePredicate,
                     action,

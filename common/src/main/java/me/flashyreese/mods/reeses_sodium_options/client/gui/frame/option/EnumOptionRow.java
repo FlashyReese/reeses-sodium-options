@@ -1,6 +1,7 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option;
 
 import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionStateStore;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
@@ -12,6 +13,8 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+
+import java.util.List;
 
 final class EnumOptionRow<E extends Enum<E>> extends AbstractOptionRow {
     private static final int MAX_CONTENT_WIDTH = 70;
@@ -31,6 +34,11 @@ final class EnumOptionRow<E extends Enum<E>> extends AbstractOptionRow {
     @Override
     protected int controlContentWidth() {
         return Math.min(MAX_CONTENT_WIDTH, this.font.width(this.displayValue()));
+    }
+
+    @Override
+    public List<ControlGuide> controlGuides() {
+        return this.canShowControlGuide() ? List.of(ControlGuide.press("Next Value")) : List.of();
     }
 
     @Override

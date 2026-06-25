@@ -11,8 +11,10 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.TabFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.option.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionsScreenUiState;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.BaseWidget;
 import net.caffeinemc.mods.sodium.client.SodiumClientMod;
 import net.caffeinemc.mods.sodium.client.config.ConfigManager;
+import net.caffeinemc.mods.sodium.client.config.structure.ExternalPage;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.config.structure.StatefulOption;
 import net.caffeinemc.mods.sodium.client.data.fingerprint.HashedFingerprint;
@@ -45,6 +47,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable, PreviousScreenHolder {
 
@@ -96,6 +99,26 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     @Override
     public Screen rso$previousScreen() {
         return this.prevScreen;
+    }
+
+    public @Nullable FlatButtonWidget rso$getApplyButton() {
+        return this.applyButton;
+    }
+
+    public @Nullable FlatButtonWidget rso$getCloseButton() {
+        return this.closeButton;
+    }
+
+    public @Nullable FlatButtonWidget rso$getUndoButton() {
+        return this.undoButton;
+    }
+
+    public @Nullable SearchTextFieldWidget rso$getSearchTextField() {
+        return this.searchTextField;
+    }
+
+    public @Nullable TabFrame rso$getTabFrame() {
+        return this.tabFrame;
     }
 
     private void checkPromptTimers() {
@@ -170,6 +193,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     protected void init() {
         super.init();
 
+        BaseWidget.setKeyboardFocusVisible(this.minecraft.getLastInputType().isKeyboard());
         ConfigManager.CONFIG.invalidateGlobalRebuildDependents();
 
         this.rootFrame = this.parentFrameBuilder().build();
@@ -373,6 +397,8 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
 
     @Override
     public boolean keyPressed(@NonNull KeyEvent event) {
+        BaseWidget.setKeyboardFocusVisible(true);
+
         if (this.prompt != null) {
             return this.prompt.keyPressed(event);
         }
@@ -383,6 +409,13 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
             this.focusSearchTextField();
             this.searchTextField.selectAllText();
             this.clearArrowNavigationMemory();
+
+            return true;
+        }
+
+        if (event.isEscape() && this.handleFocusedOptionBackNavigation()) {
+            this.clearArrowNavigationMemory();
+            this.afterInput(previousTabKey);
 
             return true;
         }
@@ -581,6 +614,12 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         return this.rootFrame == null ? null : findFocusedOptionRow(this.rootFrame);
     }
 
+    private boolean handleFocusedOptionBackNavigation() {
+        OptionRow focusedOptionRow = this.getFocusedOptionRow();
+
+        return focusedOptionRow != null && focusedOptionRow.handleBackNavigation();
+    }
+
     private static @Nullable OptionRow findFocusedOptionRow(GuiEventListener listener) {
         if (listener instanceof OptionRow optionRow && optionRow.isFocused()) {
             return optionRow;
@@ -598,6 +637,99 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
 
     private @Nullable String getSelectedTabKey() {
         return this.tabFrame == null ? null : this.tabFrame.getSelectedTabKey().orElse(null);
+    }
+
+    public @Nullable String rso$getSelectedTabKey() {
+        return this.getSelectedTabKey();
+    }
+
+    public boolean rso$cycleTab(int direction) {
+        BaseWidget.setKeyboardFocusVisible(true);
+
+        if (this.tabFrame == null || direction == 0) {
+            return false;
+        }
+
+        List<Tab<?>> tabs = this.tabFrame.getTabs();
+        if (tabs.isEmpty()) {
+            return false;
+        }
+
+        int currentIndex = this.tabFrame.getSelectedTab()
+                .map(tabs::indexOf)
+                .filter(index -> index >= 0)
+                .orElse(0);
+
+        for (int offset = 1; offset <= tabs.size(); offset++) {
+            int nextIndex = Math.floorMod(currentIndex + direction * offset, tabs.size());
+            Tab<?> nextTab = tabs.get(nextIndex);
+            if (nextTab.getPage() instanceof ExternalPage) {
+                continue;
+            }
+
+            this.clearArrowNavigationMemory();
+            this.tabFrame.setTab(Optional.of(nextTab));
+            this.focusFirstOptionInSelectedTab();
+            this.rememberCurrentOptionFocus();
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean rso$focusFirstOptionInSelectedTab() {
+        BaseWidget.setKeyboardFocusVisible(true);
+
+        return this.focusFirstOptionInSelectedTab();
+    }
+
+    private boolean focusFirstOptionInSelectedTab() {
+        if (this.tabFrame == null) {
+            return false;
+        }
+
+        return this.focusOptionRow(this.tabFrame.findFirstSelectedOptionRow());
+    }
+
+    public boolean rso$navigateController(ScreenDirection direction) {
+        BaseWidget.setKeyboardFocusVisible(true);
+
+        if (this.prompt != null) {
+            return this.keyPressed(new KeyEvent(keyForDirection(direction), 0, 0));
+        }
+
+        return this.keyPressedArrow(new KeyEvent(keyForDirection(direction), 0, 0), direction);
+    }
+
+    public boolean rso$handleControllerBack() {
+        BaseWidget.setKeyboardFocusVisible(true);
+
+        return this.keyPressed(new KeyEvent(GLFW.GLFW_KEY_ESCAPE, 0, 0));
+    }
+
+    public boolean rso$handleControllerPress() {
+        BaseWidget.setKeyboardFocusVisible(true);
+
+        return this.keyPressed(new KeyEvent(GLFW.GLFW_KEY_ENTER, 0, 0));
+    }
+
+    public void rso$afterControllerInput(@Nullable String previousTabKey) {
+        this.afterInput(previousTabKey);
+    }
+
+    public @Nullable GuiEventListener rso$getFocusedLeaf() {
+        return focusedLeaf(this.getFocused());
+    }
+
+    private static @Nullable GuiEventListener focusedLeaf(@Nullable GuiEventListener listener) {
+        if (listener instanceof ContainerEventHandler container) {
+            GuiEventListener focused = container.getFocused();
+            if (focused != null) {
+                return focusedLeaf(focused);
+            }
+        }
+
+        return listener;
     }
 
     private boolean keyPressedArrow(KeyEvent event, ScreenDirection direction) {
@@ -700,6 +832,15 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
             case GLFW.GLFW_KEY_UP -> ScreenDirection.UP;
             case GLFW.GLFW_KEY_DOWN -> ScreenDirection.DOWN;
             default -> null;
+        };
+    }
+
+    private static int keyForDirection(ScreenDirection direction) {
+        return switch (direction) {
+            case LEFT -> GLFW.GLFW_KEY_LEFT;
+            case RIGHT -> GLFW.GLFW_KEY_RIGHT;
+            case UP -> GLFW.GLFW_KEY_UP;
+            case DOWN -> GLFW.GLFW_KEY_DOWN;
         };
     }
 

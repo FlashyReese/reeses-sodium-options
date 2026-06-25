@@ -11,6 +11,8 @@ plugins {
 val MINECRAFT_VERSION = rootProject.extra["MINECRAFT_VERSION"] as String
 val NEOFORGE_VERSION = rootProject.extra["NEOFORGE_VERSION"] as String
 val SODIUM_VERSION = rootProject.extra["SODIUM_VERSION"] as String
+val CONTROLIFY_VERSION = rootProject.extra["CONTROLIFY_VERSION"] as String
+val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
 
 base {
     archivesName.set("${rootProject.name}-neoforge")
@@ -64,6 +66,11 @@ dependencies {
     implementation("net.caffeinemc:sodium-neoforge:$SODIUM_VERSION")
     implementation("net.caffeinemc:sodium-neoforge-api:$SODIUM_VERSION")
     implementation("net.caffeinemc:sodium-neoforge-mod:$SODIUM_VERSION")
+    if (CONTROLIFY_ENABLED) {
+        compileOnly("dev.isxander:controlify:$CONTROLIFY_VERSION-neoforge") {
+            isTransitive = false
+        }
+    }
     add("common", project(":common")) {
         isTransitive = false
     }
@@ -95,9 +102,20 @@ tasks.withType<JavaExec>().configureEach {
 tasks {
     processResources {
         inputs.property("version", project.version)
+        inputs.property("controlifyEnabled", CONTROLIFY_ENABLED)
 
         filesMatching("META-INF/neoforge.mods.toml") {
             expand(mapOf("version" to project.version))
+        }
+
+        if (!CONTROLIFY_ENABLED) {
+            doLast {
+                val metadata = layout.buildDirectory.file("resources/main/META-INF/neoforge.mods.toml").get().asFile
+                val text = metadata.readText()
+                    .replace(Regex("""\[\[dependencies\.reeses_sodium_options]]\RmodId = "controlify"\Rtype = "optional"\RversionRange = "\[[^"]+"\Rordering = "AFTER"\Rside = "CLIENT"\R\R?"""), "")
+
+                metadata.writeText(text)
+            }
         }
     }
 
