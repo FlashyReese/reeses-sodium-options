@@ -50,11 +50,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable, PreviousScreenHolder {
 
     private static final OptionsScreenUiState SHARED_UI_STATE = new OptionsScreenUiState();
-    private static final String RSO_CONFIG_ID = "reeses-sodium-options";
+    private static final Set<String> RSO_CONFIG_IDS = Set.of("reeses-sodium-options", "reeses_sodium_options");
 
     private static final double ASPECT_RATIO_16_9 = 16.0 / 9.0;
     private static final int TOOLBAR_BUTTON_WIDTH = 65;
@@ -353,7 +354,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     }
 
     private static boolean isOwnConfig(ModOptions modOptions) {
-        return RSO_CONFIG_ID.equals(modOptions.configId());
+        return RSO_CONFIG_IDS.contains(modOptions.configId());
     }
 
     @Override
