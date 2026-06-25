@@ -8,7 +8,7 @@ modId = "reeses_sodium_options"
 version = "${version}"
 displayName = "Reese's Sodium Options"
 
-logoFile = "icon.png" #optional
+logoFile = "assets/reeses-sodium-options/icon.png" #optional
 
 authors = "FlashyReese"
 
