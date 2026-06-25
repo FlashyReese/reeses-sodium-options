@@ -13,6 +13,8 @@ public interface OptionRow extends Renderable, GuiEventListener, NarratableEntry
 
     void releaseActionButtonLayoutHold();
 
+    boolean handleBackNavigation();
+
     boolean undoFocusedActionButton();
 
     void clearActionButtonFocus();

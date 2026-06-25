@@ -10,6 +10,8 @@ val FABRIC_LOADER_VERSION = rootProject.extra["FABRIC_LOADER_VERSION"] as String
 val FABRIC_API_VERSION = rootProject.extra["FABRIC_API_VERSION"] as String
 
 val SODIUM_VERSION = rootProject.extra["SODIUM_VERSION"] as String
+val CONTROLIFY_VERSION = rootProject.extra["CONTROLIFY_VERSION"] as String
+val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
 
 architectury {
     common("fabric", "neoforge")
@@ -19,6 +21,13 @@ architectury {
 // This trick hides common tasks in the IDEA list.
 tasks.configureEach {
     group = null
+}
+
+sourceSets.named("main") {
+    if (!CONTROLIFY_ENABLED) {
+        java.exclude("me/flashyreese/mods/reeses_sodium_options/client/controlify/**")
+        resources.exclude("META-INF/services/dev.isxander.controlify.api.entrypoint.ControlifyEntrypoint")
+    }
 }
 
 dependencies {
@@ -39,6 +48,11 @@ dependencies {
     addDependentFabricModule("fabric-rendering-v1")
 
     compileOnly("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
+    if (CONTROLIFY_ENABLED) {
+        compileOnly("dev.isxander:controlify:$CONTROLIFY_VERSION-fabric") {
+            isTransitive = false
+        }
+    }
 }
 
 publishing {

@@ -22,6 +22,7 @@ public abstract class BaseWidget implements Renderable, GuiEventListener, Narrat
     protected final Font font;
     protected boolean focused;
     protected boolean hovered;
+    private static boolean keyboardFocusVisible = Minecraft.getInstance().getLastInputType().isKeyboard();
     private LayoutBounds dim;
 
     protected BaseWidget(LayoutBounds dim) {
@@ -74,7 +75,11 @@ public abstract class BaseWidget implements Renderable, GuiEventListener, Narrat
     }
 
     public static boolean isKeyboardFocusVisible() {
-        return Minecraft.getInstance().getLastInputType().isKeyboard();
+        return keyboardFocusVisible;
+    }
+
+    public static void setKeyboardFocusVisible(boolean keyboardFocusVisible) {
+        BaseWidget.keyboardFocusVisible = keyboardFocusVisible;
     }
 
     protected boolean shouldRenderFocusBorder() {
