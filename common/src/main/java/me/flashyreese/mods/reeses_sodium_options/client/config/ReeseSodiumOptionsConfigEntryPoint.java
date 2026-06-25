@@ -19,6 +19,7 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
     @Override
     public void registerConfigLate(ConfigBuilder builder) {
         builder.registerOwnModOptions()
+                .setNonTintedIcon(this.modIcon())
                 .addPage(this.createOptionsPage(builder));
     }
 
@@ -183,5 +184,9 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
 
     private ResourceLocation optionId(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    }
+
+    private ResourceLocation modIcon() {
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, "icon.png");
     }
 }
