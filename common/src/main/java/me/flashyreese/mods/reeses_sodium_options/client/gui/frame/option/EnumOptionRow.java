@@ -7,6 +7,8 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
 import net.caffeinemc.mods.sodium.client.config.structure.EnumOption;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -97,7 +99,41 @@ final class EnumOptionRow<E extends Enum<E>> extends AbstractOptionRow {
         return this.option.isEnabled() ? value : this.formatDisabledControlValue(value);
     }
 
+    @Override
+    protected Component narrationValue() {
+        return this.option.showControl() ? this.option.getElementName(this.option.getValidatedValue()) : null;
+    }
+
+    @Override
+    protected void updateControlNarration(NarrationElementOutput builder) {
+        if (!this.option.isEnabled()) {
+            builder.add(NarratedElementType.HINT, Component.translatable("rso.narration.option_unavailable"));
+            return;
+        }
+
+        if (!this.option.showControl()) {
+            return;
+        }
+
+        Component nextValue = this.option.getElementName(this.nextValue(false));
+        if (this.isFocused()) {
+            builder.add(NarratedElementType.USAGE, Component.translatable("narration.cycle_button.usage.focused", nextValue));
+        } else if (this.isHovered()) {
+            builder.add(NarratedElementType.USAGE, Component.translatable("narration.cycle_button.usage.hovered", nextValue));
+        }
+    }
+
     private void cycleControl(boolean reverse) {
+        E nextValue = this.nextValue(reverse);
+        if (nextValue == this.option.getValidatedValue()) {
+            return;
+        }
+
+        this.option.modifyValue(nextValue);
+        this.playClickSound();
+    }
+
+    private E nextValue(boolean reverse) {
         E[] values = this.option.getEnumClass().getEnumConstants();
         E currentValue = this.option.getValidatedValue();
         int valueIndex = 0;
@@ -116,10 +152,10 @@ final class EnumOptionRow<E extends Enum<E>> extends AbstractOptionRow {
             E nextValue = values[valueIndex];
 
             if (this.option.isValueAllowed(nextValue)) {
-                this.option.modifyValue(nextValue);
-                this.playClickSound();
-                return;
+                return nextValue;
             }
         }
+
+        return currentValue;
     }
 }
