@@ -30,6 +30,13 @@ versionRange = "[0.8.12,)"
 ordering = "NONE"
 side = "CLIENT"
 
+[[dependencies.reeses_sodium_options]]
+modId = "controlify"
+type = "optional"
+versionRange = "[3.0.0,)"
+ordering = "AFTER"
+side = "CLIENT"
+
 [[mixins]]
 config = "reeses-sodium-options.mixins.json"
 

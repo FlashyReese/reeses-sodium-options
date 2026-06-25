@@ -1,6 +1,8 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option;
 
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuideProvider;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.option.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionStateStore;
@@ -37,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHandler, OptionRow {
+abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHandler, OptionRow, ControlGuideProvider {
     protected static final int CONTROL_RIGHT_PADDING = 6;
 
     protected final OptionActionButtonController actionButtons;
@@ -218,6 +220,11 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     }
 
     @Override
+    public boolean handleBackNavigation() {
+        return false;
+    }
+
+    @Override
     public boolean undoFocusedActionButton() {
         return this.actionButtons.undoFocusedButton();
     }
@@ -233,6 +240,15 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
 
     protected boolean isRowFocused() {
         return this.rowFocused;
+    }
+
+    @Override
+    public List<ControlGuide> controlGuides() {
+        return List.of();
+    }
+
+    protected boolean canShowControlGuide() {
+        return this.isRowFocused() && this.getOption().isEnabled() && this.optionShowsControl();
     }
 
     protected boolean isMouseOverRow(double mouseX, double mouseY) {

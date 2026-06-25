@@ -1,6 +1,8 @@
  package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuideProvider;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiThemes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
@@ -24,7 +26,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
-public class TextFieldWidget extends BaseWidget {
+import java.util.List;
+
+public class TextFieldWidget extends BaseWidget implements ControlGuideProvider {
     private static final long CURSOR_ANIMATION_DURATION = 750;
 
     private final Font font = Minecraft.getInstance().font;
@@ -46,6 +50,13 @@ public class TextFieldWidget extends BaseWidget {
     public TextFieldWidget(LayoutBounds dim, @Nullable Component placeholder) {
         super(dim);
         this.placeholder = placeholder;
+    }
+
+    @Override
+    public List<ControlGuide> controlGuides() {
+        return this.isVisible() && this.isEditable() && this.isFocused()
+                ? List.of(ControlGuide.press("Edit"))
+                : List.of();
     }
 
     /** Called whenever the text content changes. */
@@ -150,6 +161,47 @@ public class TextFieldWidget extends BaseWidget {
         int selectionStartIndex = Math.min(this.selectionStart, this.selectionEnd);
         int selectionEndIndex = Math.max(this.selectionStart, this.selectionEnd);
         return this.text.substring(selectionStartIndex, selectionEndIndex);
+    }
+
+    public String getText() {
+        return this.text;
+    }
+
+    public boolean rso$acceptChar(char ch, int modifiers) {
+        if (!this.isVisible() || !this.isEditable()) {
+            return false;
+        }
+
+        this.write(String.valueOf(ch));
+        return true;
+    }
+
+    public boolean rso$acceptKeyCode(int keycode, int scancode, int modifiers) {
+        if (!this.isVisible()) {
+            return false;
+        }
+
+        this.setFocused(true);
+        return this.keyPressed(new KeyEvent(keycode, scancode, modifiers));
+    }
+
+    public boolean rso$moveCursor(int amount) {
+        if (!this.isVisible()) {
+            return false;
+        }
+
+        this.moveCursor(amount);
+        return true;
+    }
+
+    public boolean rso$copyText() {
+        if (!this.isVisible()) {
+            return false;
+        }
+
+        String selectedText = this.getSelectedText();
+        Minecraft.getInstance().keyboardHandler.setClipboard(selectedText.isEmpty() ? this.text : selectedText);
+        return true;
     }
 
     public void write(String text) {

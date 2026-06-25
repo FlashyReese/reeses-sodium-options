@@ -1,6 +1,8 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
 
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuideProvider;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiThemes;
@@ -17,7 +19,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
-public class LabelWidget extends BaseWidget {
+import java.util.List;
+
+public class LabelWidget extends BaseWidget implements ControlGuideProvider {
     private static final int TEXT_PADDING = 5;
     private static final int CHEVRON_GAP = 4;
     private static final String CHEVRON_COLLAPSED = "▶";
@@ -54,6 +58,14 @@ public class LabelWidget extends BaseWidget {
 
     public void setCollapsed(boolean collapsed) {
         this.collapsed = collapsed;
+    }
+
+    public List<ControlGuide> controlGuides() {
+        if (this.onToggle == null || !this.isFocused()) {
+            return List.of();
+        }
+
+        return List.of(ControlGuide.press(this.collapsed ? "Expand" : "Collapse"));
     }
 
     @Override

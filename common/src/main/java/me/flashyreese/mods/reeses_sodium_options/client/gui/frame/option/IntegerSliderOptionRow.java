@@ -2,6 +2,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option;
 
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionStateStore;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
@@ -17,6 +18,8 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
+
+import java.util.List;
 
 final class IntegerSliderOptionRow extends AbstractOptionRow {
     private static final int SLIDER_WIDTH = 90;
@@ -54,6 +57,16 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
     @Override
     protected int controlContentWidth() {
         return this.contentWidth;
+    }
+
+    public List<ControlGuide> controlGuides() {
+        if (!this.canShowControlGuide()) {
+            return List.of();
+        }
+
+        return this.editMode
+                ? List.of(ControlGuide.navigationLeftRight("Adjust Value"), ControlGuide.press("Done"))
+                : List.of(ControlGuide.press("Edit Slider Value"));
     }
 
     @Override
@@ -174,6 +187,16 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
     protected boolean activateControl() {
         this.editMode = !this.editMode;
 
+        return true;
+    }
+
+    @Override
+    public boolean handleBackNavigation() {
+        if (!this.editMode) {
+            return false;
+        }
+
+        this.editMode = false;
         return true;
     }
 
