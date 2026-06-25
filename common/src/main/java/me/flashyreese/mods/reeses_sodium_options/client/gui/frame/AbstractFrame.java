@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -187,6 +188,22 @@ public abstract class AbstractFrame extends BaseWidget implements ContainerEvent
     @Override
     public @NotNull List<? extends GuiEventListener> children() {
         return this.children;
+    }
+
+    public List<NarratableEntry> collectNarratables() {
+        List<NarratableEntry> narratables = new ArrayList<>();
+
+        for (GuiEventListener child : this.children) {
+            if (child instanceof AbstractFrame frame) {
+                narratables.addAll(frame.collectNarratables());
+            } else if (child instanceof OptionRow optionRow) {
+                narratables.addAll(optionRow.collectNarratables());
+            } else if (child instanceof NarratableEntry narratable) {
+                narratables.add(narratable);
+            }
+        }
+
+        return narratables;
     }
 
     @Override

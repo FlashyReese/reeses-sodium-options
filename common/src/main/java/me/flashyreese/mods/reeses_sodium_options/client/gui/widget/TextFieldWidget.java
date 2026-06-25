@@ -7,6 +7,8 @@ import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -316,12 +318,16 @@ public class TextFieldWidget extends BaseWidget {
     }
 
     public boolean isActive() {
+        return this.isVisible();
+    }
+
+    private boolean canConsumeTextInput() {
         return this.isVisible() && this.isFocused() && this.isEditable();
     }
 
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
-        if (!this.isActive()) {
+        if (!this.canConsumeTextInput()) {
             return false;
         }
         if (StringUtil.isAllowedChatCharacter(codePoint)) {
@@ -336,7 +342,7 @@ public class TextFieldWidget extends BaseWidget {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         this.onInteraction();
-        if (!this.isActive()) {
+        if (!this.canConsumeTextInput()) {
             return false;
         } else {
             this.selecting = Screen.hasShiftDown();
@@ -457,5 +463,11 @@ public class TextFieldWidget extends BaseWidget {
             return null;
         }
         return super.nextFocusPath(navigation);
+    }
+
+    @Override
+    public void updateNarration(NarrationElementOutput builder) {
+        Component label = this.placeholder == null ? Component.empty() : this.placeholder;
+        builder.add(NarratedElementType.TITLE, Component.translatable("gui.narrate.editBox", label, this.text));
     }
 }

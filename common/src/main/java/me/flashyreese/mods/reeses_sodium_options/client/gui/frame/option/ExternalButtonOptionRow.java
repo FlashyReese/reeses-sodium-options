@@ -6,6 +6,8 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
 import net.caffeinemc.mods.sodium.client.config.structure.ExternalButtonOption;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -66,5 +68,15 @@ final class ExternalButtonOptionRow extends AbstractOptionRow {
         return Component.empty()
                 .append(BASE_BUTTON_TEXT.copy().withStyle(ChatFormatting.UNDERLINE))
                 .append(Component.literal(" >").withStyle(Style.EMPTY.withColor(this.theme.theme)));
+    }
+
+    @Override
+    protected void updateControlNarration(NarrationElementOutput builder) {
+        if (!this.option.isEnabled()) {
+            builder.add(NarratedElementType.HINT, Component.translatable("rso.narration.option_unavailable"));
+            return;
+        }
+
+        this.addUsageNarration(builder, "narration.link.usage.focused", "narration.link.usage.hovered");
     }
 }

@@ -5,6 +5,10 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionStateSto
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
 import net.caffeinemc.mods.sodium.client.config.structure.BooleanOption;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 
 final class BooleanOptionRow extends AbstractOptionRow {
     private static final int CONTENT_WIDTH = 30;
@@ -70,6 +74,34 @@ final class BooleanOptionRow extends AbstractOptionRow {
         this.playClickSound();
 
         return true;
+    }
+
+    @Override
+    protected Component narrationValue() {
+        return this.option.showControl() ? CommonComponents.optionStatus(this.option.getValidatedValue()) : null;
+    }
+
+    @Override
+    protected void updateControlNarration(NarrationElementOutput builder) {
+        if (!this.option.isEnabled()) {
+            builder.add(NarratedElementType.HINT, Component.translatable("rso.narration.option_unavailable"));
+            return;
+        }
+
+        if (!this.option.showControl()) {
+            return;
+        }
+
+        boolean checked = this.option.getValidatedValue();
+        if (this.isFocused()) {
+            builder.add(NarratedElementType.USAGE, Component.translatable(checked
+                    ? "narration.checkbox.usage.focused.uncheck"
+                    : "narration.checkbox.usage.focused.check"));
+        } else if (this.isHovered()) {
+            builder.add(NarratedElementType.USAGE, Component.translatable(checked
+                    ? "narration.checkbox.usage.hovered.uncheck"
+                    : "narration.checkbox.usage.hovered.check"));
+        }
     }
 
     private LayoutBounds checkboxDim() {

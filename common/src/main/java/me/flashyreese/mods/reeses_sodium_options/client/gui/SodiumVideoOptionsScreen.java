@@ -23,10 +23,14 @@ import net.caffeinemc.mods.sodium.client.services.PlatformRuntimeInformation;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.TabOrderedElement;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenDirection;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
 import net.minecraft.network.chat.Component;
@@ -40,6 +44,7 @@ import org.lwjgl.glfw.GLFW;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -79,6 +84,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     private @Nullable ComponentPath previousArrowFocusPath;
     private @Nullable GuiEventListener currentArrowFocusLeaf;
     private @Nullable ScreenDirection lastArrowDirection;
+    private @Nullable NarratableEntry lastNarratable;
 
     public SodiumVideoOptionsScreen(Screen prev) {
         super(Component.literal("Reese's Sodium Menu"));
@@ -183,6 +189,35 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         if (this.prompt != null) {
             this.prompt.init();
         }
+    }
+
+    @Override
+    protected void updateNarratedWidget(NarrationElementOutput narrationElementOutput) {
+        List<NarratableEntry> narratables = this.rootFrame == null
+                ? List.of()
+                : this.rootFrame.collectNarratables()
+                .stream()
+                .filter(NarratableEntry::isActive)
+                .sorted(Comparator.comparingInt(TabOrderedElement::getTabOrderGroup))
+                .toList();
+
+        NarratableSearchResult result = Screen.findNarratableWidget(narratables, this.lastNarratable);
+        if (result == null) {
+            return;
+        }
+
+        if (result.priority.isTerminal()) {
+            this.lastNarratable = result.entry;
+        }
+
+        if (narratables.size() > 1) {
+            narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.screen", result.index + 1, narratables.size()));
+            if (result.priority == NarratableEntry.NarrationPriority.FOCUSED) {
+                narrationElementOutput.add(NarratedElementType.USAGE, this.getUsageNarration());
+            }
+        }
+
+        result.entry.updateNarration(narrationElementOutput.nest());
     }
 
     private void focusSearchTextField() {

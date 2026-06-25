@@ -6,6 +6,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,7 +76,7 @@ public class FlatButtonWidget extends BaseWidget {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (!this.isFocused() || !isSelectionKey(keyCode)) {
+        if (!this.enabled || !this.visible || !this.isFocused() || !isSelectionKey(keyCode)) {
             return false;
         }
 
@@ -87,6 +88,16 @@ public class FlatButtonWidget extends BaseWidget {
     @Override
     public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent navigation) {
         return this.enabled && this.visible ? super.nextFocusPath(navigation) : null;
+    }
+
+    @Override
+    public boolean isActive() {
+        return this.enabled && this.visible;
+    }
+
+    @Override
+    public void updateNarration(NarrationElementOutput builder) {
+        this.addButtonNarration(builder, this.label);
     }
 
     public void setSelected(boolean selected) {

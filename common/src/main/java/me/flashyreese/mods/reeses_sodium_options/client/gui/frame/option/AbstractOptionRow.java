@@ -20,13 +20,16 @@ import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.CommonComponents;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 
 abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHandler, OptionRow {
@@ -37,7 +40,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     private final OptionStateStore optionStateStore;
     private final Option option;
     private final @Nullable StatefulOption<?> statefulOption;
-    private boolean focused;
+    private boolean rowFocused;
     private boolean dragging;
 
     AbstractOptionRow(LayoutBounds dim, GuiTheme theme, OptionStateStore optionStateStore, Option option) {
@@ -99,7 +102,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     }
 
     protected boolean controlKeyPressed(int keyCode, int scanCode, int modifiers) {
-        return this.focused && isSelectionKey(keyCode) && this.activateControl();
+        return this.rowFocused && isSelectionKey(keyCode) && this.activateControl();
     }
 
     @Override
@@ -110,12 +113,12 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
 
     @Override
     public boolean isFocused() {
-        return this.focused || this.actionButtons.getFocused() != null;
+        return this.rowFocused || this.actionButtons.getFocused() != null;
     }
 
     @Override
     public void setFocused(boolean focused) {
-        this.focused = focused;
+        this.rowFocused = focused;
         if (!focused) {
             this.actionButtons.clearFocus();
             this.onControlFocusLost();
@@ -125,7 +128,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     @Override
     public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent navigation) {
         OptionActionButtonController.FocusPathResult result = this.actionButtons
-                .nextFocusPath(this, this, this.focused, navigation);
+                .nextFocusPath(this, this, this.rowFocused, navigation);
         if (result.handled()) {
             return result.path();
         }
@@ -139,13 +142,40 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
 
     @Override
     public @Nullable ComponentPath getCurrentFocusPath() {
-        return this.actionButtons.currentFocusPath(this, this, this.focused);
+        return this.actionButtons.currentFocusPath(this, this, this.rowFocused);
+    }
+
+    @Override
+    public NarrationPriority narrationPriority() {
+        if (this.rowFocused) {
+            return NarrationPriority.FOCUSED;
+        }
+
+        return this.hovered ? NarrationPriority.HOVERED : NarrationPriority.NONE;
+    }
+
+    @Override
+    public List<NarratableEntry> collectNarratables() {
+        List<NarratableEntry> narratables = new ArrayList<>();
+        narratables.add(this);
+
+        for (GuiEventListener child : this.actionButtons.children()) {
+            if (child instanceof NarratableEntry narratable) {
+                narratables.add(narratable);
+            }
+        }
+
+        return narratables;
     }
 
     @Override
     public void updateNarration(NarrationElementOutput builder) {
-        builder.add(NarratedElementType.TITLE, this.getOption().getName());
-        super.updateNarration(builder);
+        Component value = this.narrationValue();
+        Component title = value == null ? this.getOption().getName() : CommonComponents.optionNameValue(this.getOption().getName(), value);
+
+        builder.add(NarratedElementType.TITLE, title);
+        this.updateControlNarration(builder);
+        this.updateTooltipNarration(builder);
     }
 
     @Override
@@ -167,7 +197,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     public void setFocused(@Nullable GuiEventListener focused) {
         this.actionButtons.setFocused(focused);
         if (focused != null) {
-            this.focused = false;
+            this.rowFocused = false;
             this.onControlFocusLost();
         }
     }
@@ -197,7 +227,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     }
 
     protected boolean isRowFocused() {
-        return this.focused;
+        return this.rowFocused;
     }
 
     protected boolean isMouseOverRow(double mouseX, double mouseY) {
@@ -230,6 +260,30 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     protected MutableComponent formatDisabledControlValue(Component value) {
         return value.copy()
                 .withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true));
+    }
+
+    protected @Nullable Component narrationValue() {
+        return null;
+    }
+
+    protected void updateControlNarration(NarrationElementOutput builder) {
+        if (this.getOption().isEnabled() && this.optionShowsControl()) {
+            this.addButtonUsageNarration(builder);
+        } else if (!this.getOption().isEnabled()) {
+            builder.add(NarratedElementType.HINT, Component.translatable("rso.narration.option_unavailable"));
+        }
+    }
+
+    protected boolean optionShowsControl() {
+        return this.statefulOption == null || this.statefulOption.showControl();
+    }
+
+    private void updateTooltipNarration(NarrationElementOutput builder) {
+        Component tooltip = this.getOption().getTooltip();
+
+        if (tooltip != null && !tooltip.getString().isBlank()) {
+            builder.add(NarratedElementType.HINT, tooltip);
+        }
     }
 
     protected abstract int controlContentWidth();

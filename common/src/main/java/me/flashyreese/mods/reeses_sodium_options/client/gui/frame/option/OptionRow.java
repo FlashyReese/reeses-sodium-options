@@ -6,10 +6,14 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 
+import java.util.List;
+
 public interface OptionRow extends Renderable, GuiEventListener, NarratableEntry {
     Option getOption();
 
     LayoutBounds getDimensions();
+
+    List<NarratableEntry> collectNarratables();
 
     void releaseActionButtonLayoutHold();
 
