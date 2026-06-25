@@ -10,6 +10,8 @@ import net.caffeinemc.mods.sodium.api.config.option.SteppedValidator;
 import net.caffeinemc.mods.sodium.client.config.structure.IntegerOption;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -189,6 +191,31 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
         Component value = this.option.formatValue(this.option.getValidatedValue());
 
         return this.option.isEnabled() ? value : this.formatDisabledControlValue(value);
+    }
+
+    @Override
+    protected Component narrationValue() {
+        return this.option.showControl() ? this.option.formatValue(this.option.getValidatedValue()) : null;
+    }
+
+    @Override
+    protected void updateControlNarration(NarrationElementOutput builder) {
+        if (!this.option.isEnabled()) {
+            builder.add(NarratedElementType.HINT, Component.translatable("rso.narration.option_unavailable"));
+            return;
+        }
+
+        if (!this.option.showControl()) {
+            return;
+        }
+
+        if (this.isFocused()) {
+            builder.add(NarratedElementType.USAGE, Component.translatable(this.editMode
+                    ? "narration.slider.usage.focused"
+                    : "narration.slider.usage.focused.keyboard_cannot_change_value"));
+        } else if (this.isHovered()) {
+            builder.add(NarratedElementType.USAGE, Component.translatable("narration.slider.usage.hovered"));
+        }
     }
 
     private int valueWidth() {

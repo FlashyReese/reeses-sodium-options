@@ -3,8 +3,12 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
@@ -150,6 +154,26 @@ public class ScrollBarWidget extends BaseWidget {
         }
 
         return false;
+    }
+
+    @Override
+    public boolean isActive() {
+        return this.maxContentOffset > 0;
+    }
+
+    @Override
+    public void updateNarration(@NonNull NarrationElementOutput builder) {
+        Component name = Component.translatable(this.mode == ScrollDirection.VERTICAL
+                ? "rso.narration.scrollbar.vertical"
+                : "rso.narration.scrollbar.horizontal");
+        int percentage = this.maxContentOffset <= 0 ? 0 : Math.round(this.offset * 100.0F / this.maxContentOffset);
+
+        builder.add(NarratedElementType.TITLE, CommonComponents.optionNameValue(name, Component.literal(percentage + "%")));
+        if (this.isFocused()) {
+            builder.add(NarratedElementType.USAGE, Component.translatable(this.mode == ScrollDirection.VERTICAL
+                    ? "rso.narration.scrollbar.usage.vertical"
+                    : "rso.narration.scrollbar.usage.horizontal"));
+        }
     }
 
     public enum ScrollDirection {

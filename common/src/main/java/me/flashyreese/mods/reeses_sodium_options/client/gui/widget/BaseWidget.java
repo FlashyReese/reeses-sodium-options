@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -107,15 +108,32 @@ public abstract class BaseWidget implements Renderable, GuiEventListener, Narrat
 
     @Override
     public @NonNull NarrationPriority narrationPriority() {
-        if (this.focused) {
+        if (this.isFocused()) {
             return NarrationPriority.FOCUSED;
         }
 
-        return this.hovered ? NarrationPriority.HOVERED : NarrationPriority.NONE;
+        return this.isHovered() ? NarrationPriority.HOVERED : NarrationPriority.NONE;
     }
 
     @Override
     public void updateNarration(@NonNull NarrationElementOutput builder) {
+    }
+
+    protected void addButtonNarration(NarrationElementOutput builder, Component label) {
+        builder.add(NarratedElementType.TITLE, Component.translatable("gui.narrate.button", label));
+        this.addButtonUsageNarration(builder);
+    }
+
+    protected void addButtonUsageNarration(NarrationElementOutput builder) {
+        this.addUsageNarration(builder, "narration.button.usage.focused", "narration.button.usage.hovered");
+    }
+
+    protected void addUsageNarration(NarrationElementOutput builder, String focusedKey, String hoveredKey) {
+        if (this.isFocused()) {
+            builder.add(NarratedElementType.USAGE, Component.translatable(focusedKey));
+        } else if (this.isHovered()) {
+            builder.add(NarratedElementType.USAGE, Component.translatable(hoveredKey));
+        }
     }
 
     @Override

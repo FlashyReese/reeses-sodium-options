@@ -6,6 +6,8 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiThemes;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.BaseWidget;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -71,6 +73,15 @@ final class TabButtonWidget extends BaseWidget {
         }
 
         return false;
+    }
+
+    @Override
+    public void updateNarration(@NonNull NarrationElementOutput builder) {
+        builder.add(NarratedElementType.TITLE, Component.translatable("gui.narrate.tab", this.tab.getTitle()));
+
+        if (!this.selected) {
+            this.addButtonUsageNarration(builder);
+        }
     }
 
     private void doAction() {

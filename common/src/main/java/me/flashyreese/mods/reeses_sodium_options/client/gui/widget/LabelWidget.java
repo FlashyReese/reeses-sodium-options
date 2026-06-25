@@ -7,6 +7,8 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiThemes;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -112,6 +114,21 @@ public class LabelWidget extends BaseWidget {
         }
 
         return ComponentPath.leaf(this);
+    }
+
+    @Override
+    public boolean isActive() {
+        return this.onToggle != null;
+    }
+
+    @Override
+    public void updateNarration(@NonNull NarrationElementOutput builder) {
+        if (this.onToggle == null) {
+            return;
+        }
+
+        Component state = Component.translatable(this.collapsed ? "rso.narration.collapsed" : "rso.narration.expanded");
+        this.addButtonNarration(builder, CommonComponents.optionNameValue(this.text, state));
     }
 
     @Override
