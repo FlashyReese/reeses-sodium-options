@@ -17,7 +17,7 @@
     "issues": "https://github.com/FlashyReese/reeses-sodium-options/issues",
     "sources": "https://github.com/FlashyReese/reeses-sodium-options.git"
   },
-  "icon": "icon.png",
+  "icon": "assets/reeses-sodium-options/icon.png",
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
