@@ -10,12 +10,14 @@ import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -33,8 +35,8 @@ public final class OptionActionButtonController {
         this.optionSupplier = optionSupplier;
         // Ordered left-to-right: reset sits to the left of undo.
         this.buttons = new ArrayList<>(2);
-        this.buttons.add(new ActionButton(0, OptionResetAction.ICON, OptionResetAction::isActive, OptionResetAction::resetToDefault, clickSound));
-        this.undoButton = new ActionButton(1, OptionUndoAction.ICON, OptionUndoAction::isActive, OptionUndoAction::undoChanges, clickSound);
+        this.buttons.add(new ActionButton(0, OptionResetAction.ICON, option -> Component.translatable("rso.narration.reset_to_default", option.getName()), OptionResetAction::isActive, OptionResetAction::resetToDefault, clickSound));
+        this.undoButton = new ActionButton(1, OptionUndoAction.ICON, option -> Component.translatable("rso.narration.undo_changes", option.getName()), OptionUndoAction::isActive, OptionUndoAction::undoChanges, clickSound);
         this.buttons.add(this.undoButton);
     }
 
@@ -299,13 +301,14 @@ public final class OptionActionButtonController {
         private final OptionActionButtonElement element;
         private boolean heldVisible;
 
-        private ActionButton(int index, Identifier icon, Predicate<StatefulOption<?>> activePredicate, Consumer<StatefulOption<?>> action, Runnable clickSound) {
+        private ActionButton(int index, Identifier icon, Function<StatefulOption<?>, Component> narrationLabelProvider, Predicate<StatefulOption<?>> activePredicate, Consumer<StatefulOption<?>> action, Runnable clickSound) {
             this.index = index;
             this.element = new OptionActionButtonElement(
                     OptionActionButtonController.this.rowBoundsSupplier,
                     OptionActionButtonController.this.optionSupplier,
                     this::buttonsFromRight,
                     icon,
+                    narrationLabelProvider,
                     activePredicate,
                     action,
                     clickSound,

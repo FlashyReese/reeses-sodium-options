@@ -11,8 +11,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -170,5 +173,24 @@ public class TabHeaderWidget extends BaseWidget {
         }
 
         return ComponentPath.leaf(this);
+    }
+
+    @Override
+    public boolean isActive() {
+        return this.action != null;
+    }
+
+    @Override
+    public void updateNarration(@NonNull NarrationElementOutput builder) {
+        if (this.action == null) {
+            return;
+        }
+
+        Component label = Component.literal(this.modOptions.name());
+        if (ReeseSodiumOptionsConfig.config().isTabHeaderVersionLabels()) {
+            label = CommonComponents.optionNameValue(label, Component.literal(this.modOptions.version()));
+        }
+
+        this.addButtonNarration(builder, label);
     }
 }
