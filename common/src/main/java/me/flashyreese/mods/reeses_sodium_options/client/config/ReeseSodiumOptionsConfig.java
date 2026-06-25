@@ -4,9 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.PreviousScreenHolder;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
 import net.caffeinemc.mods.sodium.api.config.ConfigState;
 import net.caffeinemc.mods.sodium.api.config.StorageEventHandler;
+import net.caffeinemc.mods.sodium.client.gui.VideoSettingsScreen;
 import net.caffeinemc.mods.sodium.client.services.PlatformRuntimeInformation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -48,6 +50,18 @@ public final class ReeseSodiumOptionsConfig {
         if (screen instanceof SodiumVideoOptionsScreen sodiumVideoOptionsScreen) {
             sodiumVideoOptionsScreen.rebuildUI();
         }
+    }
+
+    static void reopenScreen(ConfigState ignored) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (!(minecraft.screen instanceof PreviousScreenHolder holder)) {
+            return;
+        }
+
+        // Reopen Sodium's options screen and let MixinSodiumOptionsGUI re-route to RSO (or not)
+        // based on the new enabled value. Deferred to run after the current apply pass completes.
+        Screen previousScreen = holder.rso$previousScreen();
+        minecraft.execute(() -> minecraft.setScreen(VideoSettingsScreen.createScreen(previousScreen)));
     }
 
     private static void readFromDisk() {
@@ -141,24 +155,30 @@ public final class ReeseSodiumOptionsConfig {
         }
     }
 
-    private static int clamp(int value, int min, int max) {
-        return Math.min(max, Math.max(min, value));
-    }
 
     public static final class ConfigData {
+        private boolean enabled = true;
         private boolean tabHeaderIcons = true;
         private boolean tabHeaderVersionLabels = true;
         private TabHeaderCollapseMode tabHeaderCollapseMode = DEFAULT_TAB_HEADER_COLLAPSE_MODE;
         private boolean tabHeaders = true;
         private boolean collapseSinglePageGroups = true;
+        private boolean collapsibleGroups = true;
         private int tooltipDelayMs = DEFAULT_TOOLTIP_DELAY_MS;
         private boolean tooltipOptionIds = false;
         private boolean colorThemes = true;
         private boolean reverseCyclingControls = true;
         private boolean shiftScrollSliderAdjustments = true;
-        private boolean resetButtonOverlay = false;
-        private boolean rsoResetButtonOverlay = true;
+        private boolean resetButtonOverlay = true;
         private boolean undoButtonOverlay = true;
+
+        public boolean isEnabled() {
+            return this.enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
 
         public boolean isTabHeaderIcons() {
             return this.tabHeaderIcons;
@@ -200,12 +220,20 @@ public final class ReeseSodiumOptionsConfig {
             this.collapseSinglePageGroups = collapseSinglePageGroups;
         }
 
+        public boolean isCollapsibleGroups() {
+            return this.collapsibleGroups;
+        }
+
+        public void setCollapsibleGroups(boolean collapsibleGroups) {
+            this.collapsibleGroups = collapsibleGroups;
+        }
+
         public int getTooltipDelayMs() {
             return this.tooltipDelayMs;
         }
 
         public void setTooltipDelayMs(int tooltipDelayMs) {
-            this.tooltipDelayMs = clamp(tooltipDelayMs, MIN_TOOLTIP_DELAY_MS, MAX_TOOLTIP_DELAY_MS);
+            this.tooltipDelayMs = Math.clamp(tooltipDelayMs, MIN_TOOLTIP_DELAY_MS, MAX_TOOLTIP_DELAY_MS);
         }
 
         public boolean isTooltipOptionIds() {
@@ -248,14 +276,6 @@ public final class ReeseSodiumOptionsConfig {
             this.resetButtonOverlay = resetButtonOverlay;
         }
 
-        public boolean isRsoResetButtonOverlay() {
-            return this.rsoResetButtonOverlay;
-        }
-
-        public void setRsoResetButtonOverlay(boolean rsoResetButtonOverlay) {
-            this.rsoResetButtonOverlay = rsoResetButtonOverlay;
-        }
-
         public boolean isUndoButtonOverlay() {
             return this.undoButtonOverlay;
         }
@@ -268,7 +288,7 @@ public final class ReeseSodiumOptionsConfig {
             if (this.tabHeaderCollapseMode == null) {
                 this.tabHeaderCollapseMode = DEFAULT_TAB_HEADER_COLLAPSE_MODE;
             }
-            this.tooltipDelayMs = clamp(this.tooltipDelayMs, MIN_TOOLTIP_DELAY_MS, MAX_TOOLTIP_DELAY_MS);
+            this.tooltipDelayMs = Math.clamp(this.tooltipDelayMs, MIN_TOOLTIP_DELAY_MS, MAX_TOOLTIP_DELAY_MS);
 
             return this;
         }

@@ -1,14 +1,9 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame;
 
-import me.flashyreese.mods.reeses_sodium_options.client.gui.AbstractWidgetExtended;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.Dim2iAccess;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.Point2iAccess;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.OptionUndoButtonControl;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.BaseWidget;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.OptionRow;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
-import net.caffeinemc.mods.sodium.client.gui.options.control.AbstractOptionList;
-import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
-import net.caffeinemc.mods.sodium.client.gui.widgets.AbstractWidget;
-import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
@@ -24,17 +19,17 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public abstract class AbstractFrame extends AbstractOptionList implements ContainerEventHandler {
+public abstract class AbstractFrame extends BaseWidget implements ContainerEventHandler {
     protected final Screen screen;
-    protected final List<AbstractWidget> children = new ArrayList<>();
-    protected final List<ControlElement> controlElements = new ArrayList<>();
+    protected final List<GuiEventListener> children = new ArrayList<>();
+    protected final List<OptionRow> optionRows = new ArrayList<>();
     protected final ModOptions modOptions;
     protected boolean renderOutline;
     private GuiEventListener focused;
     private boolean dragging;
     private Consumer<GuiEventListener> focusListener;
 
-    public AbstractFrame(Dim2i dim, Screen screen, boolean renderOutline, ModOptions modOptions) {
+    public AbstractFrame(LayoutBounds dim, Screen screen, boolean renderOutline, ModOptions modOptions) {
         super(dim);
         this.screen = screen;
         this.renderOutline = renderOutline;
@@ -42,70 +37,79 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
     }
 
     @Override
-    public int getScrollAmount() {
-        return 0;
-    }
-
-    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        // Option rows get first chance (e.g. shift-scroll slider adjustments); nested frames are
+        // reached by recursion, so their rows and scroll handling run via the frame branch.
         for (GuiEventListener element : this.children) {
-            if (element instanceof AbstractFrame abstractFrame) {
-                for (ControlElement controlElement : abstractFrame.controlElements) {
-                    if (controlElement.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount))
-                        return true;
+            if (element instanceof OptionRow optionRow) {
+                if (optionRow.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
+                    return true;
                 }
-                if (abstractFrame.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount))
-                    return true;
-            }
-            if (element instanceof ControlElement controlElement) {
-                if (controlElement.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount))
-                    return true;
+            } else if (element instanceof AbstractFrame frame && frame.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
+                return true;
             }
         }
         return false;
     }
 
     public void buildFrame() {
+        this.clearFocusIfFocusedChildRemoved();
+        this.collectOptionRows();
+    }
+
+    public void rebuildFrameContent() {
+        this.buildFrame();
+    }
+
+    public void updateFrameDim(LayoutBounds dim) {
+        this.setDim(dim);
+    }
+
+    protected void collectOptionRows() {
+        this.optionRows.clear();
         for (GuiEventListener element : this.children) {
             if (element instanceof AbstractFrame abstractFrame) {
-                this.controlElements.addAll(abstractFrame.controlElements);
+                this.optionRows.addAll(abstractFrame.optionRows);
             }
-            if (element instanceof ControlElement) {
-                this.controlElements.add((ControlElement) element);
+            if (element instanceof OptionRow optionRow) {
+                this.optionRows.add(optionRow);
             }
         }
     }
 
-    public List<ControlElement> getControlElements() {
-        return List.copyOf(this.controlElements);
+    protected void clearFocusIfFocusedChildRemoved() {
+        GuiEventListener focused = this.getFocused();
+        if (focused != null && !this.children.contains(focused)) {
+            this.setFocused(null);
+        }
     }
 
-    public @Nullable ControlElement findFirstControlElement(Predicate<ControlElement> predicate) {
-        return this.controlElements.stream()
+    public @Nullable OptionRow findFirstOptionRow(Predicate<OptionRow> predicate) {
+        return this.optionRows.stream()
                 .filter(predicate)
                 .findFirst()
                 .orElse(null);
     }
 
-    public @Nullable ControlElement findLastControlElement(Predicate<ControlElement> predicate) {
-        for (int i = this.controlElements.size() - 1; i >= 0; i--) {
-            ControlElement controlElement = this.controlElements.get(i);
-            if (predicate.test(controlElement)) {
-                return controlElement;
+    public @Nullable OptionRow findLastOptionRow(Predicate<OptionRow> predicate) {
+        for (int i = this.optionRows.size() - 1; i >= 0; i--) {
+            OptionRow optionRow = this.optionRows.get(i);
+            if (predicate.test(optionRow)) {
+                return optionRow;
             }
         }
 
         return null;
     }
 
-    public boolean focusControlElement(ControlElement controlElement) {
+    public boolean focusOptionRow(OptionRow optionRow) {
         for (GuiEventListener child : this.children) {
-            if (child == controlElement) {
-                this.setFocused(controlElement);
+            if (child == optionRow) {
+                this.setFocused(optionRow);
                 return true;
             }
 
-            if (child instanceof AbstractFrame frame && frame.focusControlElement(controlElement)) {
+            if (child instanceof AbstractFrame frame && frame.focusOptionRow(optionRow)) {
                 this.setFocused(frame);
                 return true;
             }
@@ -114,11 +118,9 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
         return false;
     }
 
-    public void releaseUndoButtonLayoutHolds() {
-        for (ControlElement controlElement : this.controlElements) {
-            if (controlElement instanceof OptionUndoButtonControl undoButtonControl) {
-                undoButtonControl.rso$releaseUndoButtonLayoutHold();
-            }
+    public void releaseActionButtonLayoutHolds() {
+        for (OptionRow optionRow : this.optionRows) {
+            optionRow.releaseActionButtonLayoutHold();
         }
     }
 
@@ -127,8 +129,10 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
         if (this.renderOutline) {
             this.drawBorder(drawContext, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), 0xFFAAAAAA);
         }
-        for (Renderable renderable : this.children) {
-            renderable.render(drawContext, mouseX, mouseY, delta);
+        for (GuiEventListener child : this.children) {
+            if (child instanceof Renderable renderable) {
+                renderable.render(drawContext, mouseX, mouseY, delta);
+            }
         }
     }
 
@@ -138,12 +142,8 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
         guiGraphics.disableScissor();
     }
 
-    protected Dim2i getFrameDim() {
-        return ((AbstractWidgetExtended) this).getDim();
-    }
-
-    protected static void setDimPoint(Dim2i dim, Point2iAccess point) {
-        ((Dim2iAccess) (Object) dim).setPoint2i(point);
+    protected LayoutBounds getFrameDim() {
+        return this.getDimensions();
     }
 
     public void registerFocusListener(Consumer<GuiEventListener> focusListener) {
@@ -190,22 +190,14 @@ public abstract class AbstractFrame extends AbstractOptionList implements Contai
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(int i, int j, int k) {
         GuiEventListener focused = this.getFocused();
 
-        if (focused instanceof OptionUndoButtonControl undoButtonControl && undoButtonControl.rso$isResetButtonFocused()) {
-            return undoButtonControl.rso$getResetButtonElement().keyPressed(keyCode, scanCode, modifiers);
-        }
-
-        if (focused instanceof OptionUndoButtonControl undoButtonControl && undoButtonControl.rso$isUndoButtonFocused()) {
-            return undoButtonControl.rso$getUndoButtonElement().keyPressed(keyCode, scanCode, modifiers);
-        }
-
-        return focused != null && focused.keyPressed(keyCode, scanCode, modifiers);
+        return focused != null && focused.keyPressed(i, j, k);
     }
 
     @Override
     public @Nullable ComponentPath nextFocusPath(@NotNull FocusNavigationEvent navigation) {
-        return super.nextFocusPath(navigation);
+        return ContainerEventHandler.super.nextFocusPath(navigation);
     }
 }

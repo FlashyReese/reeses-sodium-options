@@ -14,7 +14,7 @@ val FABRIC_API_VERSION = "0.116.12+1.21.1"
 val MAVEN_GROUP = providers.gradleProperty("maven_group").get()
 val ARCHIVE_NAME = providers.gradleProperty("archives_name").get()
 val MOD_VERSION = "2.1.0"
-val SODIUM_VERSION = "0.8.12-beta.1+mc1.21.1"
+val SODIUM_VERSION = "0.8.12-beta.2+mc1.21.1"
 
 extra["MINECRAFT_VERSION"] = MINECRAFT_VERSION
 extra["NEOFORGE_VERSION"] = NEOFORGE_VERSION

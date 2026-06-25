@@ -2,20 +2,10 @@
   "required": true,
   "minVersion": "0.8",
   "package": "me.flashyreese.mods.reeses_sodium_options.mixin",
-  "refmap": "reeses-sodium-options.refmap.json",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "sodium.MixinAbstractWidget",
-    "sodium.MixinControlElement",
-    "sodium.MixinCyclingControlElement",
-    "sodium.MixinDim2i",
-    "sodium.MixinFlatButtonWidget",
     "sodium.MixinOption",
-    "sodium.MixinResetButton",
-    "sodium.MixinSliderControlElement",
-    "sodium.MixinSodiumOptionsGUI",
-    "sodium.MixinStatefulControlElement",
-    "sodium.MixinTickBoxControlElement"
+    "sodium.MixinSodiumOptionsGUI"
   ],
   "injectors": {
     "defaultRequire": 1
