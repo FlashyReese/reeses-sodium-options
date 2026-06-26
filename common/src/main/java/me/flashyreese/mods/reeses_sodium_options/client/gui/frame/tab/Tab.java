@@ -1,24 +1,25 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab;
 
+import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.state.Holder;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionStateStore;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.PageFrame;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.PageFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.ScrollableFrame;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.config.structure.Page;
-import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 public class Tab<T extends AbstractFrame> {
     private final ModOptions modOptions;
     private final Component title;
     private final Page page;
-    private final Function<Dim2i, T> frameFunction;
+    private final Function<LayoutBounds, T> frameFunction;
 
-    public Tab(ModOptions modOptions, Component title, Page page, Function<Dim2i, T> frameFunction) {
+    public Tab(ModOptions modOptions, Component title, Page page, Function<LayoutBounds, T> frameFunction) {
         this.modOptions = modOptions;
         this.title = title;
         this.page = page;
@@ -41,7 +42,7 @@ public class Tab<T extends AbstractFrame> {
         return page;
     }
 
-    public Function<Dim2i, T> getFrameFunction() {
+    public Function<LayoutBounds, T> getFrameFunction() {
         return this.frameFunction;
     }
 
@@ -49,14 +50,14 @@ public class Tab<T extends AbstractFrame> {
         private ModOptions modOptions;
         private Component title;
         private Page page;
-        private Function<Dim2i, T> frameFunction;
+        private Function<LayoutBounds, T> frameFunction;
 
         public Builder<T> withTitle(Component title) {
             this.title = title;
             return this;
         }
 
-        public Builder<T> withFrameFunction(Function<Dim2i, T> frameFunction) {
+        public Builder<T> withFrameFunction(Function<LayoutBounds, T> frameFunction) {
             this.frameFunction = frameFunction;
             return this;
         }
@@ -76,21 +77,32 @@ public class Tab<T extends AbstractFrame> {
             return new Tab<T>(this.modOptions, this.title, this.page, this.frameFunction);
         }
 
-        public Tab<ScrollableFrame> from(Screen screen, ModOptions modOptions, Page page, AtomicReference<Integer> verticalScrollBarOffset) {
-            return new Tab<>(modOptions, page.name(), page, dim2i -> ScrollableFrame
-                    .builder()
-                    .withDimension(dim2i)
-                    .withModOptions(modOptions)
-                    .withScreen(screen)
-                    .withFrame(PageFrame
-                            .builder()
-                            .withDimension(new Dim2i(dim2i.x(), dim2i.y(), dim2i.width(), dim2i.height()))
-                            .withModOptions(modOptions)
-                            .withPage(page)
-                            .withScreen(screen)
-                            .build())
-                    .withVerticalScrollBarOffset(verticalScrollBarOffset)
-                    .build());
+        public Tab<ScrollableFrame> from(Screen screen, ModOptions modOptions, Page page, Holder<Integer> verticalScrollBarOffset, OptionStateStore optionStateStore) {
+            return new Tab<>(modOptions, page.name(), page, bounds -> {
+                PageFrame pageFrame = PageFrame
+                        .builder()
+                        .withDimension(bounds)
+                        .withModOptions(modOptions)
+                        .withPage(page)
+                        .withScreen(screen)
+                        .withOptionStateStore(optionStateStore)
+                        .build();
+                ScrollableFrame scrollableFrame = ScrollableFrame
+                        .builder()
+                        .withDimension(bounds)
+                        .withModOptions(modOptions)
+                        .withScreen(screen)
+                        .withFrame(pageFrame)
+                        .withVerticalScrollBarOffset(verticalScrollBarOffset)
+                        .build();
+                pageFrame.setGroupToggleRebuildHandler(collapseKey -> {
+                    scrollableFrame.rebuildContentFrame();
+                    if (pageFrame.focusGroupHeader(collapseKey)) {
+                        scrollableFrame.setFocused(pageFrame);
+                    }
+                });
+                return scrollableFrame;
+            });
         }
     }
 }

@@ -17,10 +17,13 @@
     "issues": "https://github.com/FlashyReese/reeses-sodium-options/issues",
     "sources": "https://github.com/FlashyReese/reeses-sodium-options.git"
   },
-  "icon": "icon.png",
+  "icon": "assets/reeses-sodium-options/icon.png",
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
+    "controlify": [
+      "me.flashyreese.mods.reeses_sodium_options.client.controlify.ReeseSodiumOptionsControlifyEntrypoint"
+    ],
     "sodium:config_api_user": [
       "me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfigEntryPoint"
     ]
@@ -46,6 +49,9 @@
   "depends": {
     "minecraft": ">=1.21.11",
     "sodium": ">=0.8.12"
+  },
+  "suggests": {
+    "controlify": ">=3.0.0"
   },
   "breaks": {
     "iris": "<1.1.4",

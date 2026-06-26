@@ -1,54 +1,36 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id("java")
     id("idea")
-    id("fabric-loom") version ("1.17.12")
+    id("dev.architectury.loom")
+    id("architectury-plugin")
+    id("com.gradleup.shadow")
 }
 
-val MINECRAFT_VERSION: String by rootProject.extra
-val PARCHMENT_VERSION: String? by rootProject.extra
-val FABRIC_LOADER_VERSION: String by rootProject.extra
-val FABRIC_API_VERSION: String by rootProject.extra
-val MOD_VERSION: String by rootProject.extra
+val MINECRAFT_VERSION = rootProject.extra["MINECRAFT_VERSION"] as String
+val FABRIC_LOADER_VERSION = rootProject.extra["FABRIC_LOADER_VERSION"] as String
 
-val SODIUM_VERSION: String by rootProject.extra
+val SODIUM_VERSION = rootProject.extra["SODIUM_VERSION"] as String
+val CONTROLIFY_VERSION = rootProject.extra["CONTROLIFY_VERSION"] as String
+val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
 
 base {
     archivesName.set("${rootProject.name}-fabric")
 }
 
-dependencies {
-    minecraft("com.mojang:minecraft:${MINECRAFT_VERSION}")
-    mappings(loom.layered {
-        officialMojangMappings()
-        if (PARCHMENT_VERSION != null) {
-            parchment("org.parchmentmc.data:parchment-${MINECRAFT_VERSION}:${PARCHMENT_VERSION}@zip")
-        }
-    })
-    modImplementation("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
-
-    fun addEmbeddedFabricModule(name: String) {
-        val module = fabricApi.module(name, FABRIC_API_VERSION)
-        modImplementation(module)
-    }
-
-    // Fabric API modules
-    addEmbeddedFabricModule("fabric-api-base")
-    addEmbeddedFabricModule("fabric-block-view-api-v2")
-    //addEmbeddedFabricModule("fabric-renderer-api-v1")
-    addEmbeddedFabricModule("fabric-rendering-fluids-v1")
-    addEmbeddedFabricModule("fabric-resource-loader-v0")
-    compileOnly(project(":common"))
-    modImplementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
-
-}
-
-tasks.test {
-    failOnNoDiscoveredTests = false
+architectury {
+    platformSetupLoomIde()
+    fabric()
 }
 
 loom {
-    @Suppress("UnstableApiUsage")
-    mixin { defaultRefmapName.set("${rootProject.name}.refmap.json") }
+    mods {
+        create("reeses-sodium-options") {
+            sourceSet("main")
+            sourceSet("main", ":common")
+        }
+    }
 
     runs {
         named("client") {
@@ -66,26 +48,97 @@ loom {
     }
 }
 
-tasks {
-    withType<JavaCompile> {
-        source(project(":common").sourceSets.main.get().allSource)
+val common = configurations.create("common") {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
+val shadowBundle = configurations.create("shadowBundle") {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
+configurations.named("compileClasspath") {
+    extendsFrom(common)
+}
+
+configurations.named("developmentFabric") {
+    extendsFrom(common)
+}
+
+dependencies {
+    minecraft("com.mojang:minecraft:$MINECRAFT_VERSION")
+    mappings(loom.layered {
+        officialMojangMappings()
+    })
+    modImplementation("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
+    modImplementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
+    if (CONTROLIFY_ENABLED) {
+        modCompileOnly("dev.isxander:controlify:$CONTROLIFY_VERSION-fabric") {
+            isTransitive = false
+        }
     }
+    add("common", project(path = ":common", configuration = "namedElements")) {
+        isTransitive = false
+    }
+    add("shadowBundle", project(path = ":common", configuration = "transformProductionFabric")) {
+        isTransitive = false
+    }
+}
 
-    javadoc { source(project(":common").sourceSets.main.get().allJava) }
+tasks.test {
+    failOnNoDiscoveredTests = false
+}
 
+tasks.matching { it.name == "runClient" || it.name == "runServer" }.configureEach {
+    dependsOn("generateRemapClasspath")
+}
+
+tasks {
     processResources {
-        from(project(":common").sourceSets.main.get().resources)
-
         inputs.property("version", project.version)
+        inputs.property("controlifyEnabled", CONTROLIFY_ENABLED)
 
         filesMatching("fabric.mod.json") {
             expand(mapOf("version" to project.version))
         }
+
+        if (!CONTROLIFY_ENABLED) {
+            doLast {
+                val metadata = layout.buildDirectory.file("resources/main/fabric.mod.json").get().asFile
+                val text = metadata.readText()
+                    .replace(Regex("""    "controlify": \[\R      "me\.flashyreese\.mods\.reeses_sodium_options\.client\.controlify\.ReeseSodiumOptionsControlifyEntrypoint"\R    ],\R"""), "")
+                    .replace(Regex("""  "suggests": \{\R    "controlify": "[^"]+"\R  },\R"""), "")
+
+                metadata.writeText(text)
+            }
+        }
     }
 
     jar {
+        archiveClassifier.set("dev")
         from(rootDir.resolve("LICENSE.txt"))
     }
+}
+
+tasks.named<ShadowJar>("shadowJar") {
+    configurations = listOf(shadowBundle)
+    archiveClassifier.set("dev-shadow")
+    from(rootDir.resolve("LICENSE.txt"))
+}
+
+tasks.named<net.fabricmc.loom.task.RemapJarTask>("remapJar") {
+    dependsOn(tasks.named("shadowJar"))
+    inputFile.set(tasks.named<ShadowJar>("shadowJar").flatMap { it.archiveFile })
+    archiveClassifier.set("")
+}
+
+configurations.named("runtimeElements") {
+    outgoing.artifacts.clear()
+}
+
+artifacts {
+    add("runtimeElements", tasks.named("remapJar"))
 }
 
 publishing {
