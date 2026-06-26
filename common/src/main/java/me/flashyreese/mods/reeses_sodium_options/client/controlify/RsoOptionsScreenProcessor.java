@@ -152,8 +152,8 @@ final class RsoOptionsScreenProcessor extends ScreenProcessor<SodiumVideoOptions
         }
 
         if (this.screen.rso$getTabFrame() != null && this.screen.rso$getTabFrame().getTabs().size() > 1) {
-            this.guideComponent(controller, ControlGuide.previousTab("Previous Tab")).ifPresent(guides::add);
-            this.guideComponent(controller, ControlGuide.nextTab("Next Tab")).ifPresent(guides::add);
+            this.guideComponent(controller, ControlGuide.previousTab(Component.translatable("rso.controller.guide.previous_tab"))).ifPresent(guides::add);
+            this.guideComponent(controller, ControlGuide.nextTab(Component.translatable("rso.controller.guide.next_tab"))).ifPresent(guides::add);
         }
 
         return this.fitGuides(guides, availableWidth);

@@ -55,7 +55,7 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
     @Override
     public List<ControlGuide> controlGuides() {
         return this.isVisible() && this.isEditable() && this.isFocused()
-                ? List.of(ControlGuide.press("Edit"))
+                ? List.of(ControlGuide.press(Component.translatable("rso.controller.guide.edit")))
                 : List.of();
     }
 
