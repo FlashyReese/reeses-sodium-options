@@ -1,6 +1,5 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.state;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
@@ -11,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 public final class OptionsScreenUiState implements OptionStateStore {
-    private final Holder<Component> tabFrameSelectedTab = new Holder<>(null);
+    private final Holder<String> tabFrameSelectedTab = new Holder<>(null);
     private final Holder<String> tabFrameSelectedGroup = new Holder<>(null);
     private final Holder<Integer> tabFrameScrollBarOffset = new Holder<>(0);
     private final Holder<Boolean> scrollSelectedTabIntoView = new Holder<>(false);
@@ -25,7 +24,7 @@ public final class OptionsScreenUiState implements OptionStateStore {
     private final Map<Identifier, OptionUiState> optionUiStates = new HashMap<>();
     private final Map<Identifier, OptionLayoutState> optionLayoutStates = new HashMap<>();
 
-    public Holder<Component> tabFrameSelectedTab() {
+    public Holder<String> tabFrameSelectedTab() {
         return tabFrameSelectedTab;
     }
 

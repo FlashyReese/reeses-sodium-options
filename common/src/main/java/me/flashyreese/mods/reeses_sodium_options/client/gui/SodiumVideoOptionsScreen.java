@@ -272,7 +272,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
                     .addChild(() -> this.hideDonateButton);
         }
 
-        this.searchTextField = new SearchTextFieldWidget(searchTextFieldDim, getOrderedModOptions().stream().flatMap(modOptions -> modOptions.pages().stream()).toList(), this.uiState,
+        this.searchTextField = new SearchTextFieldWidget(searchTextFieldDim, getOrderedModOptions(), this.uiState,
                 tabFrameDim.height(), this::refreshSearchResults);
 
         basicFrameBuilder.addChild(() -> this.searchTextField);

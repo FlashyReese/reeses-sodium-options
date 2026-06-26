@@ -4,7 +4,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionsScreenUiState;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.SearchResultOrder;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.TextFieldWidget;
-import net.caffeinemc.mods.sodium.client.config.structure.Page;
+import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -16,12 +16,12 @@ public class SearchTextFieldWidget extends TextFieldWidget {
     private final int tabDimHeight;
     private final Runnable refreshSearchResults;
 
-    public SearchTextFieldWidget(LayoutBounds dim, List<Page> pages, OptionsScreenUiState uiState, int tabDimHeight, Runnable refreshSearchResults) {
+    public SearchTextFieldWidget(LayoutBounds dim, List<ModOptions> modOptions, OptionsScreenUiState uiState, int tabDimHeight, Runnable refreshSearchResults) {
         super(dim, Component.translatable("rso.search_bar_empty"));
         this.uiState = uiState;
         this.tabDimHeight = tabDimHeight;
         this.refreshSearchResults = refreshSearchResults;
-        this.optionSearch = new OptionSearch(pages);
+        this.optionSearch = new OptionSearch(modOptions);
 
         String lastSearch = this.uiState.lastSearch().get();
         if (lastSearch != null && !lastSearch.trim().isEmpty()) {
@@ -67,7 +67,7 @@ public class SearchTextFieldWidget extends TextFieldWidget {
 
         target.optionUiState().setSelected(true);
         this.uiState.lastSearchIndex().set((startIndex + 1) % total);
-        this.uiState.tabFrameSelectedTab().set(target.tabName());
+        this.uiState.tabFrameSelectedTab().set(target.tabKey());
         this.uiState.scrollSelectedTabIntoView().set(true);
         this.uiState.optionPageScrollBarOffset().set(target.scrollOffset(this.tabDimHeight));
         this.refreshSearchResults.run();
