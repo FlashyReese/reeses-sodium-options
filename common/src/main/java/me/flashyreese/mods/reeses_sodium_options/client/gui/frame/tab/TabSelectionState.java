@@ -9,7 +9,6 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.state.Holder;
 import net.caffeinemc.mods.sodium.client.config.structure.ExternalPage;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,25 +20,25 @@ import java.util.function.Consumer;
 
 final class TabSelectionState {
     private final List<Tab<?>> tabs;
-    private final Holder<Component> persistedTabTitle;
+    private final Holder<String> persistedTabKey;
     private final Screen screen;
     private final Map<Tab<?>, AbstractFrame> framesByTab = new HashMap<>();
     private Optional<Tab<?>> selectedTab = Optional.empty();
     private @Nullable AbstractFrame selectedFrame;
 
-    TabSelectionState(List<Tab<?>> tabs, Holder<Component> persistedTabTitle, Screen screen) {
+    TabSelectionState(List<Tab<?>> tabs, Holder<String> persistedTabKey, Screen screen) {
         this.tabs = tabs;
-        this.persistedTabTitle = persistedTabTitle;
+        this.persistedTabKey = persistedTabKey;
         this.screen = screen;
     }
 
     void restorePersistedTab(Consumer<Tab<?>> restoredTabConsumer) {
-        if (this.persistedTabTitle.get() == null) {
+        if (this.persistedTabKey.get() == null) {
             return;
         }
 
         this.selectedTab = this.tabs.stream()
-                .filter(tab -> tab.getTitle().getString().equals(this.persistedTabTitle.get().getString()))
+                .filter(tab -> getTabKey(tab).equals(this.persistedTabKey.get()))
                 .findAny();
         this.selectedTab.ifPresent(restoredTabConsumer);
     }
@@ -62,7 +61,7 @@ final class TabSelectionState {
             if (value.getPage() instanceof ExternalPage externalPage) {
                 externalPage.currentScreenConsumer().accept(this.screen);
             } else {
-                this.persistedTabTitle.set(value.getTitle());
+                this.persistedTabKey.set(getTabKey(value));
             }
         });
     }

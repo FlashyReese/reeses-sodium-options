@@ -137,6 +137,11 @@ final class TabRail {
         }
     }
 
+    @Nullable
+    BaseWidget scrollBar() {
+        return this.canScroll ? this.scrollBar : null;
+    }
+
     boolean mouseClicked(double mouseX, double mouseY, int button) {
         return this.canScroll && this.scrollBar.mouseClicked(mouseX, mouseY, button);
     }
