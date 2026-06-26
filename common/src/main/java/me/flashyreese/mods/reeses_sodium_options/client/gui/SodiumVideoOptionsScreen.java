@@ -2,21 +2,27 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.BasicFrame;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.components.SearchTextFieldComponent;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.OptionRow;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.action.OptionUndoAction;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.FlatButtonWidget;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.search.SearchTextFieldWidget;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.Tab;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.TabFrame;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.option.OptionExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionsScreenUiState;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.BaseWidget;
 import net.caffeinemc.mods.sodium.client.SodiumClientMod;
 import net.caffeinemc.mods.sodium.client.config.ConfigManager;
+import net.caffeinemc.mods.sodium.client.config.structure.ExternalPage;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
-import net.caffeinemc.mods.sodium.client.config.structure.OptionPage;
+import net.caffeinemc.mods.sodium.client.config.structure.StatefulOption;
 import net.caffeinemc.mods.sodium.client.data.fingerprint.HashedFingerprint;
 import net.caffeinemc.mods.sodium.client.gui.SodiumOptions;
 import net.caffeinemc.mods.sodium.client.gui.prompt.ScreenPrompt;
 import net.caffeinemc.mods.sodium.client.gui.prompt.ScreenPromptable;
-import net.caffeinemc.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import net.caffeinemc.mods.sodium.client.services.PlatformRuntimeInformation;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
@@ -33,21 +39,29 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
-public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable {
+public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable, PreviousScreenHolder {
 
-    private static final UiState SHARED_UI_STATE = new UiState();
-    private static final String RSO_CONFIG_ID = "reeses-sodium-options";
+    private static final OptionsScreenUiState SHARED_UI_STATE = new OptionsScreenUiState();
+    private static final Set<String> RSO_CONFIG_IDS = Set.of("reeses-sodium-options", "reeses_sodium_options");
+
+    private static final double ASPECT_RATIO_16_9 = 16.0 / 9.0;
+    private static final int TOOLBAR_BUTTON_WIDTH = 65;
+    private static final int TOOLBAR_BUTTON_GAP = 4;
+    private static final int TOOLBAR_BUTTON_Y_GAP = 5;
+    private static final int TOP_ROW_HEIGHT = 20;
+    private static final int TOP_ROW_Y_GAP = 26;
+
     private static final List<FormattedText> DONATION_PROMPT_MESSAGE;
 
     static {
@@ -61,13 +75,13 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     }
 
     private final Screen prevScreen;
-    private final UiState uiState;
-    private final List<OptionPage> pages = new ArrayList<>();
+    private final OptionsScreenUiState uiState;
     private FlatButtonWidget applyButton, closeButton, undoButton;
     private FlatButtonWidget donateButton, hideDonateButton;
     private boolean hasPendingChanges;
-    private SearchTextFieldComponent searchTextField;
+    private SearchTextFieldWidget searchTextField;
     private AbstractFrame rootFrame;
+    private TabFrame tabFrame;
     private @Nullable ScreenPrompt prompt;
     private @Nullable ComponentPath previousArrowFocusPath;
     private @Nullable GuiEventListener currentArrowFocusLeaf;
@@ -81,6 +95,31 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         this.checkPromptTimers();
 
         ConfigManager.CONFIG.resetAllOptionsFromBindings();
+    }
+
+    @Override
+    public Screen rso$previousScreen() {
+        return this.prevScreen;
+    }
+
+    public @Nullable FlatButtonWidget rso$getApplyButton() {
+        return this.applyButton;
+    }
+
+    public @Nullable FlatButtonWidget rso$getCloseButton() {
+        return this.closeButton;
+    }
+
+    public @Nullable FlatButtonWidget rso$getUndoButton() {
+        return this.undoButton;
+    }
+
+    public @Nullable SearchTextFieldWidget rso$getSearchTextField() {
+        return this.searchTextField;
+    }
+
+    public @Nullable TabFrame rso$getTabFrame() {
+        return this.tabFrame;
     }
 
     private void checkPromptTimers() {
@@ -144,18 +183,27 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         if (wasSearchBarFocused) this.focusSearchTextField();
     }
 
+    private void refreshSearchResults() {
+        this.clearArrowNavigationMemory();
+        if (this.tabFrame != null) {
+            this.tabFrame.refreshFromState();
+        }
+    }
+
     @Override
     protected void init() {
         super.init();
 
+        BaseWidget.setKeyboardFocusVisible(this.minecraft.getLastInputType().isKeyboard());
         ConfigManager.CONFIG.invalidateGlobalRebuildDependents();
 
         this.rootFrame = this.parentFrameBuilder().build();
         this.addRenderableWidget(this.rootFrame);
 
-        //this.searchTextField.setFocused(!this.uiState.lastSearch().get().trim().isEmpty());
         if (this.searchTextField.isFocused()) {
             this.focusSearchTextField();
+        } else if (this.restoreFocusedOptionForSelectedTab()) {
+            this.rememberCurrentOptionFocus();
         } else {
             this.setFocused(this.rootFrame);
         }
@@ -176,27 +224,29 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         }
     }
 
-    protected BasicFrame.Builder parentFrameBuilder() {
-        BasicFrame.Builder basicFrameBuilder;
+    private BasicFrame.Builder parentFrameBuilder() {
+        boolean donationCleared = SodiumClientMod.options().notifications.hasClearedDonationButton;
 
         // Calculates if resolution exceeds 16:9 ratio, force 16:9
         int newWidth = this.width;
-        if ((float) this.width / (float) this.height > 1.77777777778) {
-            newWidth = (int) (this.height * 1.77777777778);
+        if ((float) this.width / (float) this.height > ASPECT_RATIO_16_9) {
+            newWidth = (int) (this.height * ASPECT_RATIO_16_9);
         }
 
-        Dim2i basicFrameDim = new Dim2i((this.width - newWidth) / 2, 0, newWidth, this.height);
-        Dim2i tabFrameDim = new Dim2i(basicFrameDim.x() + basicFrameDim.width() / 20 / 2, basicFrameDim.y() + basicFrameDim.height() / 4 / 2, basicFrameDim.width() - (basicFrameDim.width() / 20), basicFrameDim.height() / 4 * 3);
+        LayoutBounds basicFrameDim = new LayoutBounds((this.width - newWidth) / 2, 0, newWidth, this.height);
+        LayoutBounds tabFrameDim = new LayoutBounds(basicFrameDim.x() + basicFrameDim.width() / 20 / 2, basicFrameDim.y() + basicFrameDim.height() / 4 / 2, basicFrameDim.width() - (basicFrameDim.width() / 20), basicFrameDim.height() / 4 * 3);
 
-        Dim2i undoButtonDim = new Dim2i(tabFrameDim.getLimitX() - 203, tabFrameDim.getLimitY() + 5, 65, 20);
-        Dim2i applyButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134, tabFrameDim.getLimitY() + 5, 65, 20);
-        Dim2i closeButtonDim = new Dim2i(tabFrameDim.getLimitX() - 65, tabFrameDim.getLimitY() + 5, 65, 20);
+        int toolbarY = tabFrameDim.getLimitY() + TOOLBAR_BUTTON_Y_GAP;
+        LayoutBounds closeButtonDim = new LayoutBounds(toolbarButtonX(tabFrameDim, 0), toolbarY, TOOLBAR_BUTTON_WIDTH, TOP_ROW_HEIGHT);
+        LayoutBounds applyButtonDim = new LayoutBounds(toolbarButtonX(tabFrameDim, 1), toolbarY, TOOLBAR_BUTTON_WIDTH, TOP_ROW_HEIGHT);
+        LayoutBounds undoButtonDim = new LayoutBounds(toolbarButtonX(tabFrameDim, 2), toolbarY, TOOLBAR_BUTTON_WIDTH, TOP_ROW_HEIGHT);
 
         Component donationText = Component.translatable("sodium.options.buttons.donate");
         int donationTextWidth = this.minecraft.font.width(donationText);
 
-        Dim2i donateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 32 - donationTextWidth, tabFrameDim.y() - 26, 10 + donationTextWidth, 20);
-        Dim2i hideDonateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 20, tabFrameDim.y() - 26, 20, 20);
+        int topRowY = tabFrameDim.y() - TOP_ROW_Y_GAP;
+        LayoutBounds donateButtonDim = new LayoutBounds(tabFrameDim.getLimitX() - 32 - donationTextWidth, topRowY, 10 + donationTextWidth, TOP_ROW_HEIGHT);
+        LayoutBounds hideDonateButtonDim = new LayoutBounds(tabFrameDim.getLimitX() - TOP_ROW_HEIGHT, topRowY, TOP_ROW_HEIGHT, TOP_ROW_HEIGHT);
 
         this.undoButton = new FlatButtonWidget(undoButtonDim, Component.translatable("sodium.options.buttons.undo"), ConfigManager.CONFIG::resetAllOptionsFromBindings, true, false);
         this.applyButton = new FlatButtonWidget(applyButtonDim, Component.translatable("sodium.options.buttons.apply"), ConfigManager.CONFIG::applyAllOptions, true, false);
@@ -205,59 +255,64 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         this.donateButton = new FlatButtonWidget(donateButtonDim, donationText, this::openDonationPage, true, false);
         this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, Component.literal("x"), this::hideDonationButton, true, false);
 
-        if (SodiumClientMod.options().notifications.hasClearedDonationButton) {
+        if (donationCleared) {
             this.setDonationButtonVisibility(false);
         }
 
+        BasicFrame.Builder basicFrameBuilder = this.parentBasicFrameBuilder(basicFrameDim, tabFrameDim);
 
-        basicFrameBuilder = this.parentBasicFrameBuilder(basicFrameDim, tabFrameDim);
-
-
-        Dim2i searchTextFieldDim;
-        if (SodiumClientMod.options().notifications.hasClearedDonationButton) {
-            searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width(), 20);
+        LayoutBounds searchTextFieldDim;
+        if (donationCleared) {
+            searchTextFieldDim = new LayoutBounds(tabFrameDim.x(), topRowY, tabFrameDim.width(), TOP_ROW_HEIGHT);
         } else {
-            searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width() - (tabFrameDim.getLimitX() - donateButtonDim.x()) - 2, 20);
+            searchTextFieldDim = new LayoutBounds(tabFrameDim.x(), topRowY, tabFrameDim.width() - (tabFrameDim.getLimitX() - donateButtonDim.x()) - 2, TOP_ROW_HEIGHT);
 
             basicFrameBuilder
-                    .addChild(dim -> this.donateButton)
-                    .addChild(dim -> this.hideDonateButton);
+                    .addChild(() -> this.donateButton)
+                    .addChild(() -> this.hideDonateButton);
         }
 
+        this.searchTextField = new SearchTextFieldWidget(searchTextFieldDim, getOrderedModOptions().stream().flatMap(modOptions -> modOptions.pages().stream()).toList(), this.uiState,
+                tabFrameDim.height(), this::refreshSearchResults);
 
-        this.searchTextField = new SearchTextFieldComponent(searchTextFieldDim, getOrderedModOptions().stream().flatMap(modOptions -> modOptions.pages().stream()).toList(), this.uiState,
-                tabFrameDim.height(), this);
-
-        basicFrameBuilder.addChild(dim -> this.searchTextField);
+        basicFrameBuilder.addChild(() -> this.searchTextField);
 
         return basicFrameBuilder;
     }
 
-    public BasicFrame.Builder parentBasicFrameBuilder(Dim2i parentBasicFrameDim, Dim2i tabFrameDim) {
+    // Toolbar buttons are laid out right-to-left: slot 0 is the rightmost (close).
+    private static int toolbarButtonX(LayoutBounds tabFrameDim, int slotFromRight) {
+        return tabFrameDim.getLimitX() - (slotFromRight + 1) * TOOLBAR_BUTTON_WIDTH - slotFromRight * TOOLBAR_BUTTON_GAP;
+    }
+
+    private BasicFrame.Builder parentBasicFrameBuilder(LayoutBounds parentBasicFrameDim, LayoutBounds tabFrameDim) {
         return BasicFrame.builder()
                 .withDimension(parentBasicFrameDim)
                 .withRenderOutline(false)
                 .withScreen(this)
-                .addChild(parentDim -> TabFrame.createBuilder()
-                        .setDimension(tabFrameDim)
-                        .withScreen(this)
-                        .shouldRenderOutline(false)
-                        .setTabSectionScrollBarOffset(this.uiState.tabFrameScrollBarOffset())
-                        .setTabSectionSelectedTab(this.uiState.tabFrameSelectedTab())
-                        .setTabSectionSelectedGroup(this.uiState.tabFrameSelectedGroup())
-                        .setManuallyCollapsedTabGroups(this.uiState.manuallyCollapsedTabGroups())
-                        .addTabs(tabs -> getOrderedModOptions()
-                                .forEach(config -> config.pages()
-                                .forEach(page -> tabs.add(Tab.builder().from(this, config, page, this.uiState.optionPageScrollBarOffset()))))
-                                        )
-                                        .onSetTab(() -> {
-                            this.uiState.optionPageScrollBarOffset().set(0);
-                        })
-                        .build()
-                )
-                .addChild(dim -> this.undoButton)
-                .addChild(dim -> this.applyButton)
-                .addChild(dim -> this.closeButton);
+                .addChild(() -> {
+                    this.tabFrame = TabFrame.createBuilder()
+                            .setDimension(tabFrameDim)
+                            .withScreen(this)
+                            .shouldRenderOutline(false)
+                            .setTabRailScrollBarOffset(this.uiState.tabFrameScrollBarOffset())
+                            .setScrollSelectedTabIntoView(this.uiState.scrollSelectedTabIntoView())
+                            .setTabRailSelectedTab(this.uiState.tabFrameSelectedTab())
+                            .setTabRailSelectedGroup(this.uiState.tabFrameSelectedGroup())
+                            .setManuallyCollapsedTabGroups(this.uiState.manuallyCollapsedTabGroups())
+                            .addTabs(tabs -> getOrderedModOptions()
+                                    .forEach(config -> config.pages()
+                                            .forEach(page -> tabs.add(Tab.builder().from(this, config, page, this.uiState.optionPageScrollBarOffset(), this.uiState))))
+                            )
+                            .onSetTab(() -> {
+                                this.uiState.optionPageScrollBarOffset().set(0);
+                            })
+                            .build();
+                    return this.tabFrame;
+                })
+                .addChild(() -> this.undoButton)
+                .addChild(() -> this.applyButton)
+                .addChild(() -> this.closeButton);
     }
 
     private static List<ModOptions> getOrderedModOptions() {
@@ -267,7 +322,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     }
 
     private static boolean isOwnConfig(ModOptions modOptions) {
-        return RSO_CONFIG_ID.equals(modOptions.configId());
+        return RSO_CONFIG_IDS.contains(modOptions.configId());
     }
 
     @Override
@@ -316,26 +371,101 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean repeated) {
+    public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean repeated) {
         this.clearArrowNavigationMemory();
+        String previousTabKey = this.getSelectedTabKey();
 
         if (this.prompt != null) {
             return this.prompt.mouseClicked(event, repeated);
         }
 
-        return super.mouseClicked(event, repeated);
+        boolean handled = super.mouseClicked(event, repeated);
+        this.afterInput(previousTabKey);
+
+        return handled;
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean mouseReleased(@NonNull MouseButtonEvent event) {
+        boolean handled = super.mouseReleased(event);
+
+        if (event.button() == 0 && this.rootFrame != null) {
+            this.rootFrame.releaseActionButtonLayoutHolds();
+        }
+
+        return handled;
+    }
+
+    @Override
+    public boolean keyPressed(@NonNull KeyEvent event) {
+        BaseWidget.setKeyboardFocusVisible(true);
+
         if (this.prompt != null) {
             return this.prompt.keyPressed(event);
         }
 
-        if (event.key() == GLFW.GLFW_KEY_P && (event.modifiers() & GLFW.GLFW_MOD_SHIFT) != 0 && !(this.searchTextField != null && this.searchTextField.isFocused())) {
+        String previousTabKey = this.getSelectedTabKey();
+
+        if (this.isSearchShortcut(event)) {
+            this.focusSearchTextField();
+            this.searchTextField.selectAllText();
+            this.clearArrowNavigationMemory();
+
+            return true;
+        }
+
+        if (event.isEscape() && this.handleFocusedOptionBackNavigation()) {
+            this.clearArrowNavigationMemory();
+            this.afterInput(previousTabKey);
+
+            return true;
+        }
+
+        if (event.isEscape() && this.clearSearchText()) {
+            this.clearArrowNavigationMemory();
+
+            return true;
+        }
+
+        if (event.key() == GLFW.GLFW_KEY_P && event.hasShiftDown() && !this.isSearchTextFieldFocused()) {
             this.minecraft.gui.setScreen(new VideoSettingsScreen(this.prevScreen, this.minecraft, this.minecraft.options));
 
             return true;
+        }
+
+        if (!this.isSearchTextFieldFocused()) {
+            if (this.isUndoShortcut(event) && this.undoFocusedOption()) {
+                this.clearArrowNavigationMemory();
+                this.afterInput(previousTabKey);
+
+                return true;
+            }
+
+            if (this.keyPressedOptionListNavigation(event)) {
+                this.clearArrowNavigationMemory();
+                this.afterInput(previousTabKey);
+
+                return true;
+            }
+
+            if (this.isApplyShortcut(event)) {
+                GuiEventListener focused = this.getFocused();
+                if (focused != null && focused.keyPressed(event)) {
+                    this.clearArrowNavigationMemory();
+                    this.afterInput(previousTabKey);
+
+                    return true;
+                }
+
+                if (ConfigManager.CONFIG.anyOptionChanged()) {
+                    ConfigManager.CONFIG.applyAllOptions();
+                    this.updateControls();
+                    this.clearArrowNavigationMemory();
+                    this.afterInput(previousTabKey);
+
+                    return true;
+                }
+            }
         }
 
         ScreenDirection arrowDirection = getArrowDirection(event);
@@ -345,18 +475,275 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
 
         this.clearArrowNavigationMemory();
 
-        return super.keyPressed(event);
+        boolean handled = super.keyPressed(event);
+        if (handled) {
+            this.afterInput(previousTabKey);
+        }
+
+        return handled;
+    }
+
+    private boolean isSearchShortcut(KeyEvent event) {
+        return event.key() == GLFW.GLFW_KEY_F && event.hasControlDown();
+    }
+
+    private boolean isUndoShortcut(KeyEvent event) {
+        return event.key() == GLFW.GLFW_KEY_Z && event.hasControlDown();
+    }
+
+    private boolean isApplyShortcut(KeyEvent event) {
+        return event.key() == GLFW.GLFW_KEY_ENTER || event.key() == GLFW.GLFW_KEY_KP_ENTER;
+    }
+
+    private boolean isSearchTextFieldFocused() {
+        return this.searchTextField != null && this.searchTextField.isFocused();
+    }
+
+    private boolean clearSearchText() {
+        if (this.searchTextField == null || !this.searchTextField.hasText()) {
+            return false;
+        }
+
+        this.searchTextField.clearText();
+        this.focusSearchTextField();
+
+        return true;
+    }
+
+    private boolean keyPressedOptionListNavigation(KeyEvent event) {
+        if (this.tabFrame == null || this.rootFrame == null) {
+            return false;
+        }
+
+        OptionRow target;
+        boolean handled = true;
+
+        switch (event.key()) {
+            case GLFW.GLFW_KEY_HOME -> {
+                this.tabFrame.scrollSelectedPageToStart();
+                target = this.tabFrame.findFirstSelectedOptionRow();
+            }
+            case GLFW.GLFW_KEY_END -> {
+                this.tabFrame.scrollSelectedPageToEnd();
+                target = this.tabFrame.findLastSelectedOptionRow();
+            }
+            case GLFW.GLFW_KEY_PAGE_UP -> {
+                handled = this.tabFrame.scrollSelectedPage(-1);
+                target = this.tabFrame.findFirstVisibleSelectedOptionRow();
+            }
+            case GLFW.GLFW_KEY_PAGE_DOWN -> {
+                handled = this.tabFrame.scrollSelectedPage(1);
+                target = this.tabFrame.findLastVisibleSelectedOptionRow();
+            }
+            default -> {
+                return false;
+            }
+        }
+
+        return this.focusOptionRow(target) || handled;
+    }
+
+    private boolean undoFocusedOption() {
+        OptionRow focusedOptionRow = this.getFocusedOptionRow();
+        if (focusedOptionRow == null || !(focusedOptionRow.getOption() instanceof StatefulOption<?> option)) {
+            return false;
+        }
+
+        if (focusedOptionRow.undoFocusedActionButton()) {
+            this.updateControls();
+            return true;
+        }
+
+        if (!OptionUndoAction.canUndo(option)) {
+            return false;
+        }
+
+        OptionUndoAction.undoChanges(option);
+        focusedOptionRow.clearActionButtonFocus();
+        this.updateControls();
+
+        return true;
+    }
+
+    private boolean restoreFocusedOptionForSelectedTab() {
+        if (this.tabFrame == null) {
+            return false;
+        }
+
+        String tabKey = this.getSelectedTabKey();
+        if (tabKey == null) {
+            return false;
+        }
+
+        Identifier optionId = this.uiState.focusedOptionIdsByTab().get(tabKey);
+
+        return optionId != null && this.focusOptionRow(this.tabFrame.findSelectedOptionRow(optionId));
+    }
+
+    private boolean focusOptionRow(@Nullable OptionRow optionRow) {
+        if (optionRow == null || this.rootFrame == null || !this.rootFrame.focusOptionRow(optionRow)) {
+            return false;
+        }
+
+        this.setFocused(this.rootFrame);
+
+        return true;
+    }
+
+    private void afterInput(@Nullable String previousTabKey) {
+        if (this.isSearchTextFieldFocused()) {
+            return;
+        }
+
+        if (!Objects.equals(previousTabKey, this.getSelectedTabKey()) && this.restoreFocusedOptionForSelectedTab()) {
+            return;
+        }
+
+        this.rememberCurrentOptionFocus();
+    }
+
+    private void rememberCurrentOptionFocus() {
+        OptionRow focusedOptionRow = this.getFocusedOptionRow();
+        String tabKey = this.getSelectedTabKey();
+
+        if (tabKey != null && focusedOptionRow != null && focusedOptionRow.getOption() instanceof OptionExtended optionExtended) {
+            this.uiState.focusedOptionIdsByTab().put(tabKey, optionExtended.rso$getId());
+        }
+    }
+
+    private @Nullable OptionRow getFocusedOptionRow() {
+        return this.rootFrame == null ? null : findFocusedOptionRow(this.rootFrame);
+    }
+
+    private boolean handleFocusedOptionBackNavigation() {
+        OptionRow focusedOptionRow = this.getFocusedOptionRow();
+
+        return focusedOptionRow != null && focusedOptionRow.handleBackNavigation();
+    }
+
+    private static @Nullable OptionRow findFocusedOptionRow(GuiEventListener listener) {
+        if (listener instanceof OptionRow optionRow && optionRow.isFocused()) {
+            return optionRow;
+        }
+
+        if (listener instanceof ContainerEventHandler container) {
+            GuiEventListener focused = container.getFocused();
+            if (focused != null) {
+                return findFocusedOptionRow(focused);
+            }
+        }
+
+        return null;
+    }
+
+    private @Nullable String getSelectedTabKey() {
+        return this.tabFrame == null ? null : this.tabFrame.getSelectedTabKey().orElse(null);
+    }
+
+    public @Nullable String rso$getSelectedTabKey() {
+        return this.getSelectedTabKey();
+    }
+
+    public boolean rso$cycleTab(int direction) {
+        BaseWidget.setKeyboardFocusVisible(true);
+
+        if (this.tabFrame == null || direction == 0) {
+            return false;
+        }
+
+        List<Tab<?>> tabs = this.tabFrame.getTabs();
+        if (tabs.isEmpty()) {
+            return false;
+        }
+
+        int currentIndex = this.tabFrame.getSelectedTab()
+                .map(tabs::indexOf)
+                .filter(index -> index >= 0)
+                .orElse(0);
+
+        for (int offset = 1; offset <= tabs.size(); offset++) {
+            int nextIndex = Math.floorMod(currentIndex + direction * offset, tabs.size());
+            Tab<?> nextTab = tabs.get(nextIndex);
+            if (nextTab.getPage() instanceof ExternalPage) {
+                continue;
+            }
+
+            this.clearArrowNavigationMemory();
+            this.tabFrame.setTab(Optional.of(nextTab));
+            this.focusFirstOptionInSelectedTab();
+            this.rememberCurrentOptionFocus();
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean rso$focusFirstOptionInSelectedTab() {
+        BaseWidget.setKeyboardFocusVisible(true);
+
+        return this.focusFirstOptionInSelectedTab();
+    }
+
+    private boolean focusFirstOptionInSelectedTab() {
+        if (this.tabFrame == null) {
+            return false;
+        }
+
+        return this.focusOptionRow(this.tabFrame.findFirstSelectedOptionRow());
+    }
+
+    public boolean rso$navigateController(ScreenDirection direction) {
+        BaseWidget.setKeyboardFocusVisible(true);
+
+        if (this.prompt != null) {
+            return this.keyPressed(new KeyEvent(keyForDirection(direction), 0, 0));
+        }
+
+        return this.keyPressedArrow(new KeyEvent(keyForDirection(direction), 0, 0), direction);
+    }
+
+    public boolean rso$handleControllerBack() {
+        BaseWidget.setKeyboardFocusVisible(true);
+
+        return this.keyPressed(new KeyEvent(GLFW.GLFW_KEY_ESCAPE, 0, 0));
+    }
+
+    public boolean rso$handleControllerPress() {
+        BaseWidget.setKeyboardFocusVisible(true);
+
+        return this.keyPressed(new KeyEvent(GLFW.GLFW_KEY_ENTER, 0, 0));
+    }
+
+    public void rso$afterControllerInput(@Nullable String previousTabKey) {
+        this.afterInput(previousTabKey);
+    }
+
+    public @Nullable GuiEventListener rso$getFocusedLeaf() {
+        return focusedLeaf(this.getFocused());
+    }
+
+    private static @Nullable GuiEventListener focusedLeaf(@Nullable GuiEventListener listener) {
+        if (listener instanceof ContainerEventHandler container) {
+            GuiEventListener focused = container.getFocused();
+            if (focused != null) {
+                return focusedLeaf(focused);
+            }
+        }
+
+        return listener;
     }
 
     private boolean keyPressedArrow(KeyEvent event, ScreenDirection direction) {
         GuiEventListener focused = this.getFocused();
         if (focused != null && focused.keyPressed(event)) {
             this.clearArrowNavigationMemory();
+            this.rememberCurrentOptionFocus();
             return true;
         }
 
         ComponentPath currentFocusPath = this.getCurrentFocusPath();
         if (this.restorePreviousArrowFocus(direction, currentFocusPath)) {
+            this.rememberCurrentOptionFocus();
             return true;
         }
 
@@ -368,6 +755,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
 
         this.changeFocus(nextFocusPath);
         this.rememberArrowNavigation(direction, currentFocusPath, nextFocusPath);
+        this.rememberCurrentOptionFocus();
 
         return true;
     }
@@ -444,6 +832,15 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         };
     }
 
+    private static int keyForDirection(ScreenDirection direction) {
+        return switch (direction) {
+            case LEFT -> GLFW.GLFW_KEY_LEFT;
+            case RIGHT -> GLFW.GLFW_KEY_RIGHT;
+            case UP -> GLFW.GLFW_KEY_UP;
+            case DOWN -> GLFW.GLFW_KEY_DOWN;
+        };
+    }
+
     @Override
     public boolean shouldCloseOnEsc() {
         return !this.hasPendingChanges;
@@ -453,6 +850,9 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     public void onClose() {
         this.uiState.lastSearch().set("");
         this.uiState.lastSearchIndex().set(0);
+        this.uiState.updateSearchResults(List.of());
+        this.uiState.clearOptionUiStates();
+        this.uiState.focusedOptionIdsByTab().clear();
         this.minecraft.gui.setScreen(this.prevScreen);
     }
 
@@ -469,61 +869,5 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     @Override
     public Dim2i getDimensions() {
         return new Dim2i(0, 0, this.width, this.height);
-    }
-
-    public static UiState sharedUiState() {
-        return SHARED_UI_STATE;
-    }
-
-    public static final class UiState {
-        private final AtomicReference<Component> tabFrameSelectedTab = new AtomicReference<>(null);
-        private final AtomicReference<String> tabFrameSelectedGroup = new AtomicReference<>(null);
-        private final AtomicReference<Integer> tabFrameScrollBarOffset = new AtomicReference<>(0);
-        private final AtomicReference<Integer> optionPageScrollBarOffset = new AtomicReference<>(0);
-        private final AtomicReference<String> lastSearch = new AtomicReference<>("");
-        private final AtomicReference<Integer> lastSearchIndex = new AtomicReference<>(0);
-        private final List<Identifier> searchResultIds = new ArrayList<>();
-        private final Set<String> manuallyCollapsedTabGroups = new HashSet<>();
-
-        public AtomicReference<Component> tabFrameSelectedTab() {
-            return tabFrameSelectedTab;
-        }
-
-        public AtomicReference<String> tabFrameSelectedGroup() {
-            return tabFrameSelectedGroup;
-        }
-
-        public AtomicReference<Integer> tabFrameScrollBarOffset() {
-            return tabFrameScrollBarOffset;
-        }
-
-        public AtomicReference<Integer> optionPageScrollBarOffset() {
-            return optionPageScrollBarOffset;
-        }
-
-        public Set<String> manuallyCollapsedTabGroups() {
-            return manuallyCollapsedTabGroups;
-        }
-
-        public AtomicReference<String> lastSearch() {
-            return lastSearch;
-        }
-
-        public AtomicReference<Integer> lastSearchIndex() {
-            return lastSearchIndex;
-        }
-
-        public List<Identifier> searchResultIds() {
-            return List.copyOf(searchResultIds);
-        }
-
-        public boolean updateSearchResults(List<Identifier> ids) {
-            if (this.searchResultIds.equals(ids)) {
-                return false;
-            }
-            this.searchResultIds.clear();
-            this.searchResultIds.addAll(ids);
-            return true;
-        }
     }
 }
