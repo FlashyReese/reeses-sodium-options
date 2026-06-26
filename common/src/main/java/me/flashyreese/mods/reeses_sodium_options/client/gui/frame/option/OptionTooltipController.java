@@ -4,6 +4,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOption
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.option.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiThemes;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.BaseWidget;
 import net.caffeinemc.mods.sodium.api.config.option.OptionImpact;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
@@ -27,8 +28,8 @@ final class OptionTooltipController {
     private final LayoutBounds viewportBounds;
     private final ModOptions modOptions;
     private final BoxRenderer boxRenderer;
-    private long hoverStartTime;
-    private @Nullable OptionRow hoveredElement;
+    private long targetStartTime;
+    private @Nullable OptionRow targetElement;
 
     OptionTooltipController(LayoutBounds viewportBounds, ModOptions modOptions, BoxRenderer boxRenderer) {
         this.viewportBounds = viewportBounds;
@@ -37,17 +38,26 @@ final class OptionTooltipController {
     }
 
     void render(GuiGraphicsExtractor guiGraphics, List<OptionRow> optionRows, int mouseX, int mouseY) {
-        OptionRow hoveredElement = this.findHoveredOptionRow(optionRows, mouseX, mouseY);
-        if (hoveredElement != null && this.hoveredElement == hoveredElement) {
-            if (this.hoverStartTime == 0) {
-                this.hoverStartTime = System.currentTimeMillis();
+        OptionRow targetElement = this.findTargetOptionRow(optionRows, mouseX, mouseY);
+        if (targetElement != null && this.targetElement == targetElement) {
+            if (this.targetStartTime == 0) {
+                this.targetStartTime = System.currentTimeMillis();
             }
 
-            this.renderTooltip(guiGraphics, hoveredElement);
+            this.renderTooltip(guiGraphics, targetElement);
         } else {
-            this.hoverStartTime = 0;
-            this.hoveredElement = hoveredElement;
+            this.targetStartTime = 0;
+            this.targetElement = targetElement;
         }
+    }
+
+    private @Nullable OptionRow findTargetOptionRow(List<OptionRow> optionRows, int mouseX, int mouseY) {
+        OptionRow hoveredElement = this.findHoveredOptionRow(optionRows, mouseX, mouseY);
+        if (hoveredElement != null) {
+            return hoveredElement;
+        }
+
+        return this.findFocusedOptionRow(optionRows);
     }
 
     private @Nullable OptionRow findHoveredOptionRow(List<OptionRow> optionRows, int mouseX, int mouseY) {
@@ -62,12 +72,24 @@ final class OptionTooltipController {
                 .orElse(null);
     }
 
+    private @Nullable OptionRow findFocusedOptionRow(List<OptionRow> optionRows) {
+        if (!BaseWidget.isKeyboardFocusVisible()) {
+            return null;
+        }
+
+        return optionRows.stream()
+                .filter(this::isVisibleOptionRow)
+                .filter(OptionRow::isFocused)
+                .findFirst()
+                .orElse(null);
+    }
+
     private boolean isVisibleOptionRow(OptionRow optionRow) {
         return this.viewportBounds.overlaps(optionRow.getDimensions());
     }
 
     private void renderTooltip(GuiGraphicsExtractor guiGraphics, OptionRow element) {
-        if (this.hoverStartTime + ReeseSodiumOptionsConfig.config().getTooltipDelayMs() > System.currentTimeMillis()) {
+        if (this.targetStartTime + ReeseSodiumOptionsConfig.config().getTooltipDelayMs() > System.currentTimeMillis()) {
             return;
         }
 
