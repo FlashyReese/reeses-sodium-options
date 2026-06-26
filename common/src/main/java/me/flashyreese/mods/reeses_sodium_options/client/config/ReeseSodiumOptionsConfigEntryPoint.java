@@ -19,15 +19,29 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
     @Override
     public void registerConfigLate(ConfigBuilder builder) {
         builder.registerOwnModOptions()
+                .setNonTintedIcon(this.modIcon())
                 .addPage(this.createOptionsPage(builder));
     }
 
     private OptionPageBuilder createOptionsPage(ConfigBuilder builder) {
         return builder.createOptionPage()
                 .setName(Component.translatable("rso.options.page"))
+                .addOptionGroup(this.createGeneralOptions(builder))
                 .addOptionGroup(this.createAppearanceOptions(builder))
                 .addOptionGroup(this.createBehaviorOptions(builder))
                 .addOptionGroup(this.createSupportOptions(builder));
+    }
+
+    private OptionGroupBuilder createGeneralOptions(ConfigBuilder builder) {
+        return builder.createOptionGroup()
+                .setName(Component.translatable("rso.options.group.general"))
+                .addOption(builder.createBooleanOption(this.optionId("enabled"))
+                        .setName(Component.translatable("rso.options.enabled.name"))
+                        .setTooltip(Component.translatable("rso.options.enabled.tooltip"))
+                        .setDefaultValue(true)
+                        .setBinding(value -> ReeseSodiumOptionsConfig.config().setEnabled(value), () -> ReeseSodiumOptionsConfig.config().isEnabled())
+                        .setStorageHandler(ReeseSodiumOptionsConfig.STORAGE_HANDLER)
+                        .setApplyHook(ReeseSodiumOptionsConfig::reopenScreen));
     }
 
     private OptionGroupBuilder createAppearanceOptions(ConfigBuilder builder) {
@@ -70,6 +84,14 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
                         "collapse_single_page_groups",
                         value -> ReeseSodiumOptionsConfig.config().setCollapseSinglePageGroups(value),
                         () -> ReeseSodiumOptionsConfig.config().isCollapseSinglePageGroups(),
+                        true,
+                        true
+                ))
+                .addOption(this.createBooleanOption(
+                        builder,
+                        "collapsible_groups",
+                        value -> ReeseSodiumOptionsConfig.config().setCollapsibleGroups(value),
+                        () -> ReeseSodiumOptionsConfig.config().isCollapsibleGroups(),
                         true,
                         true
                 ))
@@ -162,5 +184,9 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
 
     private Identifier optionId(String path) {
         return Identifier.fromNamespaceAndPath(MOD_ID, path);
+    }
+
+    private Identifier modIcon() {
+        return Identifier.fromNamespaceAndPath(MOD_ID, "icon.png");
     }
 }

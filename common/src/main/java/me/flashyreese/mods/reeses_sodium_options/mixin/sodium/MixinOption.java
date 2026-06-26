@@ -1,71 +1,31 @@
 package me.flashyreese.mods.reeses_sodium_options.mixin.sodium;
 
-import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.option.OptionExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.option.OptionStateProvider;
+import net.caffeinemc.mods.sodium.client.config.structure.Config;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
-import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(Option.class)
-public class MixinOption implements OptionExtended {
+public class MixinOption implements OptionExtended, OptionStateProvider {
     @Shadow
     @Final
     Identifier id;
 
-    @Unique
-    private Dim2i parent;
-    @Unique
-    private Dim2i dim2i;
-    @Unique
-    private boolean highlight;
-    @Unique
-    private boolean selected;
+    @Shadow
+    Config state;
 
     @Override
-    public Identifier getId() {
+    public Identifier rso$getId() {
         return id;
     }
 
     @Override
-    public boolean isHighlight() {
-        return this.highlight;
-    }
-
-    @Override
-    public void setHighlight(boolean highlight) {
-        this.highlight = highlight;
-    }
-
-    @Override
-    public Dim2i getDim2i() {
-        return this.dim2i;
-    }
-
-    @Override
-    public void setDim2i(Dim2i dim2i) {
-        this.dim2i = dim2i;
-    }
-
-    @Override
-    public Dim2i getParentDimension() {
-        return this.parent;
-    }
-
-    @Override
-    public void setParentDimension(Dim2i parent) {
-        this.parent = parent;
-    }
-
-    @Override
-    public boolean getSelected() {
-        return this.selected;
-    }
-
-    @Override
-    public void setSelected(boolean selected) {
-        this.selected = selected;
+    public @Nullable Config rso$getParentConfig() {
+        return this.state;
     }
 }

@@ -3,43 +3,57 @@ import net.fabricmc.loom.task.AbstractRemapJarTask
 plugins {
     id("java")
     id("idea")
-    id("net.fabricmc.fabric-loom") version "1.17.12"
+    id("dev.architectury.loom-no-remap")
+    id("architectury-plugin")
 }
 
-val MINECRAFT_VERSION: String by rootProject.extra
-val PARCHMENT_VERSION: String? by rootProject.extra
-val FABRIC_LOADER_VERSION: String by rootProject.extra
-val FABRIC_API_VERSION: String by rootProject.extra
+val MINECRAFT_VERSION = rootProject.extra["MINECRAFT_VERSION"] as String
+val FABRIC_LOADER_VERSION = rootProject.extra["FABRIC_LOADER_VERSION"] as String
+val FABRIC_API_VERSION = rootProject.extra["FABRIC_API_VERSION"] as String
 
-val SODIUM_VERSION: String by rootProject.extra
+val SODIUM_VERSION = rootProject.extra["SODIUM_VERSION"] as String
+val CONTROLIFY_VERSION = rootProject.extra["CONTROLIFY_VERSION"] as String
+val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
+
+architectury {
+    common("fabric", "neoforge")
+    injectInjectables = false
+}
 
 // This trick hides common tasks in the IDEA list.
 tasks.configureEach {
     group = null
 }
 
+sourceSets.named("main") {
+    if (!CONTROLIFY_ENABLED) {
+        java.exclude("me/flashyreese/mods/reeses_sodium_options/client/controlify/**")
+        resources.exclude("META-INF/services/dev.isxander.controlify.api.entrypoint.ControlifyEntrypoint")
+    }
+}
+
 dependencies {
-    minecraft(group = "com.mojang", name = "minecraft", version = MINECRAFT_VERSION)
+    minecraft("net.minecraft:minecraft:$MINECRAFT_VERSION")
+
     compileOnly("io.github.llamalad7:mixinextras-common:0.5.4")
     annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.4")
     compileOnly("net.fabricmc:sponge-mixin:0.17.3+mixin.0.8.7")
+    compileOnly("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
 
     fun addDependentFabricModule(name: String) {
         val module = fabricApi.module(name, FABRIC_API_VERSION)
-        implementation(module)
+        compileOnly(module)
     }
 
     addDependentFabricModule("fabric-api-base")
     addDependentFabricModule("fabric-block-getter-api-v2")
     addDependentFabricModule("fabric-rendering-v1")
 
-    implementation("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
-}
-
-loom {
-    mixin {
-        useLegacyMixinAp = false
-        //defaultRefmapName = "${rootProject.name}.refmap.json"
+    compileOnly("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
+    if (CONTROLIFY_ENABLED) {
+        compileOnly("dev.isxander:controlify:$CONTROLIFY_VERSION-fabric") {
+            isTransitive = false
+        }
     }
 }
 

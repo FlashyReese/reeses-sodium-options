@@ -8,7 +8,7 @@ modId = "reeses_sodium_options"
 version = "${version}"
 displayName = "Reese's Sodium Options"
 
-logoFile = "icon.png" #optional
+logoFile = "assets/reeses-sodium-options/icon.png" #optional
 
 authors = "FlashyReese"
 
@@ -28,6 +28,13 @@ modId = "sodium"
 type = "required"
 versionRange = "[0.8.7,)"
 ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.reeses_sodium_options]]
+modId = "controlify"
+type = "optional"
+versionRange = "[3.0.2,)"
+ordering = "AFTER"
 side = "CLIENT"
 
 [[mixins]]
