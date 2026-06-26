@@ -168,6 +168,7 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
             return false;
         }
 
+        this.setFocused(true);
         this.write(String.valueOf(ch));
         return true;
     }
