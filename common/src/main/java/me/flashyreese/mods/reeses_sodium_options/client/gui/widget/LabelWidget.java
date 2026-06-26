@@ -61,7 +61,7 @@ public class LabelWidget extends BaseWidget implements ControlGuideProvider {
             return List.of();
         }
 
-        return List.of(ControlGuide.press(this.collapsed ? "Expand" : "Collapse"));
+        return List.of(ControlGuide.press(Component.translatable(this.collapsed ? "rso.controller.guide.expand" : "rso.controller.guide.collapse")));
     }
 
     @Override

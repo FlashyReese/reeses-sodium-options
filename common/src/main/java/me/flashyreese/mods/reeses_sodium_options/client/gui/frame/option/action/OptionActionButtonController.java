@@ -33,8 +33,8 @@ public final class OptionActionButtonController {
         this.optionSupplier = optionSupplier;
         // Ordered left-to-right: reset sits to the left of undo.
         this.buttons = new ArrayList<>(2);
-        this.buttons.add(new ActionButton(0, OptionResetAction.ICON, Component.literal("Reset"), option -> Component.translatable("rso.narration.reset_to_default", option.getName()), OptionResetAction::isActive, OptionResetAction::resetToDefault, clickSound));
-        this.undoButton = new ActionButton(1, OptionUndoAction.ICON, Component.literal("Undo"), option -> Component.translatable("rso.narration.undo_changes", option.getName()), OptionUndoAction::isActive, OptionUndoAction::undoChanges, clickSound);
+        this.buttons.add(new ActionButton(0, OptionResetAction.ICON, Component.translatable("rso.controller.guide.reset"), option -> Component.translatable("rso.narration.reset_to_default", option.getName()), OptionResetAction::isActive, OptionResetAction::resetToDefault, clickSound));
+        this.undoButton = new ActionButton(1, OptionUndoAction.ICON, Component.translatable("rso.controller.guide.undo"), option -> Component.translatable("rso.narration.undo_changes", option.getName()), OptionUndoAction::isActive, OptionUndoAction::undoChanges, clickSound);
         this.buttons.add(this.undoButton);
     }
 

@@ -35,7 +35,7 @@ final class EnumOptionRow<E extends Enum<E>> extends AbstractOptionRow {
     }
 
     public List<ControlGuide> controlGuides() {
-        return this.canShowControlGuide() ? List.of(ControlGuide.press("Next Value")) : List.of();
+        return this.canShowControlGuide() ? List.of(ControlGuide.press(Component.translatable("rso.controller.guide.next_value"))) : List.of();
     }
 
     @Override

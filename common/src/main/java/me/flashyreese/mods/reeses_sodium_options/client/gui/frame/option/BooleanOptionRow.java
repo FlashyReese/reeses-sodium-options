@@ -37,7 +37,7 @@ final class BooleanOptionRow extends AbstractOptionRow {
     }
 
     public List<ControlGuide> controlGuides() {
-        return this.canShowControlGuide() ? List.of(ControlGuide.press("Toggle")) : List.of();
+        return this.canShowControlGuide() ? List.of(ControlGuide.press(Component.translatable("rso.controller.guide.toggle"))) : List.of();
     }
 
     @Override
