@@ -18,7 +18,7 @@ val CONTROLIFY_ENABLED = providers.gradleProperty("rso.enableControlify")
 // https://semver.org/
 val MAVEN_GROUP = providers.gradleProperty("maven_group").get()
 val ARCHIVE_NAME = providers.gradleProperty("archives_name").get()
-val MOD_VERSION = "2.1.0"
+val MOD_VERSION = "2.2.0"
 val SODIUM_VERSION = "0.8.12-beta.2+mc1.21.1"
 
 extra["MINECRAFT_VERSION"] = MINECRAFT_VERSION
