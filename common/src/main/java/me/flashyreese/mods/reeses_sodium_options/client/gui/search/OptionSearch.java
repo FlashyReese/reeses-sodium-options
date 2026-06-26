@@ -9,8 +9,8 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.state.SearchResultOr
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.SearchResultOrdering;
 import me.flashyreese.mods.reeses_sodium_options.client.search.SearchIndex;
 import me.flashyreese.mods.reeses_sodium_options.client.search.SearchResult;
+import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.caffeinemc.mods.sodium.client.config.structure.Page;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,20 +21,23 @@ final class OptionSearch {
     private final List<SearchableOption> options;
     private final SearchIndex<SearchableOption> searchIndex;
 
-    OptionSearch(List<Page> pages) {
+    OptionSearch(List<ModOptions> modOptionsList) {
         List<SearchableOption> options = new ArrayList<>();
 
-        for (Page page : pages) {
-            for (var group : page.groups()) {
-                for (var option : group.options()) {
-                    if (!(option instanceof OptionExtended optionExtended)) {
-                        continue;
-                    }
+        for (ModOptions modOptions : modOptionsList) {
+            for (Page page : modOptions.pages()) {
+                String tabKey = modOptions.configId() + ":" + page.name().getString();
+                for (var group : page.groups()) {
+                    for (var option : group.options()) {
+                        if (!(option instanceof OptionExtended optionExtended)) {
+                            continue;
+                        }
 
-                    options.add(new SearchableOption(
-                            optionExtended.rso$getId(),
-                            page.name(),
-                            String.format("%s %s", option.getName().getString(), option.getTooltip().getString())));
+                        options.add(new SearchableOption(
+                                optionExtended.rso$getId(),
+                                tabKey,
+                                String.format("%s %s", option.getName().getString(), option.getTooltip().getString())));
+                    }
                 }
             }
         }
@@ -85,13 +88,13 @@ final class OptionSearch {
             return null;
         }
 
-        return new NavigationTarget(option.tabName(), optionUiState, bounds, parentBounds);
+        return new NavigationTarget(option.tabKey(), optionUiState, bounds, parentBounds);
     }
 
-    private record SearchableOption(Identifier id, Component tabName, String searchableText) {
+    private record SearchableOption(Identifier id, String tabKey, String searchableText) {
     }
 
-    record NavigationTarget(Component tabName, OptionUiState optionUiState, LayoutBounds bounds, LayoutBounds parentBounds) {
+    record NavigationTarget(String tabKey, OptionUiState optionUiState, LayoutBounds bounds, LayoutBounds parentBounds) {
         int scrollOffset(int viewportHeight) {
             if (this.parentBounds.height() <= 0) {
                 return 0;
