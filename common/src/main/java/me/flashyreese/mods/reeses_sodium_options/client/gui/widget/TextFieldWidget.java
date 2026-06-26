@@ -1,4 +1,4 @@
- package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
+package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
@@ -172,6 +172,7 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
             return false;
         }
 
+        this.setFocused(true);
         this.write(String.valueOf(ch));
         return true;
     }
