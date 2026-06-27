@@ -300,6 +300,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
                             .setTabRailSelectedTab(this.uiState.tabFrameSelectedTab())
                             .setTabRailSelectedGroup(this.uiState.tabFrameSelectedGroup())
                             .setManuallyCollapsedTabGroups(this.uiState.manuallyCollapsedTabGroups())
+                            .setOptionStateStore(this.uiState)
                             .addTabs(tabs -> getOrderedModOptions()
                                     .forEach(config -> config.pages()
                                             .forEach(page -> tabs.add(Tab.builder().from(this, config, page, this.uiState.optionPageScrollBarOffset(), this.uiState))))
@@ -850,7 +851,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     public void onClose() {
         this.uiState.lastSearch().set("");
         this.uiState.lastSearchIndex().set(0);
-        this.uiState.updateSearchResults(List.of());
+        this.uiState.updateSearchResults(false, List.of());
         this.uiState.clearOptionUiStates();
         this.uiState.focusedOptionIdsByTab().clear();
         this.minecraft.gui.setScreen(this.prevScreen);

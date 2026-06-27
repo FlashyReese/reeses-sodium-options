@@ -142,6 +142,14 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
                 ))
                 .addOption(this.createBooleanOption(
                         builder,
+                        "hide_non_matching_options",
+                        value -> ReeseSodiumOptionsConfig.config().setHideNonMatchingOptions(value),
+                        () -> ReeseSodiumOptionsConfig.config().isHideNonMatchingOptions(),
+                        true,
+                        true
+                ))
+                .addOption(this.createBooleanOption(
+                        builder,
                         "reset_button_overlay",
                         value -> ReeseSodiumOptionsConfig.config().setResetButtonOverlay(value),
                         () -> ReeseSodiumOptionsConfig.config().isResetButtonOverlay(),
