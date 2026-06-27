@@ -75,6 +75,11 @@ public class TabHeaderWidget extends BaseWidget {
 
         int overflow = textWidth - availableWidth;
 
+        if (ReeseSodiumOptionsConfig.config().isReducedMotion()) {
+            this.applyScissor(g, x, y, availableWidth, lineHeight, () -> g.text(font, text, x, y, color, false));
+            return;
+        }
+
         long nowMs = Util.getMillis();
 
         // Duration (in ms) to traverse overflow pixels at the chosen speed

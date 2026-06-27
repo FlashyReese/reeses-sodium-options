@@ -30,12 +30,12 @@ final class PageLayout {
         this.contentHeight = contentHeight;
     }
 
-    static PageLayout create(Page page, boolean searchActive, List<SearchResultEntry> results, SearchResultOrder resultOrder, boolean collapsible, Set<Identifier> collapsedGroups) {
+    static PageLayout create(Page page, boolean searchActive, List<SearchResultEntry> results, SearchResultOrder resultOrder, boolean hideDisabledOptions, boolean collapsible, Set<Identifier> collapsedGroups) {
         if (searchActive) {
-            return createSearchLayout(buildSearchEntries(page, results, resultOrder));
+            return createSearchLayout(buildSearchEntries(page, results, resultOrder, hideDisabledOptions));
         }
 
-        return createPageLayout(page, collapsible, collapsedGroups);
+        return createPageLayout(page, hideDisabledOptions, collapsible, collapsedGroups);
     }
 
     List<Row> rows() {
@@ -77,13 +77,14 @@ final class PageLayout {
         return new PageLayout(rows, y);
     }
 
-    private static PageLayout createPageLayout(Page page, boolean collapsible, Set<Identifier> collapsedGroups) {
+    private static PageLayout createPageLayout(Page page, boolean hideDisabledOptions, boolean collapsible, Set<Identifier> collapsedGroups) {
         List<Row> rows = new ArrayList<>();
-        List<OptionGroup> groups = page.groups();
+        List<VisibleGroup> groups = visibleGroups(page.groups(), hideDisabledOptions);
         int y = 0;
 
         for (int i = 0; i < groups.size(); i++) {
-            OptionGroup group = groups.get(i);
+            VisibleGroup visibleGroup = groups.get(i);
+            OptionGroup group = visibleGroup.group();
 
             Identifier collapseKey = collapsible ? groupCollapseKey(group) : null;
             boolean collapsed = collapseKey != null && collapsedGroups.contains(collapseKey);
@@ -95,7 +96,7 @@ final class PageLayout {
             }
 
             if (!collapsed) {
-                for (Option option : group.options()) {
+                for (Option option : visibleGroup.options()) {
                     rows.add(new OptionRow(group, option, y));
                     y += ROW_HEIGHT;
                 }
@@ -107,6 +108,28 @@ final class PageLayout {
         }
 
         return new PageLayout(rows, y);
+    }
+
+    private static List<VisibleGroup> visibleGroups(List<OptionGroup> groups, boolean hideDisabledOptions) {
+        if (!hideDisabledOptions) {
+            return groups.stream()
+                    .map(group -> new VisibleGroup(group, group.options()))
+                    .toList();
+        }
+
+        List<VisibleGroup> visibleGroups = new ArrayList<>();
+        for (OptionGroup group : groups) {
+            List<Option> options = group.options()
+                    .stream()
+                    .filter(Option::isEnabled)
+                    .toList();
+
+            if (!options.isEmpty()) {
+                visibleGroups.add(new VisibleGroup(group, options));
+            }
+        }
+
+        return visibleGroups;
     }
 
     private static @Nullable Identifier groupCollapseKey(OptionGroup group) {
@@ -123,25 +146,25 @@ final class PageLayout {
         return group.name() != null && !group.name().getString().isEmpty();
     }
 
-    private static List<SearchEntry> buildSearchEntries(Page page, List<SearchResultEntry> results, SearchResultOrder resultOrder) {
+    private static List<SearchEntry> buildSearchEntries(Page page, List<SearchResultEntry> results, SearchResultOrder resultOrder, boolean hideDisabledOptions) {
         if (results.isEmpty()) {
             return List.of();
         }
 
         return switch (resultOrder) {
-            case PAGE_DISPLAY -> buildSearchEntriesInPageOrder(page, results);
-            case RANKED -> buildSearchEntriesInResultOrder(page, results);
+            case PAGE_DISPLAY -> buildSearchEntriesInPageOrder(page, results, hideDisabledOptions);
+            case RANKED -> buildSearchEntriesInResultOrder(page, results, hideDisabledOptions);
         };
     }
 
-    private static List<SearchEntry> buildSearchEntriesInPageOrder(Page page, List<SearchResultEntry> results) {
+    private static List<SearchEntry> buildSearchEntriesInPageOrder(Page page, List<SearchResultEntry> results, boolean hideDisabledOptions) {
         Set<Option> resultOptions = Collections.newSetFromMap(new IdentityHashMap<>());
         results.forEach(result -> resultOptions.add(result.option()));
 
         List<SearchEntry> entries = new ArrayList<>();
         for (OptionGroup group : page.groups()) {
             for (Option option : group.options()) {
-                if (resultOptions.contains(option)) {
+                if (resultOptions.contains(option) && shouldShowOption(option, hideDisabledOptions)) {
                     entries.add(new SearchEntry(group, option));
                 }
             }
@@ -150,11 +173,13 @@ final class PageLayout {
         return entries;
     }
 
-    private static List<SearchEntry> buildSearchEntriesInResultOrder(Page page, List<SearchResultEntry> results) {
+    private static List<SearchEntry> buildSearchEntriesInResultOrder(Page page, List<SearchResultEntry> results, boolean hideDisabledOptions) {
         Map<Option, SearchEntry> entriesByOption = new IdentityHashMap<>();
         for (OptionGroup group : page.groups()) {
             for (Option option : group.options()) {
-                entriesByOption.put(option, new SearchEntry(group, option));
+                if (shouldShowOption(option, hideDisabledOptions)) {
+                    entriesByOption.put(option, new SearchEntry(group, option));
+                }
             }
         }
 
@@ -167,6 +192,10 @@ final class PageLayout {
         }
 
         return ordered;
+    }
+
+    private static boolean shouldShowOption(Option option, boolean hideDisabledOptions) {
+        return !hideDisabledOptions || option.isEnabled();
     }
 
     interface Row {
@@ -183,5 +212,8 @@ final class PageLayout {
     }
 
     private record SearchEntry(OptionGroup group, Option option) {
+    }
+
+    private record VisibleGroup(OptionGroup group, List<Option> options) {
     }
 }
