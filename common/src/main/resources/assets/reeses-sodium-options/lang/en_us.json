@@ -49,6 +49,8 @@
   "rso.options.tooltip_option_ids.tooltip": "Shows option identifiers at the top of option tooltips.",
   "rso.options.color_themes.name": "Color Themes",
   "rso.options.color_themes.tooltip": "Controls whether tab buttons, option controls, and tooltip borders use each mod's color theme.",
+  "rso.options.themed_headers_and_labels.name": "Themed Headers and Labels",
+  "rso.options.themed_headers_and_labels.tooltip": "Applies each mod's color theme to tab headers, mod icons, and option group labels.",
   "rso.options.reverse_cycling_controls.name": "Reverse Cycling Controls",
   "rso.options.reverse_cycling_controls.tooltip": "Allows right-clicking cycling controls to move backward through values.",
   "rso.options.shift_scroll_slider_adjustments.name": "Shift-Scroll Slider Adjustments",
