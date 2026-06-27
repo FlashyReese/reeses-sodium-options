@@ -28,7 +28,6 @@ public class TabHeaderWidget extends BaseWidget {
     private static final int TEXT_COLOR = 0xFFFFFFFF;
     private static final int SECONDARY_TEXT_COLOR = 0xFFAAAAAA;
     private static final int TEXT_X = 5;
-    private static final int TEXT_X_WITH_ICON = 20;
     private static final int ICON_SPACING = 4;
 
     private final ModOptions modOptions;
@@ -115,8 +114,7 @@ public class TabHeaderWidget extends BaseWidget {
             if (!ReeseSodiumOptionsConfig.config().isTabHeaderIcons() || this.modOptions.icon() == null) {
                 xOffset = TEXT_X;
             } else {
-                IconRenderer.renderIconWithSpacing(guiGraphics, this.modOptions.icon(), TEXT_COLOR, modOptions.iconMonochrome(), this.getX(), this.getY(), this.getHeight(), ICON_SPACING);
-                xOffset = TEXT_X_WITH_ICON;
+                xOffset = IconRenderer.renderIconWithSpacing(guiGraphics, this.modOptions.icon(), TEXT_COLOR, modOptions.iconMonochrome(), this.getX(), this.getY(), this.getHeight(), ICON_SPACING);
             }
 
             int textX = this.getX() + xOffset;
