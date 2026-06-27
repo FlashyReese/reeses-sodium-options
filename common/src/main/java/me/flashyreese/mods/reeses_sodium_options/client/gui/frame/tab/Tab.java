@@ -38,6 +38,10 @@ public class Tab<T extends AbstractFrame> {
         return title;
     }
 
+    String key() {
+        return this.modOptions.configId() + ":" + this.title.getString();
+    }
+
     public Page getPage() {
         return page;
     }

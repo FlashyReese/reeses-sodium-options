@@ -167,7 +167,7 @@ final class TabSelectionState {
     }
 
     private static String getTabKey(Tab<?> tab) {
-        return tab.getModOptions().configId() + ":" + tab.getTitle().getString();
+        return tab.key();
     }
 
     private @Nullable AbstractFrame frameFor(Tab<?> tab, LayoutBounds frameSection) {

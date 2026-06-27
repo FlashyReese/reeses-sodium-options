@@ -17,7 +17,8 @@ public final class OptionsScreenUiState implements OptionStateStore {
     private final Holder<Integer> optionPageScrollBarOffset = new Holder<>(0);
     private final Holder<String> lastSearch = new Holder<>("");
     private final Holder<Integer> lastSearchIndex = new Holder<>(0);
-    private final List<ResourceLocation> searchResultIds = new ArrayList<>();
+    private final List<SearchResultEntry> searchResults = new ArrayList<>();
+    private boolean searchActive;
     private final Set<String> manuallyCollapsedTabGroups = new HashSet<>();
     private final Set<ResourceLocation> collapsedOptionGroups = new HashSet<>();
     private final Map<String, ResourceLocation> focusedOptionIdsByTab = new HashMap<>();
@@ -66,8 +67,13 @@ public final class OptionsScreenUiState implements OptionStateStore {
     }
 
     @Override
-    public List<ResourceLocation> searchResultIds() {
-        return List.copyOf(searchResultIds);
+    public boolean searchActive() {
+        return this.searchActive;
+    }
+
+    @Override
+    public List<SearchResultEntry> searchResults() {
+        return List.copyOf(searchResults);
     }
 
     @Override
@@ -80,9 +86,9 @@ public final class OptionsScreenUiState implements OptionStateStore {
         return this.optionLayoutStates.computeIfAbsent(id, unused -> new OptionLayoutState());
     }
 
-    public void setHighlightedOptions(List<ResourceLocation> ids) {
+    public void setHighlightedOptions(List<SearchResultEntry> results) {
         this.optionUiStates.values().forEach(OptionUiState::clearHighlight);
-        ids.forEach(id -> this.optionUiState(id).setHighlighted(true));
+        results.forEach(result -> this.optionUiState(result.optionId()).setHighlighted(true));
     }
 
     public void clearSelectedOptions() {
@@ -94,13 +100,14 @@ public final class OptionsScreenUiState implements OptionStateStore {
         this.optionLayoutStates.clear();
     }
 
-    public boolean updateSearchResults(List<ResourceLocation> ids) {
-        if (this.searchResultIds.equals(ids)) {
+    public boolean updateSearchResults(boolean active, List<SearchResultEntry> results) {
+        if (this.searchActive == active && this.searchResults.equals(results)) {
             return false;
         }
 
-        this.searchResultIds.clear();
-        this.searchResultIds.addAll(ids);
+        this.searchActive = active;
+        this.searchResults.clear();
+        this.searchResults.addAll(results);
 
         return true;
     }

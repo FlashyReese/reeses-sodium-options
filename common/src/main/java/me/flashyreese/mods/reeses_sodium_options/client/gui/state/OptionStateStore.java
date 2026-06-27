@@ -10,7 +10,9 @@ public interface OptionStateStore {
 
     OptionLayoutState optionLayoutState(ResourceLocation id);
 
-    List<ResourceLocation> searchResultIds();
+    boolean searchActive();
+
+    List<SearchResultEntry> searchResults();
 
     Set<ResourceLocation> collapsedOptionGroups();
 }

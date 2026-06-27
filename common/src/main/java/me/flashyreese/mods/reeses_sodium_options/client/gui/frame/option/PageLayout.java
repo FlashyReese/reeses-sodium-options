@@ -1,8 +1,8 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.option.OptionExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.state.SearchResultEntry;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.SearchResultOrder;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.state.SearchResultOrdering;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
 import net.caffeinemc.mods.sodium.client.config.structure.OptionGroup;
 import net.caffeinemc.mods.sodium.client.config.structure.Page;
@@ -11,7 +11,10 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 final class PageLayout {
@@ -27,11 +30,9 @@ final class PageLayout {
         this.contentHeight = contentHeight;
     }
 
-    static PageLayout create(Page page, List<ResourceLocation> resultIds, SearchResultOrder resultOrder, boolean collapsible, Set<ResourceLocation> collapsedGroups) {
-        List<SearchEntry> searchEntries = buildSearchEntries(page, resultIds, resultOrder);
-
-        if (!searchEntries.isEmpty()) {
-            return createSearchLayout(searchEntries);
+    static PageLayout create(Page page, boolean searchActive, List<SearchResultEntry> results, SearchResultOrder resultOrder, boolean collapsible, Set<ResourceLocation> collapsedGroups) {
+        if (searchActive) {
+            return createSearchLayout(buildSearchEntries(page, results, resultOrder));
         }
 
         return createPageLayout(page, collapsible, collapsedGroups);
@@ -122,21 +123,50 @@ final class PageLayout {
         return group.name() != null && !group.name().getString().isEmpty();
     }
 
-    private static List<SearchEntry> buildSearchEntries(Page page, List<ResourceLocation> resultIds, SearchResultOrder resultOrder) {
-        if (resultIds.isEmpty()) {
+    private static List<SearchEntry> buildSearchEntries(Page page, List<SearchResultEntry> results, SearchResultOrder resultOrder) {
+        if (results.isEmpty()) {
             return List.of();
         }
+
+        return switch (resultOrder) {
+            case PAGE_DISPLAY -> buildSearchEntriesInPageOrder(page, results);
+            case RANKED -> buildSearchEntriesInResultOrder(page, results);
+        };
+    }
+
+    private static List<SearchEntry> buildSearchEntriesInPageOrder(Page page, List<SearchResultEntry> results) {
+        Set<Option> resultOptions = Collections.newSetFromMap(new IdentityHashMap<>());
+        results.forEach(result -> resultOptions.add(result.option()));
 
         List<SearchEntry> entries = new ArrayList<>();
         for (OptionGroup group : page.groups()) {
             for (Option option : group.options()) {
-                if (option instanceof OptionExtended optionExtended) {
-                    entries.add(new SearchEntry(group, option, optionExtended.rso$getId()));
+                if (resultOptions.contains(option)) {
+                    entries.add(new SearchEntry(group, option));
                 }
             }
         }
 
-        return SearchResultOrdering.order(resultOrder, resultIds, entries, SearchEntry::id);
+        return entries;
+    }
+
+    private static List<SearchEntry> buildSearchEntriesInResultOrder(Page page, List<SearchResultEntry> results) {
+        Map<Option, SearchEntry> entriesByOption = new IdentityHashMap<>();
+        for (OptionGroup group : page.groups()) {
+            for (Option option : group.options()) {
+                entriesByOption.put(option, new SearchEntry(group, option));
+            }
+        }
+
+        List<SearchEntry> ordered = new ArrayList<>(results.size());
+        for (SearchResultEntry result : results) {
+            SearchEntry entry = entriesByOption.get(result.option());
+            if (entry != null) {
+                ordered.add(entry);
+            }
+        }
+
+        return ordered;
     }
 
     interface Row {
@@ -152,6 +182,6 @@ final class PageLayout {
     record OptionRow(OptionGroup group, Option option, int y) implements Row {
     }
 
-    private record SearchEntry(OptionGroup group, Option option, ResourceLocation id) {
+    private record SearchEntry(OptionGroup group, Option option) {
     }
 }

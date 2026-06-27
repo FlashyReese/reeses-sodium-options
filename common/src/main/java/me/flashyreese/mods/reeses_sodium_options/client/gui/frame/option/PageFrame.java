@@ -61,7 +61,8 @@ public class PageFrame extends AbstractFrame {
     }
 
     public void setupFrame() {
-        this.layout = PageLayout.create(this.page, this.optionStateStore.searchResultIds(), SearchResultOrder.DEFAULT,
+        this.layout = PageLayout.create(this.page, ReeseSodiumOptionsConfig.config().isHideNonMatchingOptions() && this.optionStateStore.searchActive(),
+                this.optionStateStore.searchResults(), SearchResultOrder.DEFAULT,
                 ReeseSodiumOptionsConfig.config().isCollapsibleGroups(), this.optionStateStore.collapsedOptionGroups());
         this.setContentHeight(this.layout.contentHeight());
         this.optionRowFactory.registerParentBounds(this.layout, this.getFrameDim());

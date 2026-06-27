@@ -6,6 +6,8 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.BaseWidget;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.ScrollFrameLayout;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.ScrollBarWidget;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.Holder;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionStateStore;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.state.SearchResultEntry;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.TabHeaderWidget;
 import net.caffeinemc.mods.sodium.client.config.structure.ExternalPage;
 import net.minecraft.client.Minecraft;
@@ -15,15 +17,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 final class TabRail {
     private final List<Tab<?>> tabs;
     private final TabGroupModel groupModel;
     private final Holder<Integer> scrollBarOffset;
+    private final OptionStateStore optionStateStore;
     private final List<BaseWidget> tabWidgets = new ArrayList<>();
     private final Map<String, TabHeaderWidget> tabHeaderWidgets = new HashMap<>();
     private final Map<Tab<?>, TabButtonWidget> tabButtonWidgets = new HashMap<>();
@@ -32,11 +37,12 @@ final class TabRail {
     private ScrollBarWidget scrollBar;
     private @Nullable BaseWidget selectedTabWidget;
 
-    TabRail(LayoutBounds frameDim, List<Tab<?>> tabs, TabGroupModel groupModel, Holder<Integer> scrollBarOffset) {
+    TabRail(LayoutBounds frameDim, List<Tab<?>> tabs, TabGroupModel groupModel, Holder<Integer> scrollBarOffset, OptionStateStore optionStateStore) {
         this.tabs = tabs;
         this.groupModel = groupModel;
         this.scrollBarOffset = scrollBarOffset;
-        this.canScroll = this.groupModel.maximumHeight() > frameDim.height();
+        this.optionStateStore = optionStateStore;
+        this.canScroll = this.groupModel.visibleHeight(this.visibleGroups()) > frameDim.height();
         this.dim = new LayoutBounds(frameDim.x(), frameDim.y(), this.calculateWidth(frameDim), frameDim.height());
     }
 
@@ -53,7 +59,7 @@ final class TabRail {
     }
 
     void updateScrollState(LayoutBounds frameDim) {
-        int contentHeight = this.groupModel.visibleHeight();
+        int contentHeight = this.groupModel.visibleHeight(this.visibleGroups());
         this.canScroll = contentHeight > frameDim.height();
         if (!this.canScroll) {
             this.setContentY(frameDim.y());
@@ -74,7 +80,7 @@ final class TabRail {
         this.selectedTabWidget = null;
         int offsetY = 0;
         boolean firstGroup = true;
-        for (TabGroup group : this.groupModel.groups()) {
+        for (TabGroup group : this.visibleGroups()) {
             int width = this.tabContentWidth();
             if (!this.groupModel.shouldShowHeaders()) {
                 for (Tab<?> tab : group.tabs()) {
@@ -103,6 +109,35 @@ final class TabRail {
                 }
             }
         }
+    }
+
+    private List<TabGroup> visibleGroups() {
+        if (!this.shouldFilterTabs()) {
+            return this.groupModel.groups();
+        }
+
+        Set<String> resultTabKeys = new HashSet<>();
+        for (SearchResultEntry result : this.optionStateStore.searchResults()) {
+            resultTabKeys.add(result.tabKey());
+        }
+
+        List<TabGroup> groups = new ArrayList<>();
+        for (TabGroup group : this.groupModel.groups()) {
+            List<Tab<?>> tabs = group.tabs()
+                    .stream()
+                    .filter(tab -> resultTabKeys.contains(tab.key()))
+                    .toList();
+
+            if (!tabs.isEmpty()) {
+                groups.add(new TabGroup(group.id(), group.modOptions(), tabs));
+            }
+        }
+
+        return groups;
+    }
+
+    private boolean shouldFilterTabs() {
+        return ReeseSodiumOptionsConfig.config().isHideNonMatchingOptions() && this.optionStateStore.searchActive();
     }
 
     void addScrollBar(List<GuiEventListener> children) {
