@@ -139,7 +139,7 @@ final class TabRail {
     }
 
     private boolean shouldFilterTabs() {
-        return ReeseSodiumOptionsConfig.config().isHideNonMatchingOptions() && this.optionStateStore.searchActive();
+        return ReeseSodiumOptionsConfig.config().isHideNonMatchingTabs() && this.optionStateStore.searchActive();
     }
 
     void addScrollBar(List<GuiEventListener> children) {

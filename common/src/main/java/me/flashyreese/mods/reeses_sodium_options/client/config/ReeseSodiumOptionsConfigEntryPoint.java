@@ -126,6 +126,22 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
                         () -> ReeseSodiumOptionsConfig.config().isThemedHeadersAndLabels(),
                         true,
                         true
+                ))
+                .addOption(this.createBooleanOption(
+                        builder,
+                        "themed_tooltip_borders",
+                        value -> ReeseSodiumOptionsConfig.config().setThemedTooltipBorders(value),
+                        () -> ReeseSodiumOptionsConfig.config().isThemedTooltipBorders(),
+                        true,
+                        false
+                ))
+                .addOption(this.createBooleanOption(
+                        builder,
+                        "reduced_motion",
+                        value -> ReeseSodiumOptionsConfig.config().setReducedMotion(value),
+                        () -> ReeseSodiumOptionsConfig.config().isReducedMotion(),
+                        false,
+                        false
                 ));
     }
 
@@ -155,6 +171,37 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
                         () -> ReeseSodiumOptionsConfig.config().isHideNonMatchingOptions(),
                         true,
                         true
+                ))
+                .addOption(this.createBooleanOption(
+                        builder,
+                        "hide_non_matching_tabs",
+                        value -> ReeseSodiumOptionsConfig.config().setHideNonMatchingTabs(value),
+                        () -> ReeseSodiumOptionsConfig.config().isHideNonMatchingTabs(),
+                        true,
+                        true
+                ))
+                .addOption(builder.createEnumOption(this.optionId("disabled_option_visibility"), ReeseSodiumOptionsConfig.DisabledOptionVisibility.class)
+                        .setName(Component.translatable("rso.options.disabled_option_visibility.name"))
+                        .setTooltip(Component.translatable("rso.options.disabled_option_visibility.tooltip"))
+                        .setDefaultValue(ReeseSodiumOptionsConfig.DEFAULT_DISABLED_OPTION_VISIBILITY)
+                        .setElementNameProvider(value -> Component.translatable("rso.options.disabled_option_visibility.value." + value.id()))
+                        .setBinding(value -> ReeseSodiumOptionsConfig.config().setDisabledOptionVisibility(value), () -> ReeseSodiumOptionsConfig.config().getDisabledOptionVisibility())
+                        .setStorageHandler(ReeseSodiumOptionsConfig.STORAGE_HANDLER)
+                        .setApplyHook(ReeseSodiumOptionsConfig::rebuildCurrentScreen))
+                .addOption(builder.createEnumOption(this.optionId("focus_border_mode"), ReeseSodiumOptionsConfig.FocusBorderMode.class)
+                        .setName(Component.translatable("rso.options.focus_border_mode.name"))
+                        .setTooltip(Component.translatable("rso.options.focus_border_mode.tooltip"))
+                        .setDefaultValue(ReeseSodiumOptionsConfig.DEFAULT_FOCUS_BORDER_MODE)
+                        .setElementNameProvider(value -> Component.translatable("rso.options.focus_border_mode.value." + value.id()))
+                        .setBinding(value -> ReeseSodiumOptionsConfig.config().setFocusBorderMode(value), () -> ReeseSodiumOptionsConfig.config().getFocusBorderMode())
+                        .setStorageHandler(ReeseSodiumOptionsConfig.STORAGE_HANDLER))
+                .addOption(this.createBooleanOption(
+                        builder,
+                        "controller_guides",
+                        value -> ReeseSodiumOptionsConfig.config().setControllerGuides(value),
+                        () -> ReeseSodiumOptionsConfig.config().isControllerGuides(),
+                        true,
+                        false
                 ))
                 .addOption(this.createBooleanOption(
                         builder,
