@@ -35,19 +35,7 @@ final class TabGroupModel {
         return List.copyOf(tabGroups.values());
     }
 
-    int maximumHeight() {
-        List<TabGroup> groups = this.groups();
-        if (groups.isEmpty()) {
-            return 0;
-        }
-
-        return groups.stream()
-                .mapToInt(group -> (this.shouldShowHeaders() ? this.headerHeight() : 0) + group.tabs().size() * TabFrame.TAB_HEIGHT)
-                .sum() + this.headerPadding(groups);
-    }
-
-    int visibleHeight() {
-        List<TabGroup> groups = this.groups();
+    int visibleHeight(List<TabGroup> groups) {
         if (groups.isEmpty()) {
             return 0;
         }

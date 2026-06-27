@@ -70,6 +70,11 @@ public class ScrollableFrame extends AbstractFrame {
     }
 
     @Override
+    public void rebuildFrameContent() {
+        this.rebuildContentFrame();
+    }
+
+    @Override
     public void buildFrame() {
         this.children.clear();
         this.optionRows.clear();
