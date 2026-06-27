@@ -121,7 +121,9 @@ final class OptionTooltipController {
         guiGraphics.pose().translate(0.0F, 0.0F, TOOLTIP_Z_OFFSET);
         try {
             this.boxRenderer.drawRect(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
-            int borderColor = ReeseSodiumOptionsConfig.config().isColorThemes() ? GuiThemes.fromSodium(this.modOptions.theme()).theme : DEFAULT_TOOLTIP_BORDER_COLOR;
+            int borderColor = ReeseSodiumOptionsConfig.config().isColorThemes() && ReeseSodiumOptionsConfig.config().isThemedTooltipBorders()
+                    ? GuiThemes.fromSodium(this.modOptions.theme()).theme
+                    : DEFAULT_TOOLTIP_BORDER_COLOR;
             this.boxRenderer.drawBorder(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, borderColor);
 
             for (int i = 0; i < tooltip.size(); i++) {

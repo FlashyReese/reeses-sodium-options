@@ -325,7 +325,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
         );
         this.drawString(guiGraphics, formattedLabel, this.getX() + CONTROL_RIGHT_PADDING, this.centeredTextY(), 0xFFFFFFFF);
 
-        if (this.isRowFocused() && BaseWidget.isKeyboardFocusVisible()) {
+        if (this.shouldRenderFocusBorder(this.isRowFocused())) {
             this.drawBorder(guiGraphics, this.getX(), this.getY(), rowLimitX, this.getLimitY(), GuiThemes.OPTION_FOCUS_BORDER);
         }
     }
