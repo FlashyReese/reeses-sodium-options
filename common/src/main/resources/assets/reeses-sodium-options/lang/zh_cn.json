@@ -11,8 +11,8 @@
   "rso.narration.scrollbar.usage.horizontal": "按左或右方向键滚动",
   "rso.options.page": "Reese's Sodium 选项",
   "rso.options.group.general": "通用",
-  "rso.options.enabled.name": "启用 Reese's Sodium 选项",
-  "rso.options.enabled.tooltip": "用 Reese's Sodium Options 替换 Sodium 的选项屏幕。禁用后将显示 Sodium 的默认屏幕。应用此选项会重新打开屏幕。",
+  "rso.options.enabled.name": "启用 Reese's Sodium 的UI修改",
+  "rso.options.enabled.tooltip": "用 Reese's Sodium Options 替换 Sodium 的选项UI界面。禁用后将显示 Sodium 的默认UI界面。应用此选项会重新打开UI界面。",
   "rso.options.group.appearance": "外观",
   "rso.options.group.behavior": "行为",
   "rso.options.group.support": "支持",
@@ -48,6 +48,6 @@
   "rso.options.support_project.name": "通过 Ko-fi 支持项目",
   "rso.options.support_project.tooltip": "在浏览器中打开 FlashyReese 的 Ko-fi 页面。",
   "rso.options.value.milliseconds": "%s 毫秒",
-  "modmenu.summaryTranslation.reeses-sodium-options": "取代 Sodium 的选项屏幕",
-  "modmenu.descriptionTranslation.reeses-sodium-options": "替换 Sodium 的选项屏幕，旨在改善用户体验。"
+  "modmenu.summaryTranslation.reeses-sodium-options": "取代 Sodium 的选项UI界面",
+  "modmenu.descriptionTranslation.reeses-sodium-options": "替换 Sodium 的选项UI界面，旨在改善用户体验。"
 }
