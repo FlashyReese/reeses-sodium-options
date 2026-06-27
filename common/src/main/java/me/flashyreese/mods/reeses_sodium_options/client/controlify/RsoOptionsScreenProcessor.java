@@ -7,6 +7,7 @@ import dev.isxander.controlify.bindings.ControlifyBindings;
 import dev.isxander.controlify.controller.ControllerEntity;
 import dev.isxander.controlify.screenop.ScreenProcessor;
 import dev.isxander.controlify.virtualmouse.VirtualMouseHandler;
+import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuideProvider;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
@@ -110,7 +111,7 @@ final class RsoOptionsScreenProcessor extends ScreenProcessor<SodiumVideoOptions
 
     @Override
     protected void render(ControllerEntity controller, GuiGraphics graphics, float tickDelta, Optional<VirtualMouseHandler> vmouse) {
-        if (this.screen.getPrompt() != null || !shouldShowGuides(controller)) {
+        if (this.screen.getPrompt() != null || !ReeseSodiumOptionsConfig.config().isControllerGuides() || !shouldShowGuides(controller)) {
             return;
         }
 

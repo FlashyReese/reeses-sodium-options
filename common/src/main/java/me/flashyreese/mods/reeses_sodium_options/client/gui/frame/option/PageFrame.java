@@ -61,9 +61,11 @@ public class PageFrame extends AbstractFrame {
     }
 
     public void setupFrame() {
-        this.layout = PageLayout.create(this.page, ReeseSodiumOptionsConfig.config().isHideNonMatchingOptions() && this.optionStateStore.searchActive(),
+        ReeseSodiumOptionsConfig.ConfigData config = ReeseSodiumOptionsConfig.config();
+        this.layout = PageLayout.create(this.page, config.isHideNonMatchingOptions() && this.optionStateStore.searchActive(),
                 this.optionStateStore.searchResults(), SearchResultOrder.DEFAULT,
-                ReeseSodiumOptionsConfig.config().isCollapsibleGroups(), this.optionStateStore.collapsedOptionGroups());
+                config.getDisabledOptionVisibility() == ReeseSodiumOptionsConfig.DisabledOptionVisibility.HIDDEN,
+                config.isCollapsibleGroups(), this.optionStateStore.collapsedOptionGroups());
         this.setContentHeight(this.layout.contentHeight());
         this.optionRowFactory.registerParentBounds(this.layout, this.getFrameDim());
     }
