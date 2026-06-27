@@ -92,14 +92,15 @@ public class PageFrame extends AbstractFrame {
 
     private LabelWidget createLabelWidget(PageLayout.LabelRow labelRow) {
         LayoutBounds dim = this.createRowDimension(labelRow.y());
+        int labelColor = this.labelColor();
 
         if (!labelRow.collapsible()) {
-            return new LabelWidget(dim, labelRow.text(), 0xFFFFFFFF);
+            return new LabelWidget(dim, labelRow.text(), labelColor);
         }
 
         ResourceLocation collapseKey = labelRow.collapseKey();
         LabelWidget widget = this.groupHeaderWidgets.computeIfAbsent(collapseKey, key ->
-                new LabelWidget(dim, labelRow.text(), 0xFFFFFFFF, this.optionRowTheme(), key, () -> this.toggleGroup(key), labelRow.collapsed()));
+                new LabelWidget(dim, labelRow.text(), labelColor, this.optionRowTheme(), key, () -> this.toggleGroup(key), labelRow.collapsed()));
         widget.setDim(dim);
         widget.setCollapsed(labelRow.collapsed());
 
@@ -202,6 +203,12 @@ public class PageFrame extends AbstractFrame {
 
     private GuiTheme optionRowTheme() {
         return ReeseSodiumOptionsConfig.config().isColorThemes() ? GuiThemes.fromSodium(this.modOptions.theme()) : GuiThemes.DEFAULT_BUTTON;
+    }
+
+    private int labelColor() {
+        return ReeseSodiumOptionsConfig.config().isColorThemes() && ReeseSodiumOptionsConfig.config().isThemedHeadersAndLabels()
+                ? GuiThemes.fromSodium(this.modOptions.theme()).themeLighter
+                : 0xFFFFFFFF;
     }
 
     public static class Builder {
