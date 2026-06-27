@@ -169,6 +169,7 @@ public final class ReeseSodiumOptionsConfig {
         private boolean colorThemes = true;
         private boolean reverseCyclingControls = true;
         private boolean shiftScrollSliderAdjustments = true;
+        private boolean hideNonMatchingOptions = true;
         private boolean resetButtonOverlay = true;
         private boolean undoButtonOverlay = true;
 
@@ -266,6 +267,14 @@ public final class ReeseSodiumOptionsConfig {
 
         public void setShiftScrollSliderAdjustments(boolean shiftScrollSliderAdjustments) {
             this.shiftScrollSliderAdjustments = shiftScrollSliderAdjustments;
+        }
+
+        public boolean isHideNonMatchingOptions() {
+            return this.hideNonMatchingOptions;
+        }
+
+        public void setHideNonMatchingOptions(boolean hideNonMatchingOptions) {
+            this.hideNonMatchingOptions = hideNonMatchingOptions;
         }
 
         public boolean isResetButtonOverlay() {
