@@ -167,6 +167,7 @@ public final class ReeseSodiumOptionsConfig {
         private int tooltipDelayMs = DEFAULT_TOOLTIP_DELAY_MS;
         private boolean tooltipOptionIds = false;
         private boolean colorThemes = true;
+        private boolean themedHeadersAndLabels = true;
         private boolean reverseCyclingControls = true;
         private boolean shiftScrollSliderAdjustments = true;
         private boolean hideNonMatchingOptions = true;
@@ -251,6 +252,14 @@ public final class ReeseSodiumOptionsConfig {
 
         public void setColorThemes(boolean colorThemes) {
             this.colorThemes = colorThemes;
+        }
+
+        public boolean isThemedHeadersAndLabels() {
+            return this.themedHeadersAndLabels;
+        }
+
+        public void setThemedHeadersAndLabels(boolean themedHeadersAndLabels) {
+            this.themedHeadersAndLabels = themedHeadersAndLabels;
         }
 
         public boolean isReverseCyclingControls() {
