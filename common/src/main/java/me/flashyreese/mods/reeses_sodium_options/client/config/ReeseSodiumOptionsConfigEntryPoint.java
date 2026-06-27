@@ -118,6 +118,14 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
                         () -> ReeseSodiumOptionsConfig.config().isColorThemes(),
                         true,
                         true
+                ))
+                .addOption(this.createBooleanOption(
+                        builder,
+                        "themed_headers_and_labels",
+                        value -> ReeseSodiumOptionsConfig.config().setThemedHeadersAndLabels(value),
+                        () -> ReeseSodiumOptionsConfig.config().isThemedHeadersAndLabels(),
+                        true,
+                        true
                 ));
     }
 
