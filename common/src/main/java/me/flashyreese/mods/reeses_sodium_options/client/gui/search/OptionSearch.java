@@ -52,7 +52,7 @@ final class OptionSearch {
                 .addAll(this.options)
                 .foldDiacritics(true)
                 .maxResults(10)
-                .minScore(0.15)
+                .minScore(0.3)
                 .rerankWithEditDistance(true)
                 .rerankLimit(50)
                 .rerankWeight(0.1)
