@@ -48,7 +48,7 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
 
     @Override
     protected void prepareRender(int mouseX, int mouseY, float delta) {
-        boolean canDrawSlider = this.option.isEnabled() && this.option.showControl();
+        boolean canDrawSlider = this.option.isEnabled() && !this.option.shouldHideControl();
         this.drawSlider = canDrawSlider && (this.isMouseOverRow(mouseX, mouseY) || this.isRowFocused() || this.sliderHeld);
         int valueWidth = this.valueWidth();
         this.contentWidth = this.drawSlider ? SLIDER_WIDTH + VALUE_GAP + valueWidth : valueWidth;
@@ -72,7 +72,7 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
 
     @Override
     protected void renderControl(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
-        if (!this.option.showControl()) {
+        if (this.option.shouldHideControl()) {
             return;
         }
 
@@ -109,7 +109,7 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
     protected boolean controlMouseClicked(MouseButtonEvent event, boolean doubleClick) {
         this.sliderHeld = false;
         if (!this.option.isEnabled()
-                || !this.option.showControl()
+                || this.option.shouldHideControl()
                 || event.button() != 0
                 || !this.isMouseOverRow(event.x(), event.y())) {
             return false;
@@ -153,7 +153,7 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (!ReeseSodiumOptionsConfig.config().isShiftScrollSliderAdjustments()
                 || !this.option.isEnabled()
-                || !this.option.showControl()
+                || this.option.shouldHideControl()
                 || !Minecraft.getInstance().hasShiftDown()
                 || !this.isMouseOverSlider(mouseX, mouseY)) {
             return false;
@@ -219,7 +219,7 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
 
     @Override
     protected Component narrationValue() {
-        return this.option.showControl() ? this.option.formatValue(this.option.getValidatedValue()) : null;
+        return !this.option.shouldHideControl() ? this.option.formatValue(this.option.getValidatedValue()) : null;
     }
 
     @Override
@@ -229,7 +229,7 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
             return;
         }
 
-        if (!this.option.showControl()) {
+        if (this.option.shouldHideControl()) {
             return;
         }
 
