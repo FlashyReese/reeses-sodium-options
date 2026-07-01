@@ -38,12 +38,12 @@ final class BooleanOptionRow extends AbstractOptionRow {
 
     @Override
     public List<ControlGuide> controlGuides() {
-        return this.canShowControlGuide() ? List.of(ControlGuide.press("Toggle")) : List.of();
+        return this.canShowControlGuide() ? List.of(ControlGuide.press(Component.translatable("rso.controller.guide.toggle"))) : List.of();
     }
 
     @Override
     protected void renderControl(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
-        if (!this.option.showControl()) {
+        if (this.option.shouldHideControl()) {
             return;
         }
 
@@ -74,7 +74,7 @@ final class BooleanOptionRow extends AbstractOptionRow {
 
     @Override
     protected boolean activateControl() {
-        if (!this.option.isEnabled() || !this.option.showControl()) {
+        if (!this.option.isEnabled() || this.option.shouldHideControl()) {
             return false;
         }
 
@@ -86,7 +86,7 @@ final class BooleanOptionRow extends AbstractOptionRow {
 
     @Override
     protected Component narrationValue() {
-        return this.option.showControl() ? CommonComponents.optionStatus(this.option.getValidatedValue()) : null;
+        return !this.option.shouldHideControl() ? CommonComponents.optionStatus(this.option.getValidatedValue()) : null;
     }
 
     @Override
@@ -96,7 +96,7 @@ final class BooleanOptionRow extends AbstractOptionRow {
             return;
         }
 
-        if (!this.option.showControl()) {
+        if (this.option.shouldHideControl()) {
             return;
         }
 

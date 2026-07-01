@@ -1,6 +1,5 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.state;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
@@ -11,21 +10,22 @@ import java.util.Map;
 import java.util.Set;
 
 public final class OptionsScreenUiState implements OptionStateStore {
-    private final Holder<Component> tabFrameSelectedTab = new Holder<>(null);
+    private final Holder<String> tabFrameSelectedTab = new Holder<>(null);
     private final Holder<String> tabFrameSelectedGroup = new Holder<>(null);
     private final Holder<Integer> tabFrameScrollBarOffset = new Holder<>(0);
     private final Holder<Boolean> scrollSelectedTabIntoView = new Holder<>(false);
     private final Holder<Integer> optionPageScrollBarOffset = new Holder<>(0);
     private final Holder<String> lastSearch = new Holder<>("");
     private final Holder<Integer> lastSearchIndex = new Holder<>(0);
-    private final List<Identifier> searchResultIds = new ArrayList<>();
+    private final List<SearchResultEntry> searchResults = new ArrayList<>();
+    private boolean searchActive;
     private final Set<String> manuallyCollapsedTabGroups = new HashSet<>();
     private final Set<Identifier> collapsedOptionGroups = new HashSet<>();
     private final Map<String, Identifier> focusedOptionIdsByTab = new HashMap<>();
     private final Map<Identifier, OptionUiState> optionUiStates = new HashMap<>();
     private final Map<Identifier, OptionLayoutState> optionLayoutStates = new HashMap<>();
 
-    public Holder<Component> tabFrameSelectedTab() {
+    public Holder<String> tabFrameSelectedTab() {
         return tabFrameSelectedTab;
     }
 
@@ -67,8 +67,13 @@ public final class OptionsScreenUiState implements OptionStateStore {
     }
 
     @Override
-    public List<Identifier> searchResultIds() {
-        return List.copyOf(searchResultIds);
+    public boolean searchActive() {
+        return this.searchActive;
+    }
+
+    @Override
+    public List<SearchResultEntry> searchResults() {
+        return List.copyOf(searchResults);
     }
 
     @Override
@@ -81,9 +86,9 @@ public final class OptionsScreenUiState implements OptionStateStore {
         return this.optionLayoutStates.computeIfAbsent(id, unused -> new OptionLayoutState());
     }
 
-    public void setHighlightedOptions(List<Identifier> ids) {
+    public void setHighlightedOptions(List<SearchResultEntry> results) {
         this.optionUiStates.values().forEach(OptionUiState::clearHighlight);
-        ids.forEach(id -> this.optionUiState(id).setHighlighted(true));
+        results.forEach(result -> this.optionUiState(result.optionId()).setHighlighted(true));
     }
 
     public void clearSelectedOptions() {
@@ -95,13 +100,14 @@ public final class OptionsScreenUiState implements OptionStateStore {
         this.optionLayoutStates.clear();
     }
 
-    public boolean updateSearchResults(List<Identifier> ids) {
-        if (this.searchResultIds.equals(ids)) {
+    public boolean updateSearchResults(boolean active, List<SearchResultEntry> results) {
+        if (this.searchActive == active && this.searchResults.equals(results)) {
             return false;
         }
 
-        this.searchResultIds.clear();
-        this.searchResultIds.addAll(ids);
+        this.searchActive = active;
+        this.searchResults.clear();
+        this.searchResults.addAll(results);
 
         return true;
     }

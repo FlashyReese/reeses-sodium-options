@@ -31,6 +31,8 @@ public final class ReeseSodiumOptionsConfig {
     static final int MIN_TOOLTIP_DELAY_MS = 0;
     static final int MAX_TOOLTIP_DELAY_MS = 5000;
     static final TabHeaderCollapseMode DEFAULT_TAB_HEADER_COLLAPSE_MODE = TabHeaderCollapseMode.ALL_EXPANDED;
+    static final DisabledOptionVisibility DEFAULT_DISABLED_OPTION_VISIBILITY = DisabledOptionVisibility.SHOWN;
+    static final FocusBorderMode DEFAULT_FOCUS_BORDER_MODE = FocusBorderMode.KEYBOARD;
 
     private static final Logger LOGGER = LoggerFactory.getLogger("Reese's Sodium Options");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -167,8 +169,16 @@ public final class ReeseSodiumOptionsConfig {
         private int tooltipDelayMs = DEFAULT_TOOLTIP_DELAY_MS;
         private boolean tooltipOptionIds = false;
         private boolean colorThemes = true;
+        private boolean themedHeadersAndLabels = true;
+        private boolean themedTooltipBorders = true;
+        private boolean reducedMotion = false;
         private boolean reverseCyclingControls = true;
         private boolean shiftScrollSliderAdjustments = true;
+        private boolean hideNonMatchingOptions = true;
+        private Boolean hideNonMatchingTabs = null;
+        private DisabledOptionVisibility disabledOptionVisibility = DEFAULT_DISABLED_OPTION_VISIBILITY;
+        private FocusBorderMode focusBorderMode = DEFAULT_FOCUS_BORDER_MODE;
+        private boolean controllerGuides = true;
         private boolean resetButtonOverlay = true;
         private boolean undoButtonOverlay = true;
 
@@ -252,6 +262,30 @@ public final class ReeseSodiumOptionsConfig {
             this.colorThemes = colorThemes;
         }
 
+        public boolean isThemedHeadersAndLabels() {
+            return this.themedHeadersAndLabels;
+        }
+
+        public void setThemedHeadersAndLabels(boolean themedHeadersAndLabels) {
+            this.themedHeadersAndLabels = themedHeadersAndLabels;
+        }
+
+        public boolean isThemedTooltipBorders() {
+            return this.themedTooltipBorders;
+        }
+
+        public void setThemedTooltipBorders(boolean themedTooltipBorders) {
+            this.themedTooltipBorders = themedTooltipBorders;
+        }
+
+        public boolean isReducedMotion() {
+            return this.reducedMotion;
+        }
+
+        public void setReducedMotion(boolean reducedMotion) {
+            this.reducedMotion = reducedMotion;
+        }
+
         public boolean isReverseCyclingControls() {
             return this.reverseCyclingControls;
         }
@@ -266,6 +300,46 @@ public final class ReeseSodiumOptionsConfig {
 
         public void setShiftScrollSliderAdjustments(boolean shiftScrollSliderAdjustments) {
             this.shiftScrollSliderAdjustments = shiftScrollSliderAdjustments;
+        }
+
+        public boolean isHideNonMatchingOptions() {
+            return this.hideNonMatchingOptions;
+        }
+
+        public void setHideNonMatchingOptions(boolean hideNonMatchingOptions) {
+            this.hideNonMatchingOptions = hideNonMatchingOptions;
+        }
+
+        public boolean isHideNonMatchingTabs() {
+            return this.hideNonMatchingTabs == null ? this.hideNonMatchingOptions : this.hideNonMatchingTabs;
+        }
+
+        public void setHideNonMatchingTabs(boolean hideNonMatchingTabs) {
+            this.hideNonMatchingTabs = hideNonMatchingTabs;
+        }
+
+        public DisabledOptionVisibility getDisabledOptionVisibility() {
+            return this.disabledOptionVisibility;
+        }
+
+        public void setDisabledOptionVisibility(DisabledOptionVisibility disabledOptionVisibility) {
+            this.disabledOptionVisibility = disabledOptionVisibility == null ? DEFAULT_DISABLED_OPTION_VISIBILITY : disabledOptionVisibility;
+        }
+
+        public FocusBorderMode getFocusBorderMode() {
+            return this.focusBorderMode;
+        }
+
+        public void setFocusBorderMode(FocusBorderMode focusBorderMode) {
+            this.focusBorderMode = focusBorderMode == null ? DEFAULT_FOCUS_BORDER_MODE : focusBorderMode;
+        }
+
+        public boolean isControllerGuides() {
+            return this.controllerGuides;
+        }
+
+        public void setControllerGuides(boolean controllerGuides) {
+            this.controllerGuides = controllerGuides;
         }
 
         public boolean isResetButtonOverlay() {
@@ -288,6 +362,15 @@ public final class ReeseSodiumOptionsConfig {
             if (this.tabHeaderCollapseMode == null) {
                 this.tabHeaderCollapseMode = DEFAULT_TAB_HEADER_COLLAPSE_MODE;
             }
+            if (this.hideNonMatchingTabs == null) {
+                this.hideNonMatchingTabs = this.hideNonMatchingOptions;
+            }
+            if (this.disabledOptionVisibility == null) {
+                this.disabledOptionVisibility = DEFAULT_DISABLED_OPTION_VISIBILITY;
+            }
+            if (this.focusBorderMode == null) {
+                this.focusBorderMode = DEFAULT_FOCUS_BORDER_MODE;
+            }
             this.tooltipDelayMs = Math.clamp(this.tooltipDelayMs, MIN_TOOLTIP_DELAY_MS, MAX_TOOLTIP_DELAY_MS);
 
             return this;
@@ -307,6 +390,45 @@ public final class ReeseSodiumOptionsConfig {
         private final String id;
 
         TabHeaderCollapseMode(String id) {
+            this.id = id;
+        }
+
+        public String id() {
+            return this.id;
+        }
+    }
+
+    public enum DisabledOptionVisibility {
+        @SerializedName("shown")
+        SHOWN("shown"),
+
+        @SerializedName("hidden")
+        HIDDEN("hidden");
+
+        private final String id;
+
+        DisabledOptionVisibility(String id) {
+            this.id = id;
+        }
+
+        public String id() {
+            return this.id;
+        }
+    }
+
+    public enum FocusBorderMode {
+        @SerializedName("keyboard")
+        KEYBOARD("keyboard"),
+
+        @SerializedName("always")
+        ALWAYS("always"),
+
+        @SerializedName("never")
+        NEVER("never");
+
+        private final String id;
+
+        FocusBorderMode(String id) {
             this.id = id;
         }
 
