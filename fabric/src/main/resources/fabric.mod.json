@@ -48,7 +48,7 @@
   },
   "depends": {
     "minecraft": "~26.1.0",
-    "sodium": ">=0.8.7"
+    "sodium": ">=0.9.1-beta.3"
   },
   "suggests": {
     "controlify": ">=3.0.2"

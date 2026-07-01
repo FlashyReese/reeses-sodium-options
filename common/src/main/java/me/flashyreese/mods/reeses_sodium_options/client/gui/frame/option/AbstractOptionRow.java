@@ -299,7 +299,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     }
 
     protected boolean optionShowsControl() {
-        return this.statefulOption == null || this.statefulOption.showControl();
+        return this.statefulOption == null || !this.statefulOption.shouldHideControl();
     }
 
     private void updateTooltipNarration(NarrationElementOutput builder) {
