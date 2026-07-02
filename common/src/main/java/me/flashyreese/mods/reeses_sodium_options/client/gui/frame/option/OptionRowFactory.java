@@ -28,7 +28,7 @@ final class OptionRowFactory {
             case IntegerOption integerOption -> new IntegerSliderOptionRow(dim, this.theme, this.optionStateStore, integerOption);
             case EnumOption<?> enumOption -> new EnumOptionRow<>(dim, this.theme, this.optionStateStore, enumOption);
             case ExternalButtonOption externalButtonOption -> new ExternalButtonOptionRow(this.screen, dim, this.theme, this.optionStateStore, externalButtonOption);
-            default -> throw new IllegalArgumentException("Unsupported Sodium option type: " + option.getClass().getName());
+            default -> new UnsupportedOptionRow(dim, this.theme, this.optionStateStore, option);
         };
 
         this.registerOptionBounds(element, dim);
