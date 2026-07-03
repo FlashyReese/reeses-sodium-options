@@ -40,7 +40,7 @@ public class PageFrame extends AbstractFrame {
         super(dim, screen, renderOutline, modOptions);
         this.page = page;
         this.optionStateStore = optionStateStore;
-        this.optionRowFactory = new OptionRowFactory(screen, this.optionRowTheme(), this.optionStateStore);
+        this.optionRowFactory = new OptionRowFactory(screen, modOptions.theme(), this.optionRowTheme(), this.optionStateStore);
         this.tooltipController = new OptionTooltipController(dim, modOptions, new OptionTooltipController.BoxRenderer() {
             @Override
             public void drawRect(GuiGraphicsExtractor guiGraphics, int x1, int y1, int x2, int y2, int color) {
