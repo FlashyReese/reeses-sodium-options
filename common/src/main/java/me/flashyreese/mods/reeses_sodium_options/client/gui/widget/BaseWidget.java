@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
 
+import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
@@ -83,7 +84,19 @@ public abstract class BaseWidget implements Renderable, GuiEventListener, Narrat
     }
 
     protected boolean shouldRenderFocusBorder() {
-        return this.isFocused() && isKeyboardFocusVisible();
+        return this.shouldRenderFocusBorder(this.isFocused());
+    }
+
+    protected boolean shouldRenderFocusBorder(boolean focused) {
+        if (!focused) {
+            return false;
+        }
+
+        return switch (ReeseSodiumOptionsConfig.config().getFocusBorderMode()) {
+            case ALWAYS -> true;
+            case KEYBOARD -> isKeyboardFocusVisible();
+            case NEVER -> false;
+        };
     }
 
     @Override

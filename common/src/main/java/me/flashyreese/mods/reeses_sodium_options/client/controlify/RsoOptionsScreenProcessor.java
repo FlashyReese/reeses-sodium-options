@@ -7,6 +7,7 @@ import dev.isxander.controlify.bindings.ControlifyBindings;
 import dev.isxander.controlify.controller.ControllerEntity;
 import dev.isxander.controlify.screenop.ScreenProcessor;
 import dev.isxander.controlify.virtualmouse.VirtualMouseHandler;
+import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuideProvider;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
@@ -110,7 +111,7 @@ final class RsoOptionsScreenProcessor extends ScreenProcessor<SodiumVideoOptions
 
     @Override
     protected void render(ControllerEntity controller, GuiGraphicsExtractor graphics, float tickDelta, Optional<VirtualMouseHandler> vmouse) {
-        if (this.screen.getPrompt() != null || !shouldShowGuides(controller)) {
+        if (this.screen.getPrompt() != null || !ReeseSodiumOptionsConfig.config().isControllerGuides() || !shouldShowGuides(controller)) {
             return;
         }
 
@@ -152,8 +153,8 @@ final class RsoOptionsScreenProcessor extends ScreenProcessor<SodiumVideoOptions
         }
 
         if (this.screen.rso$getTabFrame() != null && this.screen.rso$getTabFrame().getTabs().size() > 1) {
-            this.guideComponent(controller, ControlGuide.previousTab("Previous Tab")).ifPresent(guides::add);
-            this.guideComponent(controller, ControlGuide.nextTab("Next Tab")).ifPresent(guides::add);
+            this.guideComponent(controller, ControlGuide.previousTab(Component.translatable("rso.controller.guide.previous_tab"))).ifPresent(guides::add);
+            this.guideComponent(controller, ControlGuide.nextTab(Component.translatable("rso.controller.guide.next_tab"))).ifPresent(guides::add);
         }
 
         return this.fitGuides(guides, availableWidth);

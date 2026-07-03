@@ -38,12 +38,12 @@ final class EnumOptionRow<E extends Enum<E>> extends AbstractOptionRow {
 
     @Override
     public List<ControlGuide> controlGuides() {
-        return this.canShowControlGuide() ? List.of(ControlGuide.press("Next Value")) : List.of();
+        return this.canShowControlGuide() ? List.of(ControlGuide.press(Component.translatable("rso.controller.guide.next_value"))) : List.of();
     }
 
     @Override
     protected void renderControl(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
-        if (!this.option.showControl()) {
+        if (this.option.shouldHideControl()) {
             return;
         }
 
@@ -73,7 +73,7 @@ final class EnumOptionRow<E extends Enum<E>> extends AbstractOptionRow {
         }
 
         if (!this.option.isEnabled()
-                || !this.option.showControl()
+                || this.option.shouldHideControl()
                 || !this.isMouseOverRow(event.x(), event.y())) {
             return false;
         }
@@ -109,7 +109,7 @@ final class EnumOptionRow<E extends Enum<E>> extends AbstractOptionRow {
 
     @Override
     protected Component narrationValue() {
-        return this.option.showControl() ? this.option.getElementName(this.option.getValidatedValue()) : null;
+        return !this.option.shouldHideControl() ? this.option.getElementName(this.option.getValidatedValue()) : null;
     }
 
     @Override
@@ -119,7 +119,7 @@ final class EnumOptionRow<E extends Enum<E>> extends AbstractOptionRow {
             return;
         }
 
-        if (!this.option.showControl()) {
+        if (this.option.shouldHideControl()) {
             return;
         }
 

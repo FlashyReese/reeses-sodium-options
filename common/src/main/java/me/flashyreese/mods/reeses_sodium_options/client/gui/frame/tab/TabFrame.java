@@ -4,13 +4,14 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.OptionRow;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.Holder;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionStateStore;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.BaseWidget;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
@@ -42,14 +43,14 @@ public class TabFrame extends AbstractFrame {
     private final Runnable onSetTab;
     private final Holder<Boolean> scrollSelectedTabIntoView;
 
-    public TabFrame(LayoutBounds dim, Screen screen, ModOptions modOptions, boolean renderOutline, List<Tab<?>> tabs, Runnable onSetTab, Holder<Component> tabRailSelectedTab, Holder<String> tabRailSelectedGroup, Holder<Integer> tabRailScrollBarOffset, Holder<Boolean> scrollSelectedTabIntoView, Set<String> manuallyCollapsedTabGroups) {
+    public TabFrame(LayoutBounds dim, Screen screen, ModOptions modOptions, boolean renderOutline, List<Tab<?>> tabs, Runnable onSetTab, Holder<String> tabRailSelectedTab, Holder<String> tabRailSelectedGroup, Holder<Integer> tabRailScrollBarOffset, Holder<Boolean> scrollSelectedTabIntoView, Set<String> manuallyCollapsedTabGroups, OptionStateStore optionStateStore) {
         super(dim, screen, renderOutline, modOptions);
         this.tabs.addAll(tabs);
         this.scrollSelectedTabIntoView = scrollSelectedTabIntoView;
         TabGroupModel tabGroupModel = new TabGroupModel(this.tabs, tabRailSelectedGroup, manuallyCollapsedTabGroups);
         LayoutBounds frameDim = this.getFrameDim();
 
-        this.tabRail = new TabRail(frameDim, this.tabs, tabGroupModel, tabRailScrollBarOffset);
+        this.tabRail = new TabRail(frameDim, this.tabs, tabGroupModel, tabRailScrollBarOffset, optionStateStore);
         this.tabSelection = new TabSelectionState(this.tabs, tabRailSelectedTab, screen);
         this.frameSection = this.tabRail.createFrameSection(frameDim);
 
@@ -110,9 +111,10 @@ public class TabFrame extends AbstractFrame {
     public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
         LayoutBounds frameDim = this.getFrameDim();
         AbstractFrame selectedFrame = this.tabSelection.selectedFrame();
+        BaseWidget scrollBar = this.tabRail.scrollBar();
         this.applyScissor(guiGraphics, frameDim.x(), frameDim.y(), frameDim.width(), frameDim.height(), () -> {
             for (GuiEventListener child : this.children) {
-                if (child != selectedFrame && child instanceof Renderable renderable) {
+                if (child != selectedFrame && child != scrollBar && child instanceof Renderable renderable) {
                     renderable.extractRenderState(guiGraphics, mouseX, mouseY, delta);
                 }
             }
@@ -196,11 +198,12 @@ public class TabFrame extends AbstractFrame {
         private LayoutBounds dim;
         private boolean renderOutline;
         private Runnable onSetTab;
-        private Holder<Component> tabRailSelectedTab = new Holder<>(null);
+        private Holder<String> tabRailSelectedTab = new Holder<>(null);
         private Holder<String> tabRailSelectedGroup = new Holder<>(null);
         private Holder<Integer> tabRailScrollBarOffset = new Holder<>(0);
         private Holder<Boolean> scrollSelectedTabIntoView = new Holder<>(false);
         private Set<String> manuallyCollapsedTabGroups = new HashSet<>();
+        private OptionStateStore optionStateStore;
         private Screen screen;
         private ModOptions modOptions;
 
@@ -224,7 +227,7 @@ public class TabFrame extends AbstractFrame {
             return this;
         }
 
-        public Builder setTabRailSelectedTab(Holder<Component> tabRailSelectedTab) {
+        public Builder setTabRailSelectedTab(Holder<String> tabRailSelectedTab) {
             this.tabRailSelectedTab = tabRailSelectedTab;
             return this;
         }
@@ -249,6 +252,11 @@ public class TabFrame extends AbstractFrame {
             return this;
         }
 
+        public Builder setOptionStateStore(OptionStateStore optionStateStore) {
+            this.optionStateStore = optionStateStore;
+            return this;
+        }
+
         public Builder withScreen(Screen screen) {
             this.screen = screen;
             return this;
@@ -261,8 +269,9 @@ public class TabFrame extends AbstractFrame {
 
         public TabFrame build() {
             Validate.notNull(this.dim, "Dimension must be specified");
+            Validate.notNull(this.optionStateStore, "Option state store must be specified");
 
-            return new TabFrame(this.dim, this.screen, this.modOptions, this.renderOutline, this.functions, this.onSetTab, this.tabRailSelectedTab, this.tabRailSelectedGroup, this.tabRailScrollBarOffset, this.scrollSelectedTabIntoView, this.manuallyCollapsedTabGroups);
+            return new TabFrame(this.dim, this.screen, this.modOptions, this.renderOutline, this.functions, this.onSetTab, this.tabRailSelectedTab, this.tabRailSelectedGroup, this.tabRailScrollBarOffset, this.scrollSelectedTabIntoView, this.manuallyCollapsedTabGroups, this.optionStateStore);
         }
     }
 }

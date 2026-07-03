@@ -10,7 +10,9 @@ public interface OptionStateStore {
 
     OptionLayoutState optionLayoutState(Identifier id);
 
-    List<Identifier> searchResultIds();
+    boolean searchActive();
+
+    List<SearchResultEntry> searchResults();
 
     Set<Identifier> collapsedOptionGroups();
 }

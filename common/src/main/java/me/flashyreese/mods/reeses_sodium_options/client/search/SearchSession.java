@@ -73,6 +73,9 @@ public final class SearchSession<T> {
                     overlap += idf * Math.min(entry.getValue(), docCount);
                 }
             }
+            if (!this.matchesQueryTokens(normalizedQuery, normalizedDoc, docTerms)) {
+                continue;
+            }
             double score = overlap / queryWeightSum;
             score = applyBoosts(score, normalizedQuery, normalizedDoc);
             if (score >= this.index.minScore()) {
@@ -91,6 +94,111 @@ public final class SearchSession<T> {
             return new ArrayList<>(results.subList(0, this.index.maxResults()));
         }
         return results;
+    }
+
+    private boolean matchesQueryTokens(String normalizedQuery, String normalizedDoc, Map<String, Integer> docTerms) {
+        List<String> queryTokens = splitTokens(normalizedQuery);
+        if (queryTokens.isEmpty()) {
+            return false;
+        }
+
+        List<String> docTokens = splitTokens(normalizedDoc);
+        if (docTokens.isEmpty()) {
+            return false;
+        }
+
+        for (String queryToken : queryTokens) {
+            if (!matchesQueryToken(queryToken, docTokens, docTerms)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean matchesQueryToken(String queryToken, List<String> docTokens, Map<String, Integer> docTerms) {
+        int queryLength = queryToken.codePointCount(0, queryToken.length());
+
+        for (String docToken : docTokens) {
+            if (queryLength <= 2) {
+                if (docToken.startsWith(queryToken)) {
+                    return true;
+                }
+                continue;
+            }
+
+            if (docToken.contains(queryToken) || isCloseToken(queryToken, queryLength, docToken)) {
+                return true;
+            }
+        }
+
+        return tokenCoverage(queryToken, docTerms) >= minTokenCoverage(queryLength);
+    }
+
+    private boolean isCloseToken(String queryToken, int queryLength, String docToken) {
+        int docLength = docToken.codePointCount(0, docToken.length());
+        if (Math.abs(docLength - queryLength) > Math.max(1, queryLength / 3)) {
+            return false;
+        }
+
+        return normalizedLevenshtein(queryToken, docToken) <= maxTokenDistance(queryLength);
+    }
+
+    private double tokenCoverage(String token, Map<String, Integer> docTerms) {
+        List<String> grams = this.index.ngramGenerator().generate(token);
+        if (grams.isEmpty()) {
+            return 0.0;
+        }
+
+        Map<String, Integer> tokenTermCounts = new HashMap<>();
+        for (String gram : grams) {
+            tokenTermCounts.merge(gram, 1, Integer::sum);
+        }
+
+        int total = 0;
+        int matched = 0;
+        for (Map.Entry<String, Integer> entry : tokenTermCounts.entrySet()) {
+            int count = entry.getValue();
+            total += count;
+            matched += Math.min(count, docTerms.getOrDefault(entry.getKey(), 0));
+        }
+
+        return total == 0 ? 0.0 : matched / (double) total;
+    }
+
+    private static List<String> splitTokens(String normalizedText) {
+        if (normalizedText == null || normalizedText.isBlank()) {
+            return List.of();
+        }
+
+        List<String> tokens = new ArrayList<>();
+        for (String token : normalizedText.split(" ")) {
+            if (!token.isEmpty()) {
+                tokens.add(token);
+            }
+        }
+
+        return tokens;
+    }
+
+    private static double minTokenCoverage(int queryLength) {
+        if (queryLength <= 3) {
+            return 0.75;
+        }
+
+        if (queryLength <= 5) {
+            return 0.6;
+        }
+
+        return 0.5;
+    }
+
+    private static double maxTokenDistance(int queryLength) {
+        if (queryLength <= 4) {
+            return 0.25;
+        }
+
+        return 0.35;
     }
 
     private double applyBoosts(double baseScore, String query, String candidate) {

@@ -3,6 +3,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiThemes;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.IconRenderer;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
@@ -32,7 +33,6 @@ public class TabHeaderWidget extends BaseWidget {
     private static final int TEXT_COLOR = 0xFFFFFFFF;
     private static final int SECONDARY_TEXT_COLOR = 0xFFAAAAAA;
     private static final int TEXT_X = 5;
-    private static final int TEXT_X_WITH_ICON = 20;
     private static final int ICON_SPACING = 4;
 
     private final ModOptions modOptions;
@@ -75,6 +75,11 @@ public class TabHeaderWidget extends BaseWidget {
 
         int overflow = textWidth - availableWidth;
 
+        if (ReeseSodiumOptionsConfig.config().isReducedMotion()) {
+            this.applyScissor(g, x, y, availableWidth, lineHeight, () -> g.text(font, text, x, y, color, false));
+            return;
+        }
+
         long nowMs = Util.getMillis();
 
         // Duration (in ms) to traverse overflow pixels at the chosen speed
@@ -111,27 +116,28 @@ public class TabHeaderWidget extends BaseWidget {
     public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
         this.hovered = this.action != null && this.isMouseOver(i, j);
         this.applyScissor(guiGraphics, this.getX(), this.getY(), this.getWidth(), this.getHeight(), () -> {
+            int primaryTextColor = this.primaryTextColor();
+            int secondaryTextColor = this.secondaryTextColor();
             this.drawRect(guiGraphics, this.getX(), this.getY(), this.getLimitX(), this.getLimitY(), this.hovered ? HEADER_BACKGROUND_HOVERED : HEADER_BACKGROUND);
             if (this.selected) {
-                this.drawRect(guiGraphics, this.getX(), this.getY(), this.getX() + 2, this.getLimitY(), TEXT_COLOR);
+                this.drawRect(guiGraphics, this.getX(), this.getY(), this.getX() + 2, this.getLimitY(), this.accentColor());
             }
             int xOffset;
             if (!ReeseSodiumOptionsConfig.config().isTabHeaderIcons() || this.modOptions.icon() == null) {
                 xOffset = TEXT_X;
             } else {
-                IconRenderer.renderIconWithSpacing(guiGraphics, this.modOptions.icon(), TEXT_COLOR, modOptions.iconMonochrome(), this.getX(), this.getY(), this.getHeight(), ICON_SPACING);
-                xOffset = TEXT_X_WITH_ICON;
+                xOffset = IconRenderer.renderIconWithSpacing(guiGraphics, this.modOptions.icon(), primaryTextColor, modOptions.iconMonochrome(), this.getX(), this.getY(), this.getHeight(), ICON_SPACING);
             }
 
             int textX = this.getX() + xOffset;
             int available = (this.getX() + this.getWidth()) - textX - TEXT_PADDING_RIGHT;
 
             if (ReeseSodiumOptionsConfig.config().isTabHeaderVersionLabels()) {
-                drawScrollingString(guiGraphics, this.modOptions.name(), textX, this.getY() + 2, TEXT_COLOR, available);
-                drawScrollingString(guiGraphics, this.modOptions.version(), textX, this.getY() + 12, SECONDARY_TEXT_COLOR, available);
+                drawScrollingString(guiGraphics, this.modOptions.name(), textX, this.getY() + 2, primaryTextColor, available);
+                drawScrollingString(guiGraphics, this.modOptions.version(), textX, this.getY() + 12, secondaryTextColor, available);
             } else {
                 int centeredY = this.getY() + Math.ceilDiv(this.getHeight() - Minecraft.getInstance().font.lineHeight, 2);
-                drawScrollingString(guiGraphics, this.modOptions.name(), textX, centeredY, TEXT_COLOR, available);
+                drawScrollingString(guiGraphics, this.modOptions.name(), textX, centeredY, primaryTextColor, available);
             }
 
             if (this.shouldRenderFocusBorder()) {
@@ -192,5 +198,25 @@ public class TabHeaderWidget extends BaseWidget {
         }
 
         this.addButtonNarration(builder, label);
+    }
+
+    private boolean useThemedText() {
+        return ReeseSodiumOptionsConfig.config().isColorThemes() && ReeseSodiumOptionsConfig.config().isThemedHeadersAndLabels();
+    }
+
+    private GuiTheme theme() {
+        return GuiThemes.fromSodium(this.modOptions.theme());
+    }
+
+    private int primaryTextColor() {
+        return this.useThemedText() ? this.theme().themeLighter : TEXT_COLOR;
+    }
+
+    private int secondaryTextColor() {
+        return this.useThemedText() ? this.theme().themeDarker : SECONDARY_TEXT_COLOR;
+    }
+
+    private int accentColor() {
+        return this.useThemedText() ? this.theme().theme : TEXT_COLOR;
     }
 }
