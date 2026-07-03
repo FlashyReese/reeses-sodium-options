@@ -9,7 +9,7 @@ import net.caffeinemc.mods.sodium.client.gui.options.control.AbstractOptionList;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -56,8 +56,8 @@ final class SodiumControlElementOptionRow extends BaseWidget implements OptionRo
     }
 
     @Override
-    public void extractRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
-        this.element.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+    public void render(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+        this.element.render(guiGraphics, mouseX, mouseY, delta);
     }
 
     @Override
