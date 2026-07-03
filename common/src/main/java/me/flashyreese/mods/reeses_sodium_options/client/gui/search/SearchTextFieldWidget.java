@@ -1,6 +1,5 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.search;
 
-import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionsScreenUiState;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.SearchResultEntry;
@@ -9,8 +8,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiThemes;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.TextFieldWidget;
 import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
@@ -40,8 +38,8 @@ public class SearchTextFieldWidget extends TextFieldWidget {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
-        super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+        super.render(guiGraphics, mouseX, mouseY, delta);
         if (!this.showClearButton()) {
             return;
         }
@@ -56,21 +54,18 @@ public class SearchTextFieldWidget extends TextFieldWidget {
         int textY = buttonBounds.getCenterY() - Minecraft.getInstance().font.lineHeight / 2;
         this.drawString(guiGraphics, CLEAR_BUTTON_LABEL, textX, textY, hovered ? GuiThemes.DEFAULT_BUTTON.themeLighter : GuiThemes.DEFAULT_BUTTON.themeDarker);
 
-        if (hovered) {
-            guiGraphics.requestCursor(CursorTypes.POINTING_HAND);
-        }
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean repeated) {
-        if (event.button() == 0 && this.showClearButton() && this.clearButtonBounds().contains(event.x(), event.y())) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0 && this.showClearButton() && this.clearButtonBounds().contains(mouseX, mouseY)) {
             this.setFocused(true);
             this.onInteraction();
             this.clearText();
             return true;
         }
 
-        return super.mouseClicked(event, repeated);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override

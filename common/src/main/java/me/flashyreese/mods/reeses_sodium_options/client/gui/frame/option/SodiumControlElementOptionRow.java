@@ -9,16 +9,14 @@ import net.caffeinemc.mods.sodium.client.gui.options.control.AbstractOptionList;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlElement;
 import net.caffeinemc.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -56,23 +54,23 @@ final class SodiumControlElementOptionRow extends BaseWidget implements OptionRo
     }
 
     @Override
-    public void extractRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
-        this.element.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+        this.element.render(guiGraphics, mouseX, mouseY, delta);
     }
 
     @Override
-    public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick) {
-        return this.element.mouseClicked(event, doubleClick);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return this.element.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean mouseReleased(@NonNull MouseButtonEvent event) {
-        return this.element.mouseReleased(event);
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return this.element.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean mouseDragged(@NonNull MouseButtonEvent event, double deltaX, double deltaY) {
-        return this.element.mouseDragged(event, deltaX, deltaY);
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return this.element.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
     @Override
@@ -81,8 +79,8 @@ final class SodiumControlElementOptionRow extends BaseWidget implements OptionRo
     }
 
     @Override
-    public boolean keyPressed(@NonNull KeyEvent event) {
-        return this.element.keyPressed(event);
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        return this.element.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -101,18 +99,23 @@ final class SodiumControlElementOptionRow extends BaseWidget implements OptionRo
     }
 
     @Override
-    public @Nullable ComponentPath nextFocusPath(@NonNull FocusNavigationEvent navigation) {
+    public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent navigation) {
         return this.isFocused() || !this.option.isEnabled() ? null : ComponentPath.leaf(this);
     }
 
     @Override
-    public @NonNull NarrationPriority narrationPriority() {
+    public NarrationPriority narrationPriority() {
         return this.element.narrationPriority();
     }
 
     @Override
-    public void updateNarration(@NonNull NarrationElementOutput builder) {
+    public void updateNarration(NarrationElementOutput builder) {
         this.element.updateNarration(builder);
+    }
+
+    @Override
+    public List<NarratableEntry> collectNarratables() {
+        return List.of(this.element);
     }
 
     @Override

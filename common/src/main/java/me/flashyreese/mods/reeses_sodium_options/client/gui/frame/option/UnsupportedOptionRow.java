@@ -4,7 +4,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionStateStore;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ final class UnsupportedOptionRow extends AbstractOptionRow {
     }
 
     @Override
-    protected void renderControl(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+    protected void renderControl(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
     }
 
     @Override
