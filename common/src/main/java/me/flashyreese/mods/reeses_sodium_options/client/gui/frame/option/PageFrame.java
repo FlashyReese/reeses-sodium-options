@@ -40,7 +40,7 @@ public class PageFrame extends AbstractFrame {
         super(dim, screen, renderOutline, modOptions);
         this.page = page;
         this.optionStateStore = optionStateStore;
-        this.optionRowFactory = new OptionRowFactory(screen, this.optionRowTheme(), this.optionStateStore);
+        this.optionRowFactory = new OptionRowFactory(screen, modOptions.theme(), this.optionRowTheme(), this.optionStateStore);
         this.tooltipController = new OptionTooltipController(dim, modOptions, new OptionTooltipController.BoxRenderer() {
             @Override
             public void drawRect(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int color) {
@@ -61,8 +61,11 @@ public class PageFrame extends AbstractFrame {
     }
 
     public void setupFrame() {
-        this.layout = PageLayout.create(this.page, this.optionStateStore.searchResultIds(), SearchResultOrder.DEFAULT,
-                ReeseSodiumOptionsConfig.config().isCollapsibleGroups(), this.optionStateStore.collapsedOptionGroups());
+        ReeseSodiumOptionsConfig.ConfigData config = ReeseSodiumOptionsConfig.config();
+        this.layout = PageLayout.create(this.page, config.isHideNonMatchingOptions() && this.optionStateStore.searchActive(),
+                this.optionStateStore.searchResults(), SearchResultOrder.DEFAULT,
+                config.getDisabledOptionVisibility() == ReeseSodiumOptionsConfig.DisabledOptionVisibility.HIDDEN,
+                config.isCollapsibleGroups(), this.optionStateStore.collapsedOptionGroups());
         this.setContentHeight(this.layout.contentHeight());
         this.optionRowFactory.registerParentBounds(this.layout, this.getFrameDim());
     }
@@ -91,14 +94,15 @@ public class PageFrame extends AbstractFrame {
 
     private LabelWidget createLabelWidget(PageLayout.LabelRow labelRow) {
         LayoutBounds dim = this.createRowDimension(labelRow.y());
+        int labelColor = this.labelColor();
 
         if (!labelRow.collapsible()) {
-            return new LabelWidget(dim, labelRow.text(), 0xFFFFFFFF);
+            return new LabelWidget(dim, labelRow.text(), labelColor);
         }
 
         Identifier collapseKey = labelRow.collapseKey();
         LabelWidget widget = this.groupHeaderWidgets.computeIfAbsent(collapseKey, key ->
-                new LabelWidget(dim, labelRow.text(), 0xFFFFFFFF, this.optionRowTheme(), key, () -> this.toggleGroup(key), labelRow.collapsed()));
+                new LabelWidget(dim, labelRow.text(), labelColor, this.optionRowTheme(), key, () -> this.toggleGroup(key), labelRow.collapsed()));
         widget.setDim(dim);
         widget.setCollapsed(labelRow.collapsed());
 
@@ -201,6 +205,12 @@ public class PageFrame extends AbstractFrame {
 
     private GuiTheme optionRowTheme() {
         return ReeseSodiumOptionsConfig.config().isColorThemes() ? GuiThemes.fromSodium(this.modOptions.theme()) : GuiThemes.DEFAULT_BUTTON;
+    }
+
+    private int labelColor() {
+        return ReeseSodiumOptionsConfig.config().isColorThemes() && ReeseSodiumOptionsConfig.config().isThemedHeadersAndLabels()
+                ? GuiThemes.fromSodium(this.modOptions.theme()).themeLighter
+                : 0xFFFFFFFF;
     }
 
     public static class Builder {

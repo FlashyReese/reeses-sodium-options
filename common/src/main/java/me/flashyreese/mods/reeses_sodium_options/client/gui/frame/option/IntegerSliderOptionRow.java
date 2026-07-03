@@ -65,8 +65,8 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
         }
 
         return this.editMode
-                ? List.of(ControlGuide.navigationLeftRight("Adjust Value"), ControlGuide.press("Done"))
-                : List.of(ControlGuide.press("Edit Slider Value"));
+                ? List.of(ControlGuide.navigationLeftRight(Component.translatable("rso.controller.guide.adjust_value")), ControlGuide.press(Component.translatable("rso.controller.guide.done")))
+                : List.of(ControlGuide.press(Component.translatable("rso.controller.guide.edit_slider")));
     }
 
     @Override

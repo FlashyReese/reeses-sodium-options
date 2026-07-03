@@ -1,5 +1,6 @@
- package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
+package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
 
+import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuideProvider;
@@ -55,7 +56,7 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
     @Override
     public List<ControlGuide> controlGuides() {
         return this.isVisible() && this.isEditable() && this.isFocused()
-                ? List.of(ControlGuide.press("Edit"))
+                ? List.of(ControlGuide.press(Component.translatable("rso.controller.guide.edit")))
                 : List.of();
     }
 
@@ -172,6 +173,7 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
             return false;
         }
 
+        this.setFocused(true);
         this.write(String.valueOf(ch));
         return true;
     }
@@ -480,6 +482,11 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
     }
 
     private void updateCursorAlpha() {
+        if (ReeseSodiumOptionsConfig.config().isReducedMotion()) {
+            this.currentCursorAlpha = 1f;
+            return;
+        }
+
         long currentTimeMillis = System.currentTimeMillis();
         if (currentTimeMillis >= this.nextCursorUpdate) {
             this.currentCursorState = !this.currentCursorState;

@@ -4,6 +4,7 @@
   "package": "me.flashyreese.mods.reeses_sodium_options.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "sodium.MixinAbstractWidget",
     "sodium.MixinOption",
     "sodium.MixinSodiumOptionsGUI"
   ],

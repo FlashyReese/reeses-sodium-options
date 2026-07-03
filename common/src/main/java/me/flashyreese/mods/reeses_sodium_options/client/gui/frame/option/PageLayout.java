@@ -1,8 +1,8 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option;
 
 import me.flashyreese.mods.reeses_sodium_options.client.gui.option.OptionExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.state.SearchResultEntry;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.SearchResultOrder;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.state.SearchResultOrdering;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
 import net.caffeinemc.mods.sodium.client.config.structure.OptionGroup;
 import net.caffeinemc.mods.sodium.client.config.structure.Page;
@@ -11,7 +11,10 @@ import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 final class PageLayout {
@@ -27,14 +30,12 @@ final class PageLayout {
         this.contentHeight = contentHeight;
     }
 
-    static PageLayout create(Page page, List<Identifier> resultIds, SearchResultOrder resultOrder, boolean collapsible, Set<Identifier> collapsedGroups) {
-        List<SearchEntry> searchEntries = buildSearchEntries(page, resultIds, resultOrder);
-
-        if (!searchEntries.isEmpty()) {
-            return createSearchLayout(searchEntries);
+    static PageLayout create(Page page, boolean searchActive, List<SearchResultEntry> results, SearchResultOrder resultOrder, boolean hideDisabledOptions, boolean collapsible, Set<Identifier> collapsedGroups) {
+        if (searchActive) {
+            return createSearchLayout(buildSearchEntries(page, results, resultOrder, hideDisabledOptions));
         }
 
-        return createPageLayout(page, collapsible, collapsedGroups);
+        return createPageLayout(page, hideDisabledOptions, collapsible, collapsedGroups);
     }
 
     List<Row> rows() {
@@ -76,13 +77,14 @@ final class PageLayout {
         return new PageLayout(rows, y);
     }
 
-    private static PageLayout createPageLayout(Page page, boolean collapsible, Set<Identifier> collapsedGroups) {
+    private static PageLayout createPageLayout(Page page, boolean hideDisabledOptions, boolean collapsible, Set<Identifier> collapsedGroups) {
         List<Row> rows = new ArrayList<>();
-        List<OptionGroup> groups = page.groups();
+        List<VisibleGroup> groups = visibleGroups(page.groups(), hideDisabledOptions);
         int y = 0;
 
         for (int i = 0; i < groups.size(); i++) {
-            OptionGroup group = groups.get(i);
+            VisibleGroup visibleGroup = groups.get(i);
+            OptionGroup group = visibleGroup.group();
 
             Identifier collapseKey = collapsible ? groupCollapseKey(group) : null;
             boolean collapsed = collapseKey != null && collapsedGroups.contains(collapseKey);
@@ -94,7 +96,7 @@ final class PageLayout {
             }
 
             if (!collapsed) {
-                for (Option option : group.options()) {
+                for (Option option : visibleGroup.options()) {
                     rows.add(new OptionRow(group, option, y));
                     y += ROW_HEIGHT;
                 }
@@ -106,6 +108,28 @@ final class PageLayout {
         }
 
         return new PageLayout(rows, y);
+    }
+
+    private static List<VisibleGroup> visibleGroups(List<OptionGroup> groups, boolean hideDisabledOptions) {
+        if (!hideDisabledOptions) {
+            return groups.stream()
+                    .map(group -> new VisibleGroup(group, group.options()))
+                    .toList();
+        }
+
+        List<VisibleGroup> visibleGroups = new ArrayList<>();
+        for (OptionGroup group : groups) {
+            List<Option> options = group.options()
+                    .stream()
+                    .filter(Option::isEnabled)
+                    .toList();
+
+            if (!options.isEmpty()) {
+                visibleGroups.add(new VisibleGroup(group, options));
+            }
+        }
+
+        return visibleGroups;
     }
 
     private static @Nullable Identifier groupCollapseKey(OptionGroup group) {
@@ -122,21 +146,56 @@ final class PageLayout {
         return group.name() != null && !group.name().getString().isEmpty();
     }
 
-    private static List<SearchEntry> buildSearchEntries(Page page, List<Identifier> resultIds, SearchResultOrder resultOrder) {
-        if (resultIds.isEmpty()) {
+    private static List<SearchEntry> buildSearchEntries(Page page, List<SearchResultEntry> results, SearchResultOrder resultOrder, boolean hideDisabledOptions) {
+        if (results.isEmpty()) {
             return List.of();
         }
+
+        return switch (resultOrder) {
+            case PAGE_DISPLAY -> buildSearchEntriesInPageOrder(page, results, hideDisabledOptions);
+            case RANKED -> buildSearchEntriesInResultOrder(page, results, hideDisabledOptions);
+        };
+    }
+
+    private static List<SearchEntry> buildSearchEntriesInPageOrder(Page page, List<SearchResultEntry> results, boolean hideDisabledOptions) {
+        Set<Option> resultOptions = Collections.newSetFromMap(new IdentityHashMap<>());
+        results.forEach(result -> resultOptions.add(result.option()));
 
         List<SearchEntry> entries = new ArrayList<>();
         for (OptionGroup group : page.groups()) {
             for (Option option : group.options()) {
-                if (option instanceof OptionExtended optionExtended) {
-                    entries.add(new SearchEntry(group, option, optionExtended.rso$getId()));
+                if (resultOptions.contains(option) && shouldShowOption(option, hideDisabledOptions)) {
+                    entries.add(new SearchEntry(group, option));
                 }
             }
         }
 
-        return SearchResultOrdering.order(resultOrder, resultIds, entries, SearchEntry::id);
+        return entries;
+    }
+
+    private static List<SearchEntry> buildSearchEntriesInResultOrder(Page page, List<SearchResultEntry> results, boolean hideDisabledOptions) {
+        Map<Option, SearchEntry> entriesByOption = new IdentityHashMap<>();
+        for (OptionGroup group : page.groups()) {
+            for (Option option : group.options()) {
+                if (shouldShowOption(option, hideDisabledOptions)) {
+                    entriesByOption.put(option, new SearchEntry(group, option));
+                }
+            }
+        }
+
+        List<SearchEntry> ordered = new ArrayList<>(results.size());
+        for (SearchResultEntry result : results) {
+            SearchEntry entry = entriesByOption.get(result.option());
+            if (entry != null) {
+                ordered.add(entry);
+            }
+        }
+
+        return ordered;
+    }
+
+    private static boolean shouldShowOption(Option option, boolean hideDisabledOptions) {
+        return !hideDisabledOptions || option.isEnabled();
     }
 
     interface Row {
@@ -152,6 +211,9 @@ final class PageLayout {
     record OptionRow(OptionGroup group, Option option, int y) implements Row {
     }
 
-    private record SearchEntry(OptionGroup group, Option option, Identifier id) {
+    private record SearchEntry(OptionGroup group, Option option) {
+    }
+
+    private record VisibleGroup(OptionGroup group, List<Option> options) {
     }
 }
