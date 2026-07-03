@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.action;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.BaseWidget;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,6 +28,9 @@ final class OptionActionButtonRenderer {
 
         int iconX = buttonBounds.getCenterX() - ICON_SIZE / 2;
         int iconY = buttonBounds.getCenterY() - ICON_SIZE / 2;
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         guiGraphics.blit(icon, iconX, iconY, 0.0F, 0.0F, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+        RenderSystem.disableBlend();
     }
 }
