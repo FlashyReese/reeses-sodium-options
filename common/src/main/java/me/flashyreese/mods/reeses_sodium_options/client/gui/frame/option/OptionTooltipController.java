@@ -3,6 +3,7 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option;
 import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.option.OptionExtended;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionStateStore;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiThemes;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.BaseWidget;
 import net.caffeinemc.mods.sodium.api.config.option.OptionImpact;
@@ -28,13 +29,15 @@ final class OptionTooltipController {
 
     private final LayoutBounds viewportBounds;
     private final ModOptions modOptions;
+    private final OptionStateStore optionStateStore;
     private final BoxRenderer boxRenderer;
     private long targetStartTime;
     private @Nullable OptionRow targetElement;
 
-    OptionTooltipController(LayoutBounds viewportBounds, ModOptions modOptions, BoxRenderer boxRenderer) {
+    OptionTooltipController(LayoutBounds viewportBounds, ModOptions modOptions, OptionStateStore optionStateStore, BoxRenderer boxRenderer) {
         this.viewportBounds = viewportBounds;
         this.modOptions = modOptions;
+        this.optionStateStore = optionStateStore;
         this.boxRenderer = boxRenderer;
     }
 
@@ -58,7 +61,12 @@ final class OptionTooltipController {
             return hoveredElement;
         }
 
-        return this.findFocusedOptionRow(optionRows);
+        OptionRow focusedElement = this.findFocusedOptionRow(optionRows);
+        if (focusedElement != null) {
+            return focusedElement;
+        }
+
+        return this.findSelectedSearchResultRow(optionRows);
     }
 
     private @Nullable OptionRow findHoveredOptionRow(List<OptionRow> optionRows, int mouseX, int mouseY) {
@@ -83,6 +91,26 @@ final class OptionTooltipController {
                 .filter(OptionRow::isFocused)
                 .findFirst()
                 .orElse(null);
+    }
+
+    private @Nullable OptionRow findSelectedSearchResultRow(List<OptionRow> optionRows) {
+        if (!this.optionStateStore.searchActive()) {
+            return null;
+        }
+
+        return optionRows.stream()
+                .filter(this::isVisibleOptionRow)
+                .filter(this::isSelectedSearchResult)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean isSelectedSearchResult(OptionRow optionRow) {
+        if (!(optionRow.getOption() instanceof OptionExtended optionExtended)) {
+            return false;
+        }
+
+        return this.optionStateStore.optionUiState(optionExtended.rso$getId()).isSelected();
     }
 
     private boolean isVisibleOptionRow(OptionRow optionRow) {
