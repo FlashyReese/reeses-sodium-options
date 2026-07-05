@@ -670,6 +670,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
             }
 
             this.clearArrowNavigationMemory();
+            this.uiState.scrollSelectedTabIntoView().set(true);
             this.tabFrame.setTab(Optional.of(nextTab));
             this.focusFirstOptionInSelectedTab();
             this.rememberCurrentOptionFocus();
