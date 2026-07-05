@@ -230,6 +230,9 @@ final class TabRail {
         header.setDim(tabHeaderDim);
         header.setSelected(selected);
         this.addTabChild(children, header);
+        if (selected) {
+            this.selectedTabWidget = header;
+        }
     }
 
     private boolean isSelectedTab(Tab<?> tab, Optional<Tab<?>> selectedTab) {
