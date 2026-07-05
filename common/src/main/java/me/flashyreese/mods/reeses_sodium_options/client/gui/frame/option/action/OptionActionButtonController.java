@@ -33,8 +33,8 @@ public final class OptionActionButtonController {
         this.optionSupplier = optionSupplier;
         // Ordered left-to-right: reset sits to the left of undo.
         this.buttons = new ArrayList<>(2);
-        this.buttons.add(new ActionButton(0, OptionResetAction.ICON, Component.translatable("rso.controller.guide.reset"), option -> Component.translatable("rso.narration.reset_to_default", option.getName()), OptionResetAction::isActive, OptionResetAction::resetToDefault, clickSound));
-        this.undoButton = new ActionButton(1, OptionUndoAction.ICON, Component.translatable("rso.controller.guide.undo"), option -> Component.translatable("rso.narration.undo_changes", option.getName()), OptionUndoAction::isActive, OptionUndoAction::undoChanges, clickSound);
+        this.buttons.add(new ActionButton(0, OptionResetAction.ICON, Component.translatable("rso.controller.guide.reset"), option -> Component.translatable("rso.narration.reset_to_default", option.getName()), OptionResetAction::isVisible, OptionResetAction::isActive, OptionResetAction::resetToDefault, clickSound));
+        this.undoButton = new ActionButton(1, OptionUndoAction.ICON, Component.translatable("rso.controller.guide.undo"), option -> Component.translatable("rso.narration.undo_changes", option.getName()), OptionUndoAction::isVisible, OptionUndoAction::isActive, OptionUndoAction::undoChanges, clickSound);
         this.buttons.add(this.undoButton);
     }
 
@@ -119,12 +119,12 @@ public final class OptionActionButtonController {
             return FocusPathResult.handled(ComponentPath.path(parent, childPath));
         }
 
-        List<GuiEventListener> visible = this.visibleButtonElements();
-        int index = visible.indexOf(focusedChild);
+        List<GuiEventListener> active = this.activeButtonElements();
+        int index = active.indexOf(focusedChild);
 
         if (this.shouldEnterActionButton(navigation)) {
-            if (index >= 0 && index + 1 < visible.size()) {
-                return FocusPathResult.handled(this.childFocusPath(parent, visible.get(index + 1)));
+            if (index >= 0 && index + 1 < active.size()) {
+                return FocusPathResult.handled(this.childFocusPath(parent, active.get(index + 1)));
             }
 
             return FocusPathResult.handled(null);
@@ -132,7 +132,7 @@ public final class OptionActionButtonController {
 
         if (this.shouldReturnToControl(navigation)) {
             if (index > 0) {
-                return FocusPathResult.handled(this.childFocusPath(parent, visible.get(index - 1)));
+                return FocusPathResult.handled(this.childFocusPath(parent, active.get(index - 1)));
             }
 
             return FocusPathResult.handled(ComponentPath.leaf(owner));
@@ -152,7 +152,7 @@ public final class OptionActionButtonController {
     }
 
     public List<GuiEventListener> children() {
-        return this.visibleButtonElements();
+        return this.activeButtonElements();
     }
 
     public @Nullable GuiEventListener getFocused() {
@@ -241,28 +241,28 @@ public final class OptionActionButtonController {
     private boolean isFocusedChildVisible() {
         for (ActionButton button : this.buttons) {
             if (button.element == this.focusedChild) {
-                return button.visible();
+                return button.visible() && button.element.isActive();
             }
         }
 
         return true;
     }
 
-    private List<GuiEventListener> visibleButtonElements() {
-        List<GuiEventListener> visible = new ArrayList<>(this.buttons.size());
+    private List<GuiEventListener> activeButtonElements() {
+        List<GuiEventListener> active = new ArrayList<>(this.buttons.size());
 
         for (ActionButton button : this.buttons) {
-            if (button.visible()) {
-                visible.add(button.element);
+            if (button.visible() && button.element.isActive()) {
+                active.add(button.element);
             }
         }
 
-        return visible;
+        return active;
     }
 
     private @Nullable GuiEventListener firstVisibleActionButton() {
         for (ActionButton button : this.buttons) {
-            if (button.visible()) {
+            if (button.visible() && button.element.isActive()) {
                 return button.element;
             }
         }
@@ -299,7 +299,7 @@ public final class OptionActionButtonController {
         private final OptionActionButtonElement element;
         private boolean heldVisible;
 
-        private ActionButton(int index, ResourceLocation icon, Component guideLabel, Function<StatefulOption<?>, Component> narrationLabelProvider, Predicate<StatefulOption<?>> activePredicate, Consumer<StatefulOption<?>> action, Runnable clickSound) {
+        private ActionButton(int index, ResourceLocation icon, Component guideLabel, Function<StatefulOption<?>, Component> narrationLabelProvider, Predicate<StatefulOption<?>> visiblePredicate, Predicate<StatefulOption<?>> activePredicate, Consumer<StatefulOption<?>> action, Runnable clickSound) {
             this.index = index;
             this.element = new OptionActionButtonElement(
                     OptionActionButtonController.this.rowBoundsSupplier,
@@ -308,6 +308,7 @@ public final class OptionActionButtonController {
                     icon,
                     guideLabel,
                     narrationLabelProvider,
+                    visiblePredicate,
                     activePredicate,
                     action,
                     clickSound,
@@ -316,7 +317,7 @@ public final class OptionActionButtonController {
         }
 
         private boolean naturallyVisible() {
-            return this.element.isActive();
+            return this.element.isVisible();
         }
 
         private boolean visible() {

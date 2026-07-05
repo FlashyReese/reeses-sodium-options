@@ -31,6 +31,7 @@ final class OptionActionButtonElement implements GuiEventListener, NarratableEnt
     private final ResourceLocation icon;
     private final Component guideLabel;
     private final Function<StatefulOption<?>, Component> narrationLabelProvider;
+    private final Predicate<StatefulOption<?>> visiblePredicate;
     private final Predicate<StatefulOption<?>> activePredicate;
     private final Consumer<StatefulOption<?>> action;
     private final Runnable clickSound;
@@ -39,7 +40,7 @@ final class OptionActionButtonElement implements GuiEventListener, NarratableEnt
     private boolean hovered;
 
     OptionActionButtonElement(Supplier<LayoutBounds> rowBoundsSupplier, Supplier<@Nullable StatefulOption<?>> optionSupplier,
-                              IntSupplier buttonsFromRight, ResourceLocation icon, Component guideLabel, Function<StatefulOption<?>, Component> narrationLabelProvider, Predicate<StatefulOption<?>> activePredicate,
+                              IntSupplier buttonsFromRight, ResourceLocation icon, Component guideLabel, Function<StatefulOption<?>, Component> narrationLabelProvider, Predicate<StatefulOption<?>> visiblePredicate, Predicate<StatefulOption<?>> activePredicate,
                               Consumer<StatefulOption<?>> action, Runnable clickSound, Runnable afterAction) {
         this.rowBoundsSupplier = rowBoundsSupplier;
         this.optionSupplier = optionSupplier;
@@ -47,6 +48,7 @@ final class OptionActionButtonElement implements GuiEventListener, NarratableEnt
         this.icon = icon;
         this.guideLabel = guideLabel;
         this.narrationLabelProvider = narrationLabelProvider;
+        this.visiblePredicate = visiblePredicate;
         this.activePredicate = activePredicate;
         this.action = action;
         this.clickSound = clickSound;
@@ -57,7 +59,13 @@ final class OptionActionButtonElement implements GuiEventListener, NarratableEnt
     public boolean isActive() {
         StatefulOption<?> option = this.optionSupplier.get();
 
-        return option != null && this.activePredicate.test(option);
+        return option != null && this.visiblePredicate.test(option) && this.activePredicate.test(option);
+    }
+
+    public boolean isVisible() {
+        StatefulOption<?> option = this.optionSupplier.get();
+
+        return option != null && this.visiblePredicate.test(option);
     }
 
     @Override
@@ -72,12 +80,13 @@ final class OptionActionButtonElement implements GuiEventListener, NarratableEnt
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, boolean focused) {
         StatefulOption<?> option = this.optionSupplier.get();
 
-        if (option == null || !this.activePredicate.test(option)) {
+        if (option == null || !this.visiblePredicate.test(option)) {
             return;
         }
 
-        this.hovered = this.isMouseOver(mouseX, mouseY);
-        OptionActionButtonRenderer.render(guiGraphics, this.icon, this.getButtonDim(this.rowBoundsSupplier.get()), mouseX, mouseY, focused);
+        boolean active = this.activePredicate.test(option);
+        this.hovered = active && this.isMouseOver(mouseX, mouseY);
+        OptionActionButtonRenderer.render(guiGraphics, this.icon, this.getButtonDim(this.rowBoundsSupplier.get()), mouseX, mouseY, focused, active);
     }
 
     @Override
@@ -101,7 +110,7 @@ final class OptionActionButtonElement implements GuiEventListener, NarratableEnt
     public boolean performAction() {
         StatefulOption<?> option = this.optionSupplier.get();
 
-        if (option == null || !this.activePredicate.test(option)) {
+        if (option == null || !this.visiblePredicate.test(option) || !this.activePredicate.test(option)) {
             return false;
         }
 
@@ -121,7 +130,7 @@ final class OptionActionButtonElement implements GuiEventListener, NarratableEnt
     public boolean isMouseOver(double mouseX, double mouseY) {
         StatefulOption<?> option = this.optionSupplier.get();
 
-        return option != null && this.activePredicate.test(option)
+        return option != null && this.visiblePredicate.test(option) && this.activePredicate.test(option)
                 && this.getButtonDim(this.rowBoundsSupplier.get()).contains(mouseX, mouseY);
     }
 
@@ -159,7 +168,7 @@ final class OptionActionButtonElement implements GuiEventListener, NarratableEnt
     public void updateNarration(NarrationElementOutput builder) {
         StatefulOption<?> option = this.optionSupplier.get();
 
-        if (option == null || !this.activePredicate.test(option)) {
+        if (option == null || !this.visiblePredicate.test(option) || !this.activePredicate.test(option)) {
             return;
         }
 

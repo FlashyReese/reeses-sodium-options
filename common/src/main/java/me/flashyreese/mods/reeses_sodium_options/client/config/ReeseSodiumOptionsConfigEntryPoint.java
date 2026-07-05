@@ -164,6 +164,15 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
                         true,
                         false
                 ))
+                .addOption(builder.createIntegerOption(this.optionId("search_result_limit"))
+                        .setName(Component.translatable("rso.options.search_result_limit.name"))
+                        .setTooltip(Component.translatable("rso.options.search_result_limit.tooltip"))
+                        .setDefaultValue(ReeseSodiumOptionsConfig.DEFAULT_SEARCH_RESULT_LIMIT)
+                        .setRange(ReeseSodiumOptionsConfig.MIN_SEARCH_RESULT_LIMIT, ReeseSodiumOptionsConfig.MAX_SEARCH_RESULT_LIMIT, 1)
+                        .setValueFormatter(value -> Component.translatable("rso.options.value.results", value))
+                        .setBinding(value -> ReeseSodiumOptionsConfig.config().setSearchResultLimit(value), () -> ReeseSodiumOptionsConfig.config().getSearchResultLimit())
+                        .setStorageHandler(ReeseSodiumOptionsConfig.STORAGE_HANDLER)
+                        .setApplyHook(ReeseSodiumOptionsConfig::rebuildCurrentScreen))
                 .addOption(this.createBooleanOption(
                         builder,
                         "hide_non_matching_options",
@@ -217,6 +226,14 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
                         value -> ReeseSodiumOptionsConfig.config().setUndoButtonOverlay(value),
                         () -> ReeseSodiumOptionsConfig.config().isUndoButtonOverlay(),
                         true,
+                        false
+                ))
+                .addOption(this.createBooleanOption(
+                        builder,
+                        "always_show_action_buttons",
+                        value -> ReeseSodiumOptionsConfig.config().setAlwaysShowActionButtons(value),
+                        () -> ReeseSodiumOptionsConfig.config().isAlwaysShowActionButtons(),
+                        false,
                         false
                 ));
     }
