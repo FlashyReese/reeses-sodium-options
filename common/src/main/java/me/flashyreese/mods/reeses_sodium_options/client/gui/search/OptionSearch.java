@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.search;
 
+import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.option.OptionExtended;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionLayoutState;
@@ -51,7 +52,7 @@ final class OptionSearch {
         this.searchIndex = SearchIndex.builder(SearchableOption::searchableText)
                 .addAll(this.options)
                 .foldDiacritics(true)
-                .maxResults(10)
+                .maxResults(ReeseSodiumOptionsConfig.config().getSearchResultLimit())
                 .minScore(0.3)
                 .rerankWithEditDistance(true)
                 .rerankLimit(50)
