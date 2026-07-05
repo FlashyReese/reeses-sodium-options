@@ -41,6 +41,8 @@ import java.util.List;
 
 abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHandler, OptionRow, ControlGuideProvider {
     protected static final int CONTROL_RIGHT_PADDING = 6;
+    private static final int SEARCH_RESULT_MARKER = 0x66FFFFFF;
+    private static final int SEARCH_RESULT_MARKER_WIDTH = 2;
 
     protected final OptionActionButtonController actionButtons;
     protected final GuiTheme theme;
@@ -321,6 +323,8 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
         String label = this.truncateLabel(option.getName().getString());
         String formattedLabel = this.formatLabel(option, label);
         int rowLimitX = this.controlLimitX();
+        OptionUiState optionUiState = this.optionUiState();
+        boolean selectedSearchResult = this.isSelectedSearchResult(optionUiState);
 
         this.hovered = this.isMouseOverRow(mouseX, mouseY);
         this.drawRect(
@@ -329,13 +333,43 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
                 this.getY(),
                 rowLimitX,
                 this.getLimitY(),
-                this.hovered ? 0xE0000000 : 0x40000000
+                this.hovered || selectedSearchResult ? 0xE0000000 : 0x40000000
         );
+        this.renderSearchResultMarker(guiGraphics, optionUiState);
         this.drawString(guiGraphics, formattedLabel, this.getX() + CONTROL_RIGHT_PADDING, this.centeredTextY(), 0xFFFFFFFF);
 
-        if (this.shouldRenderFocusBorder(this.isRowFocused())) {
-            this.drawBorder(guiGraphics, this.getX(), this.getY(), rowLimitX, this.getLimitY(), GuiThemes.OPTION_FOCUS_BORDER);
+        int borderColor = this.rowBorderColor(optionUiState);
+        if (borderColor != 0) {
+            this.drawBorder(guiGraphics, this.getX(), this.getY(), rowLimitX, this.getLimitY(), borderColor);
         }
+    }
+
+    private void renderSearchResultMarker(GuiGraphicsExtractor guiGraphics, @Nullable OptionUiState optionUiState) {
+        if (optionUiState == null || !optionUiState.isHighlighted() || optionUiState.isSelected()) {
+            return;
+        }
+
+        this.drawRect(guiGraphics, this.getX(), this.getY(), this.getX() + SEARCH_RESULT_MARKER_WIDTH, this.getLimitY(), SEARCH_RESULT_MARKER);
+    }
+
+    private int rowBorderColor(@Nullable OptionUiState optionUiState) {
+        if (this.shouldRenderFocusBorder(this.isRowFocused())) {
+            return GuiThemes.OPTION_FOCUS_BORDER;
+        }
+
+        return this.isSelectedSearchResult(optionUiState) ? GuiThemes.OPTION_FOCUS_BORDER : 0;
+    }
+
+    private boolean isSelectedSearchResult(@Nullable OptionUiState optionUiState) {
+        return optionUiState != null && optionUiState.isHighlighted() && optionUiState.isSelected();
+    }
+
+    private @Nullable OptionUiState optionUiState() {
+        if (!(this.option instanceof OptionExtended optionExtended)) {
+            return null;
+        }
+
+        return this.optionStateStore.optionUiState(optionExtended.rso$getId());
     }
 
     private String truncateLabel(String label) {
@@ -352,27 +386,6 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
         } else {
             formattedLabel = ChatFormatting.GRAY.toString() + ChatFormatting.STRIKETHROUGH + label;
         }
-
-        return this.applyHighlightColor(option, formattedLabel);
-    }
-
-    private String applyHighlightColor(Option option, String formattedLabel) {
-        if (!(option instanceof OptionExtended optionExtended)) {
-            return formattedLabel;
-        }
-
-        OptionUiState optionUiState = this.optionStateStore.optionUiState(optionExtended.rso$getId());
-        if (!optionUiState.isHighlighted()) {
-            return formattedLabel;
-        }
-
-        String replacement = optionUiState.isSelected()
-                ? ChatFormatting.DARK_GREEN.toString()
-                : ChatFormatting.YELLOW.toString();
-
-        formattedLabel = formattedLabel.replace(ChatFormatting.WHITE.toString(), ChatFormatting.WHITE + replacement);
-        formattedLabel = formattedLabel.replace(ChatFormatting.STRIKETHROUGH.toString(), ChatFormatting.STRIKETHROUGH + replacement);
-        formattedLabel = formattedLabel.replace(ChatFormatting.ITALIC.toString(), ChatFormatting.ITALIC + replacement);
 
         return formattedLabel;
     }
