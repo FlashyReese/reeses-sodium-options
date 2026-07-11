@@ -11,6 +11,11 @@ import java.util.Objects;
 public final class OptionResetAction {
     static final Identifier ICON = Identifier.fromNamespaceAndPath("reeses-sodium-options", "textures/gui/reset_to_default.png");
 
+    public static boolean isVisible(StatefulOption<?> option) {
+        return ReeseSodiumOptionsConfig.config().isResetButtonOverlay()
+                && (ReeseSodiumOptionsConfig.config().isAlwaysShowActionButtons() || canReset(option));
+    }
+
     public static boolean isActive(StatefulOption<?> option) {
         return ReeseSodiumOptionsConfig.config().isResetButtonOverlay()
                 && canReset(option);
