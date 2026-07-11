@@ -192,7 +192,11 @@ public class PageFrame extends AbstractFrame {
 
             GuiEventListener child = this.children.get(childIndex++);
             if (child instanceof BaseWidget widget) {
-                widget.setDim(this.createRowDimension(row.y()));
+                LayoutBounds rowDim = this.createRowDimension(row.y());
+                widget.setDim(rowDim);
+                if (child instanceof OptionRow optionRow) {
+                    this.optionRowFactory.registerOptionBounds(optionRow, rowDim);
+                }
             }
         }
     }
