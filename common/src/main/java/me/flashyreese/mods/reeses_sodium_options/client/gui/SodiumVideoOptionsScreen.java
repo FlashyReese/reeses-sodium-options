@@ -300,6 +300,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
                             .setTabRailSelectedTab(this.uiState.tabFrameSelectedTab())
                             .setTabRailSelectedGroup(this.uiState.tabFrameSelectedGroup())
                             .setManuallyCollapsedTabGroups(this.uiState.manuallyCollapsedTabGroups())
+                            .setOptionPageScrollBarOffset(this.uiState.optionPageScrollBarOffset())
                             .setOptionStateStore(this.uiState)
                             .addTabs(tabs -> getOrderedModOptions()
                                     .forEach(config -> config.pages()
@@ -670,6 +671,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
             }
 
             this.clearArrowNavigationMemory();
+            this.uiState.scrollSelectedTabIntoView().set(true);
             this.tabFrame.setTab(Optional.of(nextTab));
             this.focusFirstOptionInSelectedTab();
             this.rememberCurrentOptionFocus();

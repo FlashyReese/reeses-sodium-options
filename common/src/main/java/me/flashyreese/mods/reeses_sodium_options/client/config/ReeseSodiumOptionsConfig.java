@@ -30,6 +30,9 @@ public final class ReeseSodiumOptionsConfig {
     static final int DEFAULT_TOOLTIP_DELAY_MS = 500;
     static final int MIN_TOOLTIP_DELAY_MS = 0;
     static final int MAX_TOOLTIP_DELAY_MS = 5000;
+    static final int DEFAULT_SEARCH_RESULT_LIMIT = 15;
+    static final int MIN_SEARCH_RESULT_LIMIT = 1;
+    static final int MAX_SEARCH_RESULT_LIMIT = 50;
     static final TabHeaderCollapseMode DEFAULT_TAB_HEADER_COLLAPSE_MODE = TabHeaderCollapseMode.ALL_EXPANDED;
     static final DisabledOptionVisibility DEFAULT_DISABLED_OPTION_VISIBILITY = DisabledOptionVisibility.SHOWN;
     static final FocusBorderMode DEFAULT_FOCUS_BORDER_MODE = FocusBorderMode.KEYBOARD;
@@ -174,6 +177,7 @@ public final class ReeseSodiumOptionsConfig {
         private boolean reducedMotion = false;
         private boolean reverseCyclingControls = true;
         private boolean shiftScrollSliderAdjustments = true;
+        private int searchResultLimit = DEFAULT_SEARCH_RESULT_LIMIT;
         private boolean hideNonMatchingOptions = true;
         private Boolean hideNonMatchingTabs = null;
         private DisabledOptionVisibility disabledOptionVisibility = DEFAULT_DISABLED_OPTION_VISIBILITY;
@@ -181,6 +185,7 @@ public final class ReeseSodiumOptionsConfig {
         private boolean controllerGuides = true;
         private boolean resetButtonOverlay = true;
         private boolean undoButtonOverlay = true;
+        private boolean alwaysShowActionButtons = false;
 
         public boolean isEnabled() {
             return this.enabled;
@@ -302,6 +307,14 @@ public final class ReeseSodiumOptionsConfig {
             this.shiftScrollSliderAdjustments = shiftScrollSliderAdjustments;
         }
 
+        public int getSearchResultLimit() {
+            return this.searchResultLimit;
+        }
+
+        public void setSearchResultLimit(int searchResultLimit) {
+            this.searchResultLimit = Math.clamp(searchResultLimit, MIN_SEARCH_RESULT_LIMIT, MAX_SEARCH_RESULT_LIMIT);
+        }
+
         public boolean isHideNonMatchingOptions() {
             return this.hideNonMatchingOptions;
         }
@@ -358,6 +371,14 @@ public final class ReeseSodiumOptionsConfig {
             this.undoButtonOverlay = undoButtonOverlay;
         }
 
+        public boolean isAlwaysShowActionButtons() {
+            return this.alwaysShowActionButtons;
+        }
+
+        public void setAlwaysShowActionButtons(boolean alwaysShowActionButtons) {
+            this.alwaysShowActionButtons = alwaysShowActionButtons;
+        }
+
         private ConfigData validate() {
             if (this.tabHeaderCollapseMode == null) {
                 this.tabHeaderCollapseMode = DEFAULT_TAB_HEADER_COLLAPSE_MODE;
@@ -372,6 +393,7 @@ public final class ReeseSodiumOptionsConfig {
                 this.focusBorderMode = DEFAULT_FOCUS_BORDER_MODE;
             }
             this.tooltipDelayMs = Math.clamp(this.tooltipDelayMs, MIN_TOOLTIP_DELAY_MS, MAX_TOOLTIP_DELAY_MS);
+            this.searchResultLimit = Math.clamp(this.searchResultLimit, MIN_SEARCH_RESULT_LIMIT, MAX_SEARCH_RESULT_LIMIT);
 
             return this;
         }

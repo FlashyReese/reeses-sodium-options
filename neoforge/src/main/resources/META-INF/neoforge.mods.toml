@@ -26,7 +26,7 @@ side = "CLIENT"
 [[dependencies.reeses_sodium_options]]
 modId = "sodium"
 type = "required"
-versionRange = "[0.9.1-beta.3,)"
+versionRange = "[0.9.1,)"
 ordering = "NONE"
 side = "CLIENT"
 
