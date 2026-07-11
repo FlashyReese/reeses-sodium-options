@@ -126,15 +126,16 @@ final class OptionSearch {
 
     record NavigationTarget(String tabKey, OptionUiState optionUiState, LayoutBounds bounds, LayoutBounds parentBounds) {
         int scrollOffset(int viewportHeight) {
-            if (this.parentBounds.height() <= 0) {
+            int contentHeight = this.parentBounds.height();
+            if (contentHeight <= 0 || contentHeight <= viewportHeight) {
                 return 0;
             }
 
-            int maxOffset = this.parentBounds.height() - viewportHeight;
+            int maxOffset = contentHeight - viewportHeight;
             int input = this.bounds.y() - this.parentBounds.y();
-            int inputOffset = input + this.bounds.height() == this.parentBounds.height() ? this.parentBounds.height() : input;
+            int inputOffset = input + this.bounds.height() == contentHeight ? contentHeight : input;
 
-            return inputOffset * maxOffset / this.parentBounds.height();
+            return (int) ((long) inputOffset * maxOffset / contentHeight);
         }
     }
 }

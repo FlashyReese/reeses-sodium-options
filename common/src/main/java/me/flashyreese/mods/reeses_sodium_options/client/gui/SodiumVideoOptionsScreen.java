@@ -332,6 +332,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
                             .setTabRailSelectedTab(this.uiState.tabFrameSelectedTab())
                             .setTabRailSelectedGroup(this.uiState.tabFrameSelectedGroup())
                             .setManuallyCollapsedTabGroups(this.uiState.manuallyCollapsedTabGroups())
+                            .setOptionPageScrollBarOffset(this.uiState.optionPageScrollBarOffset())
                             .setOptionStateStore(this.uiState)
                             .addTabs(tabs -> getOrderedModOptions()
                                     .forEach(config -> config.pages()

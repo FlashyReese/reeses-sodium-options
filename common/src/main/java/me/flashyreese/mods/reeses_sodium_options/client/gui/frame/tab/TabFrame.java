@@ -40,11 +40,14 @@ public class TabFrame extends AbstractFrame {
     private final List<Tab<?>> tabs = new ArrayList<>();
     private final Runnable onSetTab;
     private final Holder<Boolean> scrollSelectedTabIntoView;
+    // Page frames share this holder, so inactive-frame rebuilds must not leave their clamped offset in it.
+    private final Holder<Integer> optionPageScrollBarOffset;
 
-    public TabFrame(LayoutBounds dim, Screen screen, ModOptions modOptions, boolean renderOutline, List<Tab<?>> tabs, Runnable onSetTab, Holder<String> tabRailSelectedTab, Holder<String> tabRailSelectedGroup, Holder<Integer> tabRailScrollBarOffset, Holder<Boolean> scrollSelectedTabIntoView, Set<String> manuallyCollapsedTabGroups, OptionStateStore optionStateStore) {
+    public TabFrame(LayoutBounds dim, Screen screen, ModOptions modOptions, boolean renderOutline, List<Tab<?>> tabs, Runnable onSetTab, Holder<String> tabRailSelectedTab, Holder<String> tabRailSelectedGroup, Holder<Integer> tabRailScrollBarOffset, Holder<Boolean> scrollSelectedTabIntoView, Holder<Integer> optionPageScrollBarOffset, Set<String> manuallyCollapsedTabGroups, OptionStateStore optionStateStore) {
         super(dim, screen, renderOutline, modOptions);
         this.tabs.addAll(tabs);
         this.scrollSelectedTabIntoView = scrollSelectedTabIntoView;
+        this.optionPageScrollBarOffset = optionPageScrollBarOffset;
         TabGroupModel tabGroupModel = new TabGroupModel(this.tabs, tabRailSelectedGroup, manuallyCollapsedTabGroups);
         LayoutBounds frameDim = this.getFrameDim();
 
@@ -58,7 +61,9 @@ public class TabFrame extends AbstractFrame {
         this.buildFrame();
 
         // Let's build each frame, future note for anyone: do not move this line.
+        int selectedPageScrollOffset = this.optionPageScrollBarOffset.getOrDefault(0);
         this.tabSelection.warmInactiveFrames(this.frameSection);
+        this.optionPageScrollBarOffset.set(selectedPageScrollOffset);
     }
 
     public static Builder createBuilder() {
@@ -76,10 +81,12 @@ public class TabFrame extends AbstractFrame {
     }
 
     public void refreshFromState() {
+        int selectedPageScrollOffset = this.optionPageScrollBarOffset.getOrDefault(0);
         this.tabSelection.restorePersistedTab(this.tabRail::showRestoredSelectedTab);
         this.tabRail.selectGroupFor(this.tabSelection.selectedTab());
         this.tabSelection.activateSelectedTab();
         this.tabSelection.refreshFrames(this.frameSection);
+        this.optionPageScrollBarOffset.set(selectedPageScrollOffset);
         this.buildFrame();
     }
 
@@ -200,6 +207,7 @@ public class TabFrame extends AbstractFrame {
         private Holder<String> tabRailSelectedGroup = new Holder<>(null);
         private Holder<Integer> tabRailScrollBarOffset = new Holder<>(0);
         private Holder<Boolean> scrollSelectedTabIntoView = new Holder<>(false);
+        private Holder<Integer> optionPageScrollBarOffset = new Holder<>(0);
         private Set<String> manuallyCollapsedTabGroups = new HashSet<>();
         private OptionStateStore optionStateStore;
         private Screen screen;
@@ -245,6 +253,11 @@ public class TabFrame extends AbstractFrame {
             return this;
         }
 
+        public Builder setOptionPageScrollBarOffset(Holder<Integer> optionPageScrollBarOffset) {
+            this.optionPageScrollBarOffset = optionPageScrollBarOffset;
+            return this;
+        }
+
         public Builder setManuallyCollapsedTabGroups(Set<String> manuallyCollapsedTabGroups) {
             this.manuallyCollapsedTabGroups = manuallyCollapsedTabGroups;
             return this;
@@ -269,7 +282,7 @@ public class TabFrame extends AbstractFrame {
             Validate.notNull(this.dim, "Dimension must be specified");
             Validate.notNull(this.optionStateStore, "Option state store must be specified");
 
-            return new TabFrame(this.dim, this.screen, this.modOptions, this.renderOutline, this.functions, this.onSetTab, this.tabRailSelectedTab, this.tabRailSelectedGroup, this.tabRailScrollBarOffset, this.scrollSelectedTabIntoView, this.manuallyCollapsedTabGroups, this.optionStateStore);
+            return new TabFrame(this.dim, this.screen, this.modOptions, this.renderOutline, this.functions, this.onSetTab, this.tabRailSelectedTab, this.tabRailSelectedGroup, this.tabRailScrollBarOffset, this.scrollSelectedTabIntoView, this.optionPageScrollBarOffset, this.manuallyCollapsedTabGroups, this.optionStateStore);
         }
     }
 }
