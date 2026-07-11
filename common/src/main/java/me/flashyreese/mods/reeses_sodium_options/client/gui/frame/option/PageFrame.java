@@ -41,7 +41,7 @@ public class PageFrame extends AbstractFrame {
         this.page = page;
         this.optionStateStore = optionStateStore;
         this.optionRowFactory = new OptionRowFactory(screen, modOptions.theme(), this.optionRowTheme(), this.optionStateStore);
-        this.tooltipController = new OptionTooltipController(dim, modOptions, new OptionTooltipController.BoxRenderer() {
+        this.tooltipController = new OptionTooltipController(dim, modOptions, this.optionStateStore, new OptionTooltipController.BoxRenderer() {
             @Override
             public void drawRect(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int color) {
                 PageFrame.this.drawRect(guiGraphics, x1, y1, x2, y2, color);
@@ -192,7 +192,11 @@ public class PageFrame extends AbstractFrame {
 
             GuiEventListener child = this.children.get(childIndex++);
             if (child instanceof BaseWidget widget) {
-                widget.setDim(this.createRowDimension(row.y()));
+                LayoutBounds rowDim = this.createRowDimension(row.y());
+                widget.setDim(rowDim);
+                if (child instanceof OptionRow optionRow) {
+                    this.optionRowFactory.registerOptionBounds(optionRow, rowDim);
+                }
             }
         }
     }

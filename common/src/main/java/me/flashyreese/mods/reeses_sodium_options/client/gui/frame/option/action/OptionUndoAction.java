@@ -9,6 +9,11 @@ import java.util.Objects;
 public final class OptionUndoAction {
     static final Identifier ICON = Identifier.fromNamespaceAndPath("reeses-sodium-options", "textures/gui/undo_to_unmodified.png");
 
+    public static boolean isVisible(StatefulOption<?> option) {
+        return ReeseSodiumOptionsConfig.config().isUndoButtonOverlay()
+                && (ReeseSodiumOptionsConfig.config().isAlwaysShowActionButtons() || canUndo(option));
+    }
+
     public static boolean isActive(StatefulOption<?> option) {
         return ReeseSodiumOptionsConfig.config().isUndoButtonOverlay()
                 && canUndo(option);
