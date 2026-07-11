@@ -91,7 +91,7 @@ public class SearchTextFieldWidget extends TextFieldWidget {
 
         this.uiState.setHighlightedOptions(results);
         if (this.uiState.updateSearchResults(searchActive, results)) {
-            this.uiState.lastSearchIndex().set(0);
+            this.uiState.lastSearchIndex().set(null);
             this.refreshSearchResults.run();
         }
     }
@@ -102,7 +102,7 @@ public class SearchTextFieldWidget extends TextFieldWidget {
     }
 
     @Override
-    protected boolean onSubmit() {
+    protected boolean onSubmit(boolean reverse) {
         if (!this.isEditable()) {
             return true;
         }
@@ -113,11 +113,14 @@ public class SearchTextFieldWidget extends TextFieldWidget {
             return true;
         }
 
-        int startIndex = Math.floorMod(this.uiState.lastSearchIndex().getOrDefault(0), total);
-        OptionSearch.NavigationTarget target = targets.get(startIndex);
+        Integer lastIndex = this.uiState.lastSearchIndex().get();
+        int targetIndex = lastIndex == null
+                ? (reverse ? total - 1 : 0)
+                : Math.floorMod(lastIndex + (reverse ? -1 : 1), total);
+        OptionSearch.NavigationTarget target = targets.get(targetIndex);
 
         target.optionUiState().setSelected(true);
-        this.uiState.lastSearchIndex().set((startIndex + 1) % total);
+        this.uiState.lastSearchIndex().set(targetIndex);
         this.uiState.tabFrameSelectedTab().set(target.tabKey());
         this.uiState.scrollSelectedTabIntoView().set(true);
         this.uiState.optionPageScrollBarOffset().set(target.scrollOffset(this.tabDimHeight));

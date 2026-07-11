@@ -16,7 +16,7 @@ public final class OptionsScreenUiState implements OptionStateStore {
     private final Holder<Boolean> scrollSelectedTabIntoView = new Holder<>(false);
     private final Holder<Integer> optionPageScrollBarOffset = new Holder<>(0);
     private final Holder<String> lastSearch = new Holder<>("");
-    private final Holder<Integer> lastSearchIndex = new Holder<>(0);
+    private final Holder<Integer> lastSearchIndex = new Holder<>(null);
     private final List<SearchResultEntry> searchResults = new ArrayList<>();
     private boolean searchActive;
     private final Set<String> manuallyCollapsedTabGroups = new HashSet<>();
