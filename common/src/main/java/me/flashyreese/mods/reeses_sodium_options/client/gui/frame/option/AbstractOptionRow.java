@@ -344,7 +344,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
         }
     }
 
-    private void renderSearchResultMarker(GuiGraphicsExtractor guiGraphics, @Nullable OptionUiState optionUiState) {
+    private void renderSearchResultMarker(GuiGraphics guiGraphics, @Nullable OptionUiState optionUiState) {
         if (optionUiState == null || !optionUiState.isHighlighted() || optionUiState.isSelected()) {
             return;
         }
