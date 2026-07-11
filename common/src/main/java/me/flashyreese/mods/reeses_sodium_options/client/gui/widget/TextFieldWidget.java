@@ -64,8 +64,8 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
     protected void onTextChanged(String text) {
     }
 
-    /** Called when Enter is pressed; return whether it was handled. */
-    protected boolean onSubmit() {
+    /** Called when Enter is pressed; the event carries modifiers such as Shift. */
+    protected boolean onSubmit(KeyEvent event) {
         return false;
     }
 
@@ -426,8 +426,8 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
                 return true;
             } else {
                 switch (event.key()) {
-                    case GLFW.GLFW_KEY_ENTER -> {
-                        return this.onSubmit();
+                    case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER -> {
+                        return this.onSubmit(event);
                     }
                     case GLFW.GLFW_KEY_BACKSPACE -> {
                         if (this.editable) {
