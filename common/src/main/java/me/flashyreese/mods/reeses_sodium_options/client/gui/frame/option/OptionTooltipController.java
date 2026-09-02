@@ -29,15 +29,13 @@ final class OptionTooltipController {
     private final LayoutBounds viewportBounds;
     private final ModOptions modOptions;
     private final OptionStateStore optionStateStore;
-    private final BoxRenderer boxRenderer;
     private long targetStartTime;
     private @Nullable OptionRow targetElement;
 
-    OptionTooltipController(LayoutBounds viewportBounds, ModOptions modOptions, OptionStateStore optionStateStore, BoxRenderer boxRenderer) {
+    OptionTooltipController(LayoutBounds viewportBounds, ModOptions modOptions, OptionStateStore optionStateStore) {
         this.viewportBounds = viewportBounds;
         this.modOptions = modOptions;
         this.optionStateStore = optionStateStore;
-        this.boxRenderer = boxRenderer;
     }
 
     void render(GuiGraphics guiGraphics, List<OptionRow> optionRows, int mouseX, int mouseY) {
@@ -143,11 +141,11 @@ final class OptionTooltipController {
             boxY = dim.getLimitY();
         }
 
-        this.boxRenderer.drawRect(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
+        guiGraphics.fill(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
         int borderColor = ReeseSodiumOptionsConfig.config().isColorThemes() && ReeseSodiumOptionsConfig.config().isThemedTooltipBorders()
                 ? GuiThemes.fromSodium(this.modOptions.theme()).theme
                 : DEFAULT_TOOLTIP_BORDER_COLOR;
-        this.boxRenderer.drawBorder(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, borderColor);
+        BaseWidget.border(guiGraphics, boxX, boxY, boxX + boxWidth, boxY + boxHeight, borderColor);
 
         for (int i = 0; i < tooltip.size(); i++) {
             guiGraphics.drawString(Minecraft.getInstance().font, tooltip.get(i), boxX + TEXT_PADDING, boxY + TEXT_PADDING + (i * LINE_HEIGHT), 0xFFFFFFFF, true);
@@ -170,11 +168,5 @@ final class OptionTooltipController {
         }
 
         return tooltip;
-    }
-
-    interface BoxRenderer {
-        void drawRect(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int color);
-
-        void drawBorder(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int color);
     }
 }

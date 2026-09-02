@@ -21,6 +21,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -75,7 +76,7 @@ final class RsoOptionsScreenProcessor extends ScreenProcessor<SodiumVideoOptions
     }
 
     @Override
-    protected @Nullable Supplier<Boolean> createScreenNavigationFunc(ScreenDirection direction) {
+    protected @NonNull Supplier<Boolean> createScreenNavigationFunc(ScreenDirection direction) {
         return () -> this.screen.rso$navigateController(direction);
     }
 
