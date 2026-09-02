@@ -173,7 +173,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput builder) {
+    public void updateNarration(@NotNull NarrationElementOutput builder) {
         Component value = this.narrationValue();
         Component title = value == null ? this.getOption().getName() : CommonComponents.optionNameValue(this.getOption().getName(), value);
 
