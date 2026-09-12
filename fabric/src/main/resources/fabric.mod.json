@@ -47,8 +47,8 @@
     }
   },
   "depends": {
-    "minecraft": "~26.1.0",
-    "sodium": ">=0.9.1"
+    "minecraft": "=${minecraft_version}",
+    "sodium": "=${sodium_version}"
   },
   "suggests": {
     "controlify": ">=3.0.2"
