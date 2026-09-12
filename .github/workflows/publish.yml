@@ -42,6 +42,7 @@ jobs:
           version-type: release
 
           loaders: neoforge
+          environment: client
 
           dependencies: |
             sodium
@@ -69,6 +70,7 @@ jobs:
           version-type: release
 
           loaders: fabric
+          environment: client
 
           dependencies: |
             sodium
