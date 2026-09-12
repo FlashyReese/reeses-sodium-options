@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.config;
 
+import com.mojang.blaze3d.Blaze3D;
 import net.caffeinemc.mods.sodium.api.config.ConfigEntryPoint;
 import net.caffeinemc.mods.sodium.api.config.structure.ConfigBuilder;
 import net.caffeinemc.mods.sodium.api.config.structure.OptionBuilder;
@@ -7,14 +8,14 @@ import net.caffeinemc.mods.sodium.api.config.structure.OptionGroupBuilder;
 import net.caffeinemc.mods.sodium.api.config.structure.OptionPageBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
 
+import java.net.URI;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
     private static final String MOD_ID = "reeses-sodium-options";
-    private static final String KO_FI_URL = "https://ko-fi.com/flashyreese";
+    private static final URI KO_FI_URL = URI.create("https://ko-fi.com/flashyreese");
 
     @Override
     public void registerConfigLate(ConfigBuilder builder) {
@@ -244,7 +245,7 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
                 .addOption(builder.createExternalButtonOption(this.optionId("support_project"))
                         .setName(Component.translatable("rso.options.support_project.name"))
                         .setTooltip(Component.translatable("rso.options.support_project.tooltip"))
-                        .setScreenConsumer(screen -> Util.getPlatform().openUri(KO_FI_URL)));
+                        .setScreenConsumer(screen -> Blaze3D.openUri(KO_FI_URL)));
     }
 
     private OptionBuilder createBooleanOption(ConfigBuilder builder, String name, Consumer<Boolean> setter, Supplier<Boolean> getter, boolean defaultValue, boolean rebuildScreen) {

@@ -1,5 +1,7 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui;
 
+import com.mojang.blaze3d.Blaze3D;
+import com.mojang.blaze3d.platform.InputConstants;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.AbstractFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.BasicFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.OptionRow;
@@ -36,13 +38,13 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLKeycode;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -368,8 +370,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     }
 
     private void openDonationPage() {
-        Util.getPlatform()
-                .openUri("https://caffeinemc.net/donate");
+        Blaze3D.openUri(URI.create("https://caffeinemc.net/donate"));
     }
 
     @Override
@@ -391,7 +392,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     public boolean mouseReleased(@NonNull MouseButtonEvent event) {
         boolean handled = super.mouseReleased(event);
 
-        if (event.button() == 0 && this.rootFrame != null) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && this.rootFrame != null) {
             this.rootFrame.releaseActionButtonLayoutHolds();
         }
 
@@ -429,7 +430,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
             return true;
         }
 
-        if (event.key() == GLFW.GLFW_KEY_P && event.hasShiftDown() && !this.isSearchTextFieldFocused()) {
+        if (event.shortcutKey() == SDLKeycode.SDLK_P && event.hasShiftDown() && !this.isSearchTextFieldFocused()) {
             this.minecraft.gui.setScreen(new VideoSettingsScreen(this.prevScreen, this.minecraft, this.minecraft.options));
 
             return true;
@@ -486,15 +487,15 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
     }
 
     private boolean isSearchShortcut(KeyEvent event) {
-        return event.key() == GLFW.GLFW_KEY_F && event.hasControlDown();
+        return event.shortcutKey() == InputConstants.KEYCODE_F && event.hasControlDown();
     }
 
     private boolean isUndoShortcut(KeyEvent event) {
-        return event.key() == GLFW.GLFW_KEY_Z && event.hasControlDown();
+        return event.shortcutKey() == InputConstants.KEYCODE_Z && event.hasControlDown();
     }
 
     private boolean isApplyShortcut(KeyEvent event) {
-        return event.key() == GLFW.GLFW_KEY_ENTER || event.key() == GLFW.GLFW_KEY_KP_ENTER;
+        return event.isConfirmation();
     }
 
     private boolean isSearchTextFieldFocused() {
@@ -520,20 +521,20 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         OptionRow target;
         boolean handled = true;
 
-        switch (event.key()) {
-            case GLFW.GLFW_KEY_HOME -> {
+        switch (event.shortcutKey()) {
+            case InputConstants.KEYCODE_HOME -> {
                 this.tabFrame.scrollSelectedPageToStart();
                 target = this.tabFrame.findFirstSelectedOptionRow();
             }
-            case GLFW.GLFW_KEY_END -> {
+            case InputConstants.KEYCODE_END -> {
                 this.tabFrame.scrollSelectedPageToEnd();
                 target = this.tabFrame.findLastSelectedOptionRow();
             }
-            case GLFW.GLFW_KEY_PAGE_UP -> {
+            case InputConstants.KEYCODE_PAGEUP -> {
                 handled = this.tabFrame.scrollSelectedPage(-1);
                 target = this.tabFrame.findFirstVisibleSelectedOptionRow();
             }
-            case GLFW.GLFW_KEY_PAGE_DOWN -> {
+            case InputConstants.KEYCODE_PAGEDOWN -> {
                 handled = this.tabFrame.scrollSelectedPage(1);
                 target = this.tabFrame.findLastVisibleSelectedOptionRow();
             }
@@ -699,22 +700,22 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
         BaseWidget.setKeyboardFocusVisible(true);
 
         if (this.prompt != null) {
-            return this.keyPressed(new KeyEvent(keyForDirection(direction), 0, 0));
+            return this.keyPressed(keyEventForDirection(direction));
         }
 
-        return this.keyPressedArrow(new KeyEvent(keyForDirection(direction), 0, 0), direction);
+        return this.keyPressedArrow(keyEventForDirection(direction), direction);
     }
 
     public boolean rso$handleControllerBack() {
         BaseWidget.setKeyboardFocusVisible(true);
 
-        return this.keyPressed(new KeyEvent(GLFW.GLFW_KEY_ESCAPE, 0, 0));
+        return this.keyPressed(new KeyEvent(InputConstants.KEY_ESCAPE, SDLKeycode.SDLK_ESCAPE, 0));
     }
 
     public boolean rso$handleControllerPress() {
         BaseWidget.setKeyboardFocusVisible(true);
 
-        return this.keyPressed(new KeyEvent(GLFW.GLFW_KEY_ENTER, 0, 0));
+        return this.keyPressed(new KeyEvent(InputConstants.KEY_RETURN, InputConstants.KEYCODE_RETURN, 0));
     }
 
     public void rso$afterControllerInput(@Nullable String previousTabKey) {
@@ -827,20 +828,20 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
 
     private static @Nullable ScreenDirection getArrowDirection(KeyEvent event) {
         return switch (event.key()) {
-            case GLFW.GLFW_KEY_LEFT -> ScreenDirection.LEFT;
-            case GLFW.GLFW_KEY_RIGHT -> ScreenDirection.RIGHT;
-            case GLFW.GLFW_KEY_UP -> ScreenDirection.UP;
-            case GLFW.GLFW_KEY_DOWN -> ScreenDirection.DOWN;
+            case InputConstants.KEY_LEFT -> ScreenDirection.LEFT;
+            case InputConstants.KEY_RIGHT -> ScreenDirection.RIGHT;
+            case InputConstants.KEY_UP -> ScreenDirection.UP;
+            case InputConstants.KEY_DOWN -> ScreenDirection.DOWN;
             default -> null;
         };
     }
 
-    private static int keyForDirection(ScreenDirection direction) {
+    private static KeyEvent keyEventForDirection(ScreenDirection direction) {
         return switch (direction) {
-            case LEFT -> GLFW.GLFW_KEY_LEFT;
-            case RIGHT -> GLFW.GLFW_KEY_RIGHT;
-            case UP -> GLFW.GLFW_KEY_UP;
-            case DOWN -> GLFW.GLFW_KEY_DOWN;
+            case LEFT -> new KeyEvent(InputConstants.KEY_LEFT, InputConstants.KEYCODE_LEFT, 0);
+            case RIGHT -> new KeyEvent(InputConstants.KEY_RIGHT, InputConstants.KEYCODE_RIGHT, 0);
+            case UP -> new KeyEvent(InputConstants.KEY_UP, InputConstants.KEYCODE_UP, 0);
+            case DOWN -> new KeyEvent(InputConstants.KEY_DOWN, InputConstants.KEYCODE_DOWN, 0);
         };
     }
 

@@ -14,7 +14,10 @@ val CONTROLIFY_VERSION = rootProject.extra["CONTROLIFY_VERSION"] as String
 val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
 
 architectury {
-    common("fabric", "neoforge")
+    common(
+        "fabric",
+        // "neoforge",
+    )
     injectInjectables = false
 }
 
@@ -33,9 +36,9 @@ sourceSets.named("main") {
 dependencies {
     minecraft("net.minecraft:minecraft:$MINECRAFT_VERSION")
 
-    compileOnly("io.github.llamalad7:mixinextras-common:0.5.4")
-    annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.4")
-    compileOnly("net.fabricmc:sponge-mixin:0.17.3+mixin.0.8.7")
+    compileOnly("io.github.llamalad7:mixinextras-common:0.5.5")
+    annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.5")
+    compileOnly("net.fabricmc:sponge-mixin:0.17.4+mixin.0.8.7")
     compileOnly("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
 
     fun addDependentFabricModule(name: String) {

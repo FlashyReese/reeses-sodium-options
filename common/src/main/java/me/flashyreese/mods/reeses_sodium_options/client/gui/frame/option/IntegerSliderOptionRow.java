@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
@@ -110,7 +111,7 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
         this.sliderHeld = false;
         if (!this.option.isEnabled()
                 || this.option.shouldHideControl()
-                || event.button() != 0
+                || event.button() != InputConstants.MOUSE_BUTTON_LEFT
                 || !this.isMouseOverRow(event.x(), event.y())) {
             return false;
         }
@@ -126,7 +127,7 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
 
     @Override
     public boolean mouseDragged(@NonNull MouseButtonEvent event, double deltaX, double deltaY) {
-        if (!this.sliderHeld || event.button() != 0 || !this.option.isEnabled()) {
+        if (!this.sliderHeld || event.button() != InputConstants.MOUSE_BUTTON_LEFT || !this.option.isEnabled()) {
             return false;
         }
 
@@ -138,7 +139,7 @@ final class IntegerSliderOptionRow extends AbstractOptionRow {
 
     @Override
     public boolean mouseReleased(@NonNull MouseButtonEvent event) {
-        if (event.button() != 0 || !this.sliderHeld) {
+        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT || !this.sliderHeld) {
             return false;
         }
 

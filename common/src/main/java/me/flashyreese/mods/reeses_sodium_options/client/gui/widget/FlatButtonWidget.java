@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiThemes;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiTheme;
@@ -72,7 +73,7 @@ public class FlatButtonWidget extends BaseWidget {
 
     @Override
     public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick) {
-        if (!this.enabled || !this.visible || event.button() != 0 || !this.isMouseOver(event.x(), event.y())) {
+        if (!this.enabled || !this.visible || event.button() != InputConstants.MOUSE_BUTTON_LEFT || !this.isMouseOver(event.x(), event.y())) {
             return false;
         }
 

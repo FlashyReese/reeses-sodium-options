@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuideProvider;
@@ -14,7 +15,6 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.action.
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.action.OptionUndoAction;
 import net.caffeinemc.mods.sodium.client.config.structure.Option;
 import net.caffeinemc.mods.sodium.client.config.structure.StatefulOption;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -33,7 +33,7 @@ import net.minecraft.network.chat.CommonComponents;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -391,7 +391,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     }
 
     private boolean tryActivateControl(MouseButtonEvent event) {
-        return event.button() == 0
+        return event.button() == InputConstants.MOUSE_BUTTON_LEFT
                 && this.isMouseOverRow(event.x(), event.y())
                 && this.activateControl();
     }
@@ -401,8 +401,6 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     }
 
     private static boolean isLeftMouseButtonDown() {
-        long window = Minecraft.getInstance().getWindow().handle();
-
-        return GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
+        return (SDLMouse.SDL_GetMouseState(null, null) & SDLMouse.SDL_BUTTON_LMASK) != 0;
     }
 }

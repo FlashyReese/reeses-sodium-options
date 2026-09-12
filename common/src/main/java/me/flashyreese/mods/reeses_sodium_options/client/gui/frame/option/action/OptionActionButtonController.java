@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.action;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import net.caffeinemc.mods.sodium.client.config.structure.StatefulOption;
 import net.minecraft.client.gui.ComponentPath;
@@ -77,7 +78,7 @@ public final class OptionActionButtonController {
     }
 
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() != 0 || this.optionSupplier.get() == null) {
+        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT || this.optionSupplier.get() == null) {
             return false;
         }
 

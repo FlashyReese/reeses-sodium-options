@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.search;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.state.OptionsScreenUiState;
@@ -65,7 +66,7 @@ public class SearchTextFieldWidget extends TextFieldWidget {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean repeated) {
-        if (event.button() == 0 && this.showClearButton() && this.clearButtonBounds().contains(event.x(), event.y())) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && this.showClearButton() && this.clearButtonBounds().contains(event.x(), event.y())) {
             this.setFocused(true);
             this.onInteraction();
             this.clearText();
