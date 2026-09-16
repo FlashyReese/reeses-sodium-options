@@ -275,8 +275,7 @@ final class TabRail {
                 .max()
                 .orElse(0);
         int preferredWidth = textWidth + (this.canScroll ? TabFrame.TAB_RAIL_SCROLL_PADDING : TabFrame.TAB_RAIL_PADDING);
-        int maximumWidth = Math.max(TabFrame.TAB_RAIL_MIN_WIDTH,
-                Math.min(TabFrame.TAB_RAIL_MAX_WIDTH, (int) (frameDim.width() * TabFrame.TAB_RAIL_MAX_WIDTH_RATIO)));
+        int maximumWidth = Math.clamp((int) (frameDim.width() * TabFrame.TAB_RAIL_MAX_WIDTH_RATIO), TabFrame.TAB_RAIL_MIN_WIDTH, TabFrame.TAB_RAIL_MAX_WIDTH);
 
         return Math.clamp(preferredWidth, TabFrame.TAB_RAIL_MIN_WIDTH, maximumWidth);
     }
