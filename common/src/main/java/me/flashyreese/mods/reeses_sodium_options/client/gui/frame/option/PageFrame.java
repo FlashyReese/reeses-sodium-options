@@ -41,17 +41,7 @@ public class PageFrame extends AbstractFrame {
         this.page = page;
         this.optionStateStore = optionStateStore;
         this.optionRowFactory = new OptionRowFactory(screen, modOptions.theme(), this.optionRowTheme(), this.optionStateStore);
-        this.tooltipController = new OptionTooltipController(dim, modOptions, this.optionStateStore, new OptionTooltipController.BoxRenderer() {
-            @Override
-            public void drawRect(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int color) {
-                PageFrame.this.drawRect(guiGraphics, x1, y1, x2, y2, color);
-            }
-
-            @Override
-            public void drawBorder(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int color) {
-                PageFrame.this.drawBorder(guiGraphics, x1, y1, x2, y2, color);
-            }
-        });
+        this.tooltipController = new OptionTooltipController(dim, modOptions, this.optionStateStore);
         this.setupFrame();
         this.buildFrame();
     }
@@ -143,7 +133,7 @@ public class PageFrame extends AbstractFrame {
     }
 
     private OptionRow getOptionRow(Option option, LayoutBounds dim) {
-        Identifier optionId = optionId(option);
+        Identifier optionId = option instanceof OptionExtended optionExtended ? optionExtended.rso$getId() : null;
         if (optionId == null) {
             return this.optionRowFactory.create(option, dim);
         }
@@ -161,10 +151,6 @@ public class PageFrame extends AbstractFrame {
         this.optionRowFactory.registerOptionBounds(optionRow, dim);
 
         return optionRow;
-    }
-
-    private static @Nullable Identifier optionId(Option option) {
-        return option instanceof OptionExtended optionExtended ? optionExtended.rso$getId() : null;
     }
 
     private LayoutBounds createRowDimension(int y) {

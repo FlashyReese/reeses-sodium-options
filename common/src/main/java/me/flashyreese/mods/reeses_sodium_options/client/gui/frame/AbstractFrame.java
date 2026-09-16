@@ -194,7 +194,7 @@ public abstract class AbstractFrame extends BaseWidget implements ContainerEvent
     }
 
     @Override
-    public Collection<? extends NarratableEntry> getNarratables() {
+    public @NonNull Collection<? extends NarratableEntry> getNarratables() {
         List<NarratableEntry> narratables = new ArrayList<>();
 
         for (GuiEventListener child : this.children) {

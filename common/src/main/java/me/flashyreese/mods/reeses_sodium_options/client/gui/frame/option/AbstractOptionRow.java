@@ -164,7 +164,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     }
 
     @Override
-    public Collection<? extends NarratableEntry> getNarratables() {
+    public @NonNull Collection<? extends NarratableEntry> getNarratables() {
         List<NarratableEntry> narratables = new ArrayList<>();
         narratables.add(this);
 
@@ -178,7 +178,7 @@ abstract class AbstractOptionRow extends BaseWidget implements ContainerEventHan
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput builder) {
+    public void updateNarration(@NonNull NarrationElementOutput builder) {
         Component value = this.narrationValue();
         Component title = value == null ? this.getOption().getName() : CommonComponents.optionNameValue(this.getOption().getName(), value);
 

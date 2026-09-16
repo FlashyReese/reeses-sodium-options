@@ -72,8 +72,6 @@ final class PageLayout {
             y += ROW_HEIGHT;
         }
 
-        y += GROUP_PADDING;
-
         return new PageLayout(rows, y);
     }
 
