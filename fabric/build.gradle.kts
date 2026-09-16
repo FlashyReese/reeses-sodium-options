@@ -117,10 +117,16 @@ tasks.withType<JavaExec>().configureEach {
 tasks {
     processResources {
         inputs.property("version", project.version)
+        inputs.property("minecraft_version", MINECRAFT_VERSION)
+        inputs.property("sodium_version", SODIUM_VERSION)
         inputs.property("controlifyEnabled", CONTROLIFY_ENABLED)
 
         filesMatching("fabric.mod.json") {
-            expand(mapOf("version" to project.version))
+            expand(mapOf(
+                "version" to project.version,
+                "minecraft_version" to MINECRAFT_VERSION,
+                "sodium_version" to SODIUM_VERSION,
+            ))
         }
 
         if (!CONTROLIFY_ENABLED) {
