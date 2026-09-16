@@ -15,8 +15,7 @@ val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
 
 architectury {
     common(
-        "fabric",
-        // "neoforge",
+        "fabric", "neoforge",
     )
     injectInjectables = false
 }
