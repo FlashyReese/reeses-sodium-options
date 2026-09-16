@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.theme.GuiThemes;
@@ -57,7 +58,7 @@ final class TabButtonWidget extends BaseWidget {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == 0 && this.isMouseOver(event.x(), event.y())) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && this.isMouseOver(event.x(), event.y())) {
             this.doAction();
             return true;
         }

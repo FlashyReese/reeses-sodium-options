@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
@@ -25,7 +26,6 @@ import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
@@ -115,6 +115,9 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
             int color = ((int) (this.currentCursorAlpha * 255) << 24) | 0x00D0D0D0;
             guiGraphics.fill(RenderPipelines.GUI, cursorX, textStartY - 1, cursorX + 1, textStartY + 1 + this.font.lineHeight, color);
         }
+        if (this.canConsumeTextInput()) {
+            Minecraft.getInstance().textInputManager().setTextInputArea(cursorX, textStartY, cursorX + 1, textStartY + this.font.lineHeight + 1);
+        }
         // Highlighted text
         if (selectionEndOffset != selectionStartOffset) {
             int selectionEndX = textStartX + this.font.width(displayedText.substring(0, selectionEndOffset));
@@ -184,7 +187,7 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
         }
 
         this.setFocused(true);
-        return this.keyPressed(new KeyEvent(keycode, scancode, modifiers));
+        return this.keyPressed(new KeyEvent(scancode, keycode, modifiers));
     }
 
     public boolean rso$moveCursor(int amount) {
@@ -248,8 +251,8 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
         this.setSelectionEnd(0);
     }
 
-    private void erase(int offset) {
-        if (Minecraft.getInstance().hasControlDown()) {
+    private void erase(int offset, boolean byWord) {
+        if (byWord) {
             this.eraseWords(offset);
         } else {
             this.eraseCharacters(offset);
@@ -384,6 +387,17 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
     }
 
     @Override
+    public boolean capturesInput() {
+        return this.canConsumeTextInput();
+    }
+
+    @Override
+    public void setFocused(boolean focused) {
+        super.setFocused(focused);
+        Minecraft.getInstance().onTextInputFocusChange(this, this.canConsumeTextInput());
+    }
+
+    @Override
     public boolean charTyped(@NonNull CharacterEvent characterEvent) {
         if (!this.canConsumeTextInput()) {
             return false;
@@ -425,28 +439,28 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
 
                 return true;
             } else {
-                switch (event.key()) {
-                    case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER -> {
+                switch (event.shortcutKey()) {
+                    case InputConstants.KEYCODE_RETURN, InputConstants.KEYCODE_NUMPADENTER -> {
                         return this.onSubmit(event);
                     }
-                    case GLFW.GLFW_KEY_BACKSPACE -> {
+                    case InputConstants.KEYCODE_BACKSPACE -> {
                         if (this.editable) {
                             this.selecting = false;
-                            this.erase(-1);
+                            this.erase(-1, event.hasControlDownWithQuirk());
                             this.selecting = event.hasShiftDown();
                         }
                         return true;
                     }
-                    case GLFW.GLFW_KEY_DELETE -> {
+                    case InputConstants.KEYCODE_DELETE -> {
                         if (this.editable) {
                             this.selecting = false;
-                            this.erase(1);
+                            this.erase(1, event.hasControlDownWithQuirk());
                             this.selecting = event.hasShiftDown();
                         }
                         return true;
                     }
-                    case GLFW.GLFW_KEY_RIGHT -> {
-                        if (event.hasControlDown()) {
+                    case InputConstants.KEYCODE_RIGHT -> {
+                        if (event.hasControlDownWithQuirk()) {
                             this.setCursor(this.getWordSkipPosition(1));
                         } else {
                             this.moveCursor(1);
@@ -455,8 +469,8 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
                         this.lastCursorPosition = this.getCursor();
                         return state;
                     }
-                    case GLFW.GLFW_KEY_LEFT -> {
-                        if (event.hasControlDown()) {
+                    case InputConstants.KEYCODE_LEFT -> {
+                        if (event.hasControlDownWithQuirk()) {
                             this.setCursor(this.getWordSkipPosition(-1));
                         } else {
                             this.moveCursor(-1);
@@ -465,11 +479,11 @@ public class TextFieldWidget extends BaseWidget implements ControlGuideProvider 
                         this.lastCursorPosition = this.getCursor();
                         return state;
                     }
-                    case GLFW.GLFW_KEY_HOME -> {
+                    case InputConstants.KEYCODE_HOME -> {
                         this.setCursorToStart();
                         return true;
                     }
-                    case GLFW.GLFW_KEY_END -> {
+                    case InputConstants.KEYCODE_END -> {
                         this.setCursorToEnd();
                         return true;
                     }

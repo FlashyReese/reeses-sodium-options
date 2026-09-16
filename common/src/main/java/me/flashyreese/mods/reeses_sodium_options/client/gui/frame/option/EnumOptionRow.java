@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.flashyreese.mods.reeses_sodium_options.client.config.ReeseSodiumOptionsConfig;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.control.ControlGuide;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
@@ -62,13 +63,13 @@ final class EnumOptionRow<E extends Enum<E>> extends AbstractOptionRow {
     @Override
     protected boolean controlMouseClicked(MouseButtonEvent event, boolean doubleClick) {
         boolean reverse = Minecraft.getInstance().hasShiftDown();
-        if (event.button() == 1) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
             if (!ReeseSodiumOptionsConfig.config().isReverseCyclingControls()) {
                 return false;
             }
 
             reverse = true;
-        } else if (event.button() != 0) {
+        } else if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) {
             return false;
         }
 

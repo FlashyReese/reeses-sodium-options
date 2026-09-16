@@ -1,5 +1,6 @@
 package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -12,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
 
@@ -90,7 +90,7 @@ public class ScrollBarWidget extends BaseWidget {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() == 0) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             this.isDragging = false;
         }
         return false;
@@ -139,11 +139,11 @@ public class ScrollBarWidget extends BaseWidget {
         }
 
         int newOffset = switch (event.key()) {
-            case GLFW.GLFW_KEY_UP -> this.getOffset() - SCROLL_STEP;
-            case GLFW.GLFW_KEY_DOWN -> this.getOffset() + SCROLL_STEP;
-            case GLFW.GLFW_KEY_LEFT ->
+            case InputConstants.KEY_UP -> this.getOffset() - SCROLL_STEP;
+            case InputConstants.KEY_DOWN -> this.getOffset() + SCROLL_STEP;
+            case InputConstants.KEY_LEFT ->
                     this.mode == ScrollDirection.HORIZONTAL ? this.getOffset() - SCROLL_STEP : this.getOffset();
-            case GLFW.GLFW_KEY_RIGHT ->
+            case InputConstants.KEY_RIGHT ->
                     this.mode == ScrollDirection.HORIZONTAL ? this.getOffset() + SCROLL_STEP : this.getOffset();
             default -> this.getOffset();
         };
