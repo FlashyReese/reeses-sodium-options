@@ -9,16 +9,16 @@ val MINECRAFT_VERSION = "26.3"
 val NEOFORGE_VERSION = "26.3.0.1-beta"
 val FABRIC_LOADER_VERSION = "0.19.5"
 val FABRIC_API_VERSION = "0.160.5+26.3"
-val CONTROLIFY_VERSION = "3.5.0+26.2"
+val CONTROLIFY_VERSION = "3.5.2+mc26.3"
 val CONTROLIFY_ENABLED = providers.gradleProperty("rso.enableControlify")
     .map { it.toBoolean() }
-    .orElse(false)
+    .orElse(true)
     .get()
 
 // https://semver.org/
 val MAVEN_GROUP = providers.gradleProperty("maven_group").get()
 val ARCHIVE_NAME = providers.gradleProperty("archives_name").get()
-val MOD_VERSION = "2.2.4"
+val MOD_VERSION = "2.2.5"
 val SODIUM_VERSION = "0.9.2+mc26.3"
 
 extra["MINECRAFT_VERSION"] = MINECRAFT_VERSION
@@ -48,6 +48,7 @@ subprojects {
 
     repositories {
         mavenCentral()
+        maven("https://maven.quiltmc.org/repository/release")
         maven("https://maven.fabricmc.net/")
         maven("https://api.modrinth.com/maven")
         maven("https://libraries.minecraft.net/")

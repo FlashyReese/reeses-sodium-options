@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.attributes.Attribute
 
 plugins {
     id("idea")
@@ -13,6 +14,7 @@ val NEOFORGE_VERSION = rootProject.extra["NEOFORGE_VERSION"] as String
 val SODIUM_VERSION = rootProject.extra["SODIUM_VERSION"] as String
 val CONTROLIFY_VERSION = rootProject.extra["CONTROLIFY_VERSION"] as String
 val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
+val CONTROLIFY_LOADER_ATTRIBUTE = Attribute.of("io.github.mcgradleconventions.loader", String::class.java)
 
 base {
     archivesName.set("${rootProject.name}-neoforge")
@@ -73,8 +75,11 @@ dependencies {
     implementation("net.caffeinemc:sodium-neoforge-api:$SODIUM_VERSION")
     implementation("net.caffeinemc:sodium-neoforge-mod:$SODIUM_VERSION")
     if (CONTROLIFY_ENABLED) {
-        compileOnly("dev.isxander:controlify:$CONTROLIFY_VERSION-neoforge") {
+        compileOnly("dev.isxander:controlify:$CONTROLIFY_VERSION") {
             isTransitive = false
+            attributes {
+                attribute(CONTROLIFY_LOADER_ATTRIBUTE, "neoforge")
+            }
         }
     }
     add("common", project(":common")) {
