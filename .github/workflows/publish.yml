@@ -39,7 +39,6 @@ jobs:
 
           name: '[NeoForge] ${{ github.event.release.name }}'
           version: '${{ github.event.release.tag_name }}+neoforge'
-          version-type: release
 
           loaders: neoforge
           environment: client
@@ -67,7 +66,6 @@ jobs:
 
           name: '[Fabric] ${{ github.event.release.name }}'
           version: '${{ github.event.release.tag_name }}+fabric'
-          version-type: release
 
           loaders: fabric
           environment: client
