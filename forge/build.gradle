@@ -1,0 +1,109 @@
+// MinecraftForge build of Reese's Sodium Options.
+//
+// All of the mod's code lives in :common without a single loader import; the fabric and neoforge
+// modules only add metadata. This build does the same for MinecraftForge: it compiles the common
+// sources against Forge and Sodium and ships a Forge mods.toml.
+plugins {
+    id 'java-library'
+    id 'idea'
+    id 'net.minecraftforge.gradle' version '[7.0.17,8)'
+}
+
+// Versions come from the root build script, so they only need to be bumped in one place.
+def rootBuild = file('../build.gradle.kts').text
+def rootValue = { String name -> (rootBuild =~ /val ${name} = "([^"]+)"/)[0][1] }
+
+def minecraftVersion = rootValue('MINECRAFT_VERSION')
+def sodiumVersion = rootValue('SODIUM_VERSION')
+def forgeVersion = '65.1.0'
+def modVersion = "${rootValue('MOD_VERSION')}+mc${minecraftVersion}"
+
+group = 'me.flashyreese.mods'
+version = modVersion
+
+base {
+    archivesName = 'reeses-sodium-options-forge'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir '../common/src/main/java'
+            // Controlify has no MinecraftForge build to compile against, so its integration is left
+            // out, the same way common/build.gradle.kts does when rso.enableControlify is false.
+            exclude 'me/flashyreese/mods/reeses_sodium_options/client/controlify/**'
+        }
+        resources {
+            srcDir '../common/src/main/resources'
+            exclude 'META-INF/services/dev.isxander.controlify.api.entrypoint.ControlifyEntrypoint'
+        }
+    }
+}
+
+minecraft {
+    runs {
+        register('client') {
+            workingDir = layout.projectDirectory.dir('run')
+            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
+        }
+    }
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+    maven { url = 'https://maven.caffeinemc.net/releases' }
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}")
+
+    // There is no Sodium build for MinecraftForge. Everything this mod uses comes from Sodium's
+    // common code, which every Sodium jar contains, so it compiles against the NeoForge one (the
+    // -mod artifact: sodium-neoforge itself only wraps it with Jar-in-Jar).
+    compileOnly("net.caffeinemc:sodium-neoforge-mod:${sodiumVersion}") {
+        transitive = false
+    }
+}
+
+tasks.named('processResources', ProcessResources) {
+    def properties = ['version': modVersion, 'minecraft_version': minecraftVersion, 'sodium_version': sodiumVersion]
+    inputs.properties properties
+
+    filesMatching('META-INF/mods.toml') {
+        expand properties
+    }
+
+    filesMatching('reeses-sodium-options.mixins.json') {
+        // Minecraft 26.2 is not obfuscated, so no refmap is generated; drop the reference to it.
+        filter { line -> line.contains('"refmap"') ? null : line }
+        // Mixin 0.8.7, which Forge ships, logs a warning for JAVA_17 with Java 25 classes.
+        // JAVA_21 is the highest level it knows.
+        filter { line -> line.replace('"JAVA_17"', '"JAVA_21"') }
+    }
+
+    exclude 'META-INF/neoforge.mods.toml'
+    exclude 'fabric.mod.json'
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from file('../LICENSE.txt')
+
+    // Forge reads mixin configs from the jar manifest, not from mods.toml.
+    manifest.attributes 'MixinConfigs': 'reeses-sodium-options.mixins.json'
+
+    destinationDirectory = layout.buildDirectory.dir('mods')
+}

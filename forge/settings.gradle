@@ -1,0 +1,14 @@
+// Standalone build. The root project applies architectury-loom conventions to every subproject, and
+// ForgeGradle cannot share a build with that, so the MinecraftForge jar is built on its own:
+//
+//     ./gradlew -p forge build
+//
+// It only compiles the common module's sources (see build.gradle) and does not touch the main build.
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net/' }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'reeses-sodium-options-forge'
