@@ -2,7 +2,9 @@ package me.flashyreese.mods.reeses_sodium_options.client.gui.widget;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.layout.LayoutBounds;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -12,13 +14,18 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 public class ScrollBarWidget extends BaseWidget {
 
     public static final int SCROLL_STEP = 6;
+
+    // Set by the optional Controlify integration to keep controller classes out of this widget.
+    private static BooleanSupplier controllerModeSupplier = () -> false;
 
     private final ScrollDirection mode;
     private final int contentLength;
@@ -30,6 +37,10 @@ public class ScrollBarWidget extends BaseWidget {
     private boolean isDragging;
     private LayoutBounds scrollThumb = null;
     private int scrollThumbClickOffset;
+
+    public static void setControllerModeSupplier(BooleanSupplier controllerModeSupplier) {
+        ScrollBarWidget.controllerModeSupplier = controllerModeSupplier;
+    }
 
     public ScrollBarWidget(LayoutBounds trackArea, ScrollDirection scrollDirection, int contentLength, int visibleAreaLength, Consumer<Integer> offsetChangeListener) {
         this(trackArea, scrollDirection, contentLength, visibleAreaLength, offsetChangeListener, null);
@@ -133,8 +144,17 @@ public class ScrollBarWidget extends BaseWidget {
     }
 
     @Override
+    public @Nullable ComponentPath nextFocusPath(@NonNull FocusNavigationEvent navigation) {
+        return this.isFocusable() ? super.nextFocusPath(navigation) : null;
+    }
+
+    public boolean isFocusable() {
+        return !controllerModeSupplier.getAsBoolean();
+    }
+
+    @Override
     public boolean keyPressed(@NonNull KeyEvent event) {
-        if (!this.isFocused()) {
+        if (!this.isFocused() || !this.isFocusable()) {
             return false;
         }
 
