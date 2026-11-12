@@ -84,6 +84,8 @@
   "rso.options.always_show_action_buttons.tooltip": "Keeps reset and undo buttons visible when their overlay is enabled, drawing unavailable actions as disabled.",
   "rso.options.support_project.name": "Support the project via Ko-fi",
   "rso.options.support_project.tooltip": "Opens FlashyReese's Ko-fi page in your browser.",
+  "rso.options.other_projects.name": "Check out my other projects",
+  "rso.options.other_projects.tooltip": "Opens https://flashyreese.me/projects in your browser.",
   "rso.options.value.milliseconds": "%s ms",
   "rso.options.value.results": "%s results",
   "modmenu.summaryTranslation.reeses-sodium-options": "Replaces Sodium's Options Screen",
