@@ -5,6 +5,7 @@ import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.BasicFrame;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.OptionRow;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.option.action.OptionUndoAction;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.FlatButtonWidget;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.ScrollBarWidget;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.search.SearchTextFieldWidget;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.Tab;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.frame.tab.TabFrame;
@@ -769,6 +770,7 @@ public class SodiumVideoOptionsScreen extends Screen implements ScreenPromptable
                 || currentFocusPath == null
                 || direction != this.lastArrowDirection.getOpposite()
                 || currentFocusPath.leafComponent() != this.currentArrowFocusLeaf
+                || (this.previousArrowFocusPath.leafComponent() instanceof ScrollBarWidget scrollBar && !scrollBar.isFocusable())
                 || !this.containsFocusLeaf(this.previousArrowFocusPath.leafComponent())) {
             return false;
         }
