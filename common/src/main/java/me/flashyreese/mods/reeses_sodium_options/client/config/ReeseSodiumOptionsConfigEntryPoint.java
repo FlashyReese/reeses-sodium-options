@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
     private static final String MOD_ID = "reeses-sodium-options";
     private static final String KO_FI_URL = "https://ko-fi.com/flashyreese";
+    private static final String OTHER_PROJECTS_URL = "https://flashyreese.me/projects";
 
     @Override
     public void registerConfigLate(ConfigBuilder builder) {
@@ -244,7 +245,11 @@ public class ReeseSodiumOptionsConfigEntryPoint implements ConfigEntryPoint {
                 .addOption(builder.createExternalButtonOption(this.optionId("support_project"))
                         .setName(Component.translatable("rso.options.support_project.name"))
                         .setTooltip(Component.translatable("rso.options.support_project.tooltip"))
-                        .setScreenConsumer(screen -> Util.getPlatform().openUri(KO_FI_URL)));
+                        .setScreenConsumer(screen -> Util.getPlatform().openUri(KO_FI_URL)))
+                .addOption(builder.createExternalButtonOption(this.optionId("other_projects"))
+                        .setName(Component.translatable("rso.options.other_projects.name"))
+                        .setTooltip(Component.translatable("rso.options.other_projects.tooltip"))
+                        .setScreenConsumer(screen -> Util.getPlatform().openUri(OTHER_PROJECTS_URL)));
     }
 
     private OptionBuilder createBooleanOption(ConfigBuilder builder, String name, Consumer<Boolean> setter, Supplier<Boolean> getter, boolean defaultValue, boolean rebuildScreen) {
