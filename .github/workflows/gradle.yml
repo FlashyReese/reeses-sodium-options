@@ -8,11 +8,11 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
       - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v6
+        uses: gradle/actions/wrapper-validation@v6.4.1
       - name: Set up JDK 25
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6.3.0
         with:
           distribution: 'temurin'
           java-version: 25
@@ -20,12 +20,12 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
       - name: Upload Build Artifacts - Fabric
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: 'RSO Fabric Artifacts'
           path: fabric/build/libs
       - name: Upload Build Artifacts - NeoForge
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: 'RSO NeoForge Artifacts'
           path: neoforge/build/libs
