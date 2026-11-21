@@ -1,15 +1,15 @@
 plugins {
     id("java")
-    id("dev.architectury.loom") version "1.17.483" apply false
-    id("architectury-plugin") version "3.5.169"
-    id("com.gradleup.shadow") version "9.3.0" apply false
+    id("dev.architectury.loom") version "1.17.493" apply false
+    id("architectury-plugin") version "3.5.170"
+    id("com.gradleup.shadow") version "9.6.1" apply false
 }
 
 val MINECRAFT_VERSION = "1.21.11"
-val NEOFORGE_VERSION = "21.11.42"
-val FABRIC_LOADER_VERSION = "0.19.3"
-val FABRIC_API_VERSION = "0.141.4+1.21.11"
-val CONTROLIFY_VERSION = "3.0.0+lts+1.21.11"
+val NEOFORGE_VERSION = "21.11.48"
+val FABRIC_LOADER_VERSION = "0.20.1"
+val FABRIC_API_VERSION = "0.141.6+1.21.11"
+val CONTROLIFY_VERSION = "3.0.1+lts+1.21.11"
 val CONTROLIFY_ENABLED = providers.gradleProperty("rso.enableControlify")
     .map { it.toBoolean() }
     .orElse(true)
@@ -18,7 +18,7 @@ val CONTROLIFY_ENABLED = providers.gradleProperty("rso.enableControlify")
 // https://semver.org/
 val MAVEN_GROUP = providers.gradleProperty("maven_group").get()
 val ARCHIVE_NAME = providers.gradleProperty("archives_name").get()
-val MOD_VERSION = "2.2.6-beta.1"
+val MOD_VERSION = "2.2.6-beta.2"
 val SODIUM_VERSION = "0.8.15-beta.1+mc1.21.11"
 
 extra["MINECRAFT_VERSION"] = MINECRAFT_VERSION

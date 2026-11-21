@@ -35,15 +35,15 @@ loom {
     runs {
         named("client") {
             client()
-            configName = "Fabric Client"
-            ideConfigGenerated(true)
-            runDir("run")
+            displayName.set("Fabric Client")
+            generateRunConfig.set(true)
+            runDirectory.set(layout.projectDirectory.dir("run"))
         }
         named("server") {
             server()
-            configName = "Fabric Server"
-            ideConfigGenerated(true)
-            runDir("run")
+            displayName.set("Fabric Server")
+            generateRunConfig.set(true)
+            runDirectory.set(layout.projectDirectory.dir("run"))
         }
     }
 }
@@ -96,14 +96,15 @@ tasks.matching { it.name == "runClient" || it.name == "runServer" }.configureEac
 
 tasks {
     processResources {
-        inputs.property("version", project.version)
+        val modVersion = project.version
+        inputs.property("version", modVersion)
         inputs.property("minecraft_version", MINECRAFT_VERSION)
         inputs.property("sodium_version", SODIUM_VERSION)
         inputs.property("controlifyEnabled", CONTROLIFY_ENABLED)
 
         filesMatching("fabric.mod.json") {
             expand(mapOf(
-                "version" to project.version,
+                "version" to modVersion,
                 "minecraft_version" to MINECRAFT_VERSION,
                 "sodium_version" to SODIUM_VERSION
             ))
