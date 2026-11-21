@@ -1,15 +1,15 @@
 plugins {
     id("java")
-    id("dev.architectury.loom-no-remap") version "1.17.483" apply false
-    id("architectury-plugin") version "3.5.169"
-    id("com.gradleup.shadow") version "9.3.0" apply false
+    id("dev.architectury.loom-no-remap") version "1.17.493" apply false
+    id("architectury-plugin") version "3.5.170"
+    id("com.gradleup.shadow") version "9.6.1" apply false
 }
 
 val MINECRAFT_VERSION = "26.2"
-val NEOFORGE_VERSION = "26.2.0.6-beta"
-val FABRIC_LOADER_VERSION = "0.19.3"
-val FABRIC_API_VERSION = "0.152.2+26.2"
-val CONTROLIFY_VERSION = "3.0.2+26.2"
+val NEOFORGE_VERSION = "26.2.0.95"
+val FABRIC_LOADER_VERSION = "0.20.1"
+val FABRIC_API_VERSION = "0.161.0+26.2"
+val CONTROLIFY_VERSION = "3.5.3+mc26.2"
 val CONTROLIFY_ENABLED = providers.gradleProperty("rso.enableControlify")
     .map { it.toBoolean() }
     .orElse(true)

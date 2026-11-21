@@ -1,3 +1,5 @@
+import org.gradle.api.attributes.Attribute
+
 plugins {
     id("java")
     id("idea")
@@ -12,6 +14,7 @@ val FABRIC_API_VERSION = rootProject.extra["FABRIC_API_VERSION"] as String
 val SODIUM_VERSION = rootProject.extra["SODIUM_VERSION"] as String
 val CONTROLIFY_VERSION = rootProject.extra["CONTROLIFY_VERSION"] as String
 val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
+val CONTROLIFY_LOADER_ATTRIBUTE = Attribute.of("io.github.mcgradleconventions.loader", String::class.java)
 
 architectury {
     common("fabric", "neoforge")
@@ -33,9 +36,9 @@ sourceSets.named("main") {
 dependencies {
     minecraft("net.minecraft:minecraft:$MINECRAFT_VERSION")
 
-    compileOnly("io.github.llamalad7:mixinextras-common:0.5.4")
-    annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.4")
-    compileOnly("net.fabricmc:sponge-mixin:0.17.3+mixin.0.8.7")
+    compileOnly("io.github.llamalad7:mixinextras-common:0.5.5")
+    annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.5")
+    compileOnly("net.fabricmc:sponge-mixin:0.17.5+mixin.0.8.7")
     compileOnly("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
 
     fun addDependentFabricModule(name: String) {
@@ -49,8 +52,11 @@ dependencies {
 
     compileOnly("net.caffeinemc:sodium-fabric:$SODIUM_VERSION")
     if (CONTROLIFY_ENABLED) {
-        compileOnly("dev.isxander:controlify:$CONTROLIFY_VERSION-fabric") {
+        compileOnly("dev.isxander:controlify:$CONTROLIFY_VERSION") {
             isTransitive = false
+            attributes {
+                attribute(CONTROLIFY_LOADER_ATTRIBUTE, "common")
+            }
         }
     }
 }
