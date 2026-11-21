@@ -1,14 +1,14 @@
 plugins {
     id("java")
     id("dev.architectury.loom-no-remap") version "1.17.493" apply false
-    id("architectury-plugin") version "3.5.169"
+    id("architectury-plugin") version "3.5.170"
     id("com.gradleup.shadow") version "9.6.1" apply false
 }
 
 val MINECRAFT_VERSION = "26.3"
-val NEOFORGE_VERSION = "26.3.0.1-beta"
-val FABRIC_LOADER_VERSION = "0.19.5"
-val FABRIC_API_VERSION = "0.160.5+26.3"
+val NEOFORGE_VERSION = "26.3.0.115"
+val FABRIC_LOADER_VERSION = "0.20.1"
+val FABRIC_API_VERSION = "0.166.2+26.3"
 val CONTROLIFY_VERSION = "3.5.3+mc26.3"
 val CONTROLIFY_ENABLED = providers.gradleProperty("rso.enableControlify")
     .map { it.toBoolean() }
@@ -19,7 +19,7 @@ val CONTROLIFY_ENABLED = providers.gradleProperty("rso.enableControlify")
 val MAVEN_GROUP = providers.gradleProperty("maven_group").get()
 val ARCHIVE_NAME = providers.gradleProperty("archives_name").get()
 val MOD_VERSION = "2.2.6-beta.4"
-val SODIUM_VERSION = "0.9.3-beta.5+mc26.3"
+val SODIUM_VERSION = "0.9.3+mc26.3"
 
 extra["MINECRAFT_VERSION"] = MINECRAFT_VERSION
 extra["NEOFORGE_VERSION"] = NEOFORGE_VERSION

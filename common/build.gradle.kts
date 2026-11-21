@@ -23,12 +23,6 @@ architectury {
     injectInjectables = false
 }
 
-// LWJGL 3.4.3 includes inactive Java 27 classes in its multi-release JAR. Architectury Transformer 5.2.91
-// scans those entries while producing the NeoForge common JAR unless LWJGL is removed from its analysis classpath.
-configurations.named("architecturyTransformerClasspath") {
-    exclude(group = "org.lwjgl")
-}
-
 // This trick hides common tasks in the IDEA list.
 tasks.configureEach {
     group = null
@@ -46,7 +40,7 @@ dependencies {
 
     compileOnly("io.github.llamalad7:mixinextras-common:0.5.5")
     annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.5")
-    compileOnly("net.fabricmc:sponge-mixin:0.17.4+mixin.0.8.7")
+    compileOnly("net.fabricmc:sponge-mixin:0.17.5+mixin.0.8.7")
     compileOnly("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
 
     fun addDependentFabricModule(name: String) {
