@@ -8,6 +8,7 @@ import dev.isxander.controlify.screenop.ComponentProcessorProvider;
 import dev.isxander.controlify.screenop.ScreenProcessorProvider;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.search.SearchTextFieldWidget;
+import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.ScrollBarWidget;
 
 public final class ReeseSodiumOptionsControlifyEntrypoint implements ControlifyEntrypoint {
     @Override
@@ -18,6 +19,7 @@ public final class ReeseSodiumOptionsControlifyEntrypoint implements ControlifyE
 
     @Override
     public void onControlifyInit(InitContext context) {
+        ScrollBarWidget.setControllerModeSupplier(() -> ControlifyApi.get().currentInputMode().isController());
     }
 
     @Override

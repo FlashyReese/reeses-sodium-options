@@ -111,14 +111,15 @@ tasks.test {
 
 tasks {
     processResources {
-        inputs.property("version", project.version)
+        val modVersion = project.version
+        inputs.property("version", modVersion)
         inputs.property("minecraft_version", MINECRAFT_VERSION)
         inputs.property("sodium_version", SODIUM_VERSION)
         inputs.property("controlifyEnabled", CONTROLIFY_ENABLED)
 
         filesMatching("fabric.mod.json") {
             expand(mapOf(
-                "version" to project.version,
+                "version" to modVersion,
                 "minecraft_version" to MINECRAFT_VERSION,
                 "sodium_version" to SODIUM_VERSION
             ))
