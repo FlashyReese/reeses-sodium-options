@@ -16,8 +16,8 @@ val CONTROLIFY_ENABLED = rootProject.extra["CONTROLIFY_ENABLED"] as Boolean
 val SODIUM_NEOFORGE_RUNTIME_MODS = listOf(
     "org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19",
     "org.sinytra.forgified-fabric-api:fabric-renderer-api-v1:3.4.1+9125b6dc19",
-    "org.sinytra.forgified-fabric-api:fabric-rendering-data-attachment-v1:0.3.48+73761d2e19",
-    "org.sinytra.forgified-fabric-api:fabric-block-view-api-v2:1.0.10+9afaaf8c19",
+    "org.sinytra.forgified-fabric-api:fabric-rendering-data-attachment-v1:0.3.49+73761d2e19",
+    "org.sinytra.forgified-fabric-api:fabric-block-view-api-v2:1.0.11+e9036fd419",
 )
 
 base {
@@ -114,14 +114,15 @@ tasks.withType<JavaExec>().configureEach {
 
 tasks {
     processResources {
-        inputs.property("version", project.version)
+        val modVersion = project.version
+        inputs.property("version", modVersion)
         inputs.property("minecraft_version", MINECRAFT_VERSION)
         inputs.property("sodium_version", SODIUM_VERSION)
         inputs.property("controlifyEnabled", CONTROLIFY_ENABLED)
 
         filesMatching("META-INF/neoforge.mods.toml") {
             expand(mapOf(
-                "version" to project.version,
+                "version" to modVersion,
                 "minecraft_version" to MINECRAFT_VERSION,
                 "sodium_version" to SODIUM_VERSION,
             ))
