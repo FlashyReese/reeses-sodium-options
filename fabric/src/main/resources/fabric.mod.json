@@ -50,10 +50,8 @@
     "minecraft": "~26.3",
     "sodium": "=${sodium_version}"
   },
-  "suggests": {
-    "controlify": ">=3.0.2"
-  },
   "breaks": {
+    "controlify": "<4.0.0-beta.1",
     "iris": "<1.1.4",
     "sodium-extra": "<0.5.3",
     "sodium": "<0.5.8"

@@ -1,28 +1,22 @@
 package me.flashyreese.mods.reeses_sodium_options.client.controlify;
 
-import dev.isxander.controlify.api.ControlifyApi;
-import dev.isxander.controlify.api.entrypoint.ControlifyEntrypoint;
-import dev.isxander.controlify.api.entrypoint.InitContext;
-import dev.isxander.controlify.api.entrypoint.PreInitContext;
-import dev.isxander.controlify.screenop.ComponentProcessorProvider;
-import dev.isxander.controlify.screenop.ScreenProcessorProvider;
+import dev.isxander.controlify.api.ControlifyEntrypoint;
+import dev.isxander.controlify.api.ControlifyEvents;
+import dev.isxander.controlify.api.screenop.ScreenopEvents;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.SodiumVideoOptionsScreen;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.search.SearchTextFieldWidget;
 import me.flashyreese.mods.reeses_sodium_options.client.gui.widget.ScrollBarWidget;
 
 public final class ReeseSodiumOptionsControlifyEntrypoint implements ControlifyEntrypoint {
     @Override
-    public void onControlifyPreInit(PreInitContext context) {
-        ScreenProcessorProvider.registerProvider(SodiumVideoOptionsScreen.class, RsoOptionsScreenProcessor::new);
-        ComponentProcessorProvider.REGISTRY.register(SearchTextFieldWidget.class, RsoSearchTextFieldProcessor::new);
-    }
-
-    @Override
-    public void onControlifyInit(InitContext context) {
-        ScrollBarWidget.setControllerModeSupplier(() -> ControlifyApi.get().currentInputMode().isController());
-    }
-
-    @Override
-    public void onControllersDiscovered(ControlifyApi controlify) {
+    public void onControlifyInitialize() {
+        ScreenopEvents.REGISTER_SCREEN_BEHAVIOURS.subscribeForever(registry -> {
+            registry.<SodiumVideoOptionsScreen>register(SodiumVideoOptionsScreen.class, RsoOptionsScreenBehaviour::new);
+            registry.<SodiumVideoOptionsScreen>register(SodiumVideoOptionsScreen.class, 101, RsoSearchTextFieldBehaviour::retainKeyboardFocus);
+        });
+        ScreenopEvents.REGISTER_ELEMENT_BEHAVIOURS.subscribeForever(event ->
+                event.registry().register(SearchTextFieldWidget.class, RsoSearchTextFieldBehaviour::new));
+        ControlifyEvents.INITIALIZED.subscribeForever(controlify ->
+                ScrollBarWidget.setControllerModeSupplier(() -> controlify.currentInputMode().isController()));
     }
 }

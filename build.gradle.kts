@@ -9,7 +9,7 @@ val MINECRAFT_VERSION = "26.3"
 val NEOFORGE_VERSION = "26.3.0.115"
 val FABRIC_LOADER_VERSION = "0.20.1"
 val FABRIC_API_VERSION = "0.166.2+26.3"
-val CONTROLIFY_VERSION = "3.5.3+mc26.3"
+val CONTROLIFY_VERSION = "4.0.0-beta.1+mc26.3"
 val CONTROLIFY_ENABLED = providers.gradleProperty("rso.enableControlify")
     .map { it.toBoolean() }
     .orElse(true)
