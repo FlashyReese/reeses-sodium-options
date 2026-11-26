@@ -33,7 +33,7 @@ side = "CLIENT"
 [[dependencies.reeses_sodium_options]]
 modId = "controlify"
 type = "optional"
-versionRange = "[3.0.2,)"
+versionRange = "[4.0.0-beta.1,)"
 ordering = "AFTER"
 side = "CLIENT"
 
