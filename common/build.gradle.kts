@@ -29,7 +29,7 @@ tasks.configureEach {
 sourceSets.named("main") {
     if (!CONTROLIFY_ENABLED) {
         java.exclude("me/flashyreese/mods/reeses_sodium_options/client/controlify/**")
-        resources.exclude("META-INF/services/dev.isxander.controlify.api.entrypoint.ControlifyEntrypoint")
+        resources.exclude("META-INF/services/dev.isxander.controlify.api.ControlifyEntrypoint")
     }
 }
 

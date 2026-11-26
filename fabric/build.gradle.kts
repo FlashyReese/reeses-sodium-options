@@ -128,7 +128,7 @@ tasks {
                 val metadata = layout.buildDirectory.file("resources/main/fabric.mod.json").get().asFile
                 val text = metadata.readText()
                     .replace(Regex("""    "controlify": \[\R      "me\.flashyreese\.mods\.reeses_sodium_options\.client\.controlify\.ReeseSodiumOptionsControlifyEntrypoint"\R    ],\R"""), "")
-                    .replace(Regex("""  "suggests": \{\R    "controlify": "[^"]+"\R  },\R"""), "")
+                    .replace(Regex("""    "controlify": "<[^"]+",\R"""), "")
 
                 metadata.writeText(text)
             }
